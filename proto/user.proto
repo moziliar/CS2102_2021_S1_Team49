@@ -69,9 +69,23 @@ message DeleteUserResp {
   User user = 3;
 }
 
+message ListAllCareTakersReq {}
+message ListAllPetOwnersReq {}
+
+message ListAllCareTakersResp {
+  repeated User care_takers = 1;
+}
+
+message ListAllPetOwnersResp {
+  repeated User pet_owners = 1;
+}
+
 service Users {
   rpc GetUser(UserReq) returns (User) {};
   rpc AddUser(User) returns (AddUserResp) {};
   rpc UpdateUser(User) returns (UpdateUserResp) {};
   rpc DeleteUser(User) returns (DeleteUserResp) {};
+
+  rpc ListAllCareTakers(ListAllCareTakersReq) returns (ListAllCareTakersResp) {};
+  rpc ListAllPetOwners(ListAllPetOwnersReq) returns (ListAllPetOwnersResp) {};
 }
