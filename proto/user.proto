@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package users;
+
+import "google/protobuf/empty.proto";
+
+message UserReq {
+  int32 user_id = 1;
+}
+
+message User {
+  int32 user_id = 1;
+  string email = 2;
+  string password = 3;
+  UserProfile profile = 4;
+  Status status = 5;
+  enum Status {
+    PET_OWNER = 0; // default to pet owner
+    CARE_TAKER = 1;
+    BOTH = 2;
+  }
+}
+
+message UserProfile {
+  string picture_url = 1;
+  int32 phone = 2;
+}
+
+message AddUserResp {
+  bool success = 1;
+  string message = 2;
+  User user = 3;
+}
+
+message UpdateUserResp {
+  bool success = 1;
+  string message = 2;
+  User user = 3;
+}
+
+message DeleteUserResp {
+  bool success = 1;
+  string message = 2;
+  User user = 3;
+}
+
+service Users {
+  rpc GetUser(UserReq) returns (User) {};
+  rpc AddUser(User) returns (AddUserResp) {};
+  rpc UpdateUser(User) returns (UpdateUserResp) {};
+  rpc DeleteUser(User) returns (DeleteUserResp) {};
+}
