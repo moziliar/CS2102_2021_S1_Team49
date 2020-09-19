@@ -7,65 +7,37 @@ import "pet.proto";
 
 message Transaction {
   int32 t_id = 1;
-  user.User owner = 2;
-  user.User care_taker = 3;
-  pet.Pet pet = 4;
-  string location = 5;
+  TransactionInfo info = 2;
+  bool is_done = 3;
+  Review review = 4;
+}
 
-  string start_date = 6;
-  string end_date = 7;
+message TransactionInfo {
+  user.User owner = 1;
+  user.User care_taker = 2;
+  pet.Pet pet = 3;
+  string location = 4;
 
-  int32 total_price = 8;
+  string start_date = 5;
+  string end_date = 6;
 
-  TransferMethod transfer_method = 9;
+  int32 total_price = 7;
+
+  TransferMethod transfer_method = 8;
   enum TransferMethod {
     PCS_ON_SITE = 0;
     OWNER_DELIVER = 1;
     TAKER_PICKUP = 2;
   }
 
-  PaymentMethod payment_method = 10;
-  enum PaymentMethod {
-    CASH = 0;
-    CREDIT_CARD = 1;
-  }
-
-  user.CreditCard credit_card = 11;
-
-  Status status = 12;
-  enum Status {
-    ONGOING = 0;
-    DONE = 1;
-  }
-
-  Review review = 13;
+  bool use_card = 9;
+  user.CreditCard credit_card = 10;
 }
 
 message Review {
   string description = 1;
   int32 rating = 2;
 }
-
-/*
-decide later whether we need these
-message AddTransactionResp {
-  bool success = 1;
-  string message = 2;
-  Transaction transaction = 3;
-}
-
-message UpdateTransactionResp {
-  bool success = 1;
-  string message = 2;
-  Transaction transaction = 3;
-}
-
-message DeleteTransactionResp {
-  bool success = 1;
-  string message = 2;
-  Transaction transaction = 3;
-}
-*/
 
 message ListTnxByOwnerIDReq {
   int32 owner_id = 1;
