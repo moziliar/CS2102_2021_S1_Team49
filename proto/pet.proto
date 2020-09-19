@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package pets;
+
+message PetReq {
+  int32 pet_id = 1;
+}
+
+message Pet {
+  int32 pet_id = 1;
+  int32 owner_id = 2;
+  PetProfile profile = 3;
+  Category category = 4;
+  enum Status {
+    NOT_TAKEN = 0;
+    TAKEN = 1;
+  }
+}
+
+message PetProfile {
+  string picture_url = 1;
+  string name = 2;
+  repeated string special_reqs = 3;
+  enum Gender {
+    MALE = 0;
+    FEMALE = 1;
+  }
+  Gender gender = 4;
+  string description = 5;
+  string date_of_birth = 6;
+}
+
+message Category {
+  string name = 1;
+  string parent_category = 2;
+}
+
+message AddPetResp {
+  bool success = 1;
+  string message = 2;
+  Pet pet = 3;
+}
+
+message UpdatePetResp {
+  bool success = 1;
+  string message = 2;
+  Pet pet = 3;
+}
+
+message DeletePetResp {
+  bool success = 1;
+  string message = 2;
+  Pet pet = 3;
+}
+
+message ListPetsReq {
+  int32 owner_id = 1;
+}
+
+message ListPetsResp {
+  repeated Pet pets = 1;
+}
+
+service Pets {
+  rpc GetPet(PetReq) returns (Pet) {};
+  rpc AddPet(Pet) returns (AddPetResp) {};
+  rpc UpdatePet(Pet) returns (UpdatePetResp) {};
+  rpc DeletePet(Pet) returns (DeletePetResp) {};
+
+  rpc ListPetsByUserID(ListPetsReq) returns (ListPetsResp) {};
+}
