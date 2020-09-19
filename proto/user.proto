@@ -1,6 +1,8 @@
 syntax = "proto3";
 
-package users;
+import "pet.proto";
+
+package user;
 
 message UserReq {
   int32 user_id = 1;
@@ -11,11 +13,28 @@ message User {
   string email = 2;
   string password = 3;
   UserProfile profile = 4;
+
   Status status = 5;
   enum Status {
     PET_OWNER = 0; // default to pet owner
     CARE_TAKER = 1;
     BOTH = 2;
+    PCS_ADMIN = 3;
+  }
+
+  // the following fields are ignored when a user is not a care_taker
+
+  // a care_taker could either have leave as full-time staff
+  // or availability as part-time
+  repeated LeaveOrAvail leave_or_avail = 7;
+  message LeaveOrAvail {
+    string start_date = 1;
+    string end_date = 2;
+  }
+  repeated Category categories = 8;
+  message Category {
+    pet.Category category = 1;
+    int32 rate = 2; // in cents/day
   }
 }
 

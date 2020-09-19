@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package pets;
+package pet;
 
 message PetReq {
   int32 pet_id = 1;
