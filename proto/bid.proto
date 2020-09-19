@@ -43,6 +43,8 @@ message ListBidsByPetIDReq {
   int32 pet_id = 1;
 }
 
+message ListAllBidsReq {}
+
 message ListBidsResp {
   repeated Bid bids = 1;
 }
@@ -52,6 +54,7 @@ service Bids {
   rpc UpdateBid(Bid) returns (UpdateBidResp) {};
   rpc DeleteBid(Bid) returns (DeleteBidResp) {};
 
+  rpc ListAllBids(ListAllBidsReq) returns (ListBidsResp) {};
   rpc ListTnxByOwnerID(ListBidsByOwnerIDReq) returns (ListBidsResp) {};
   rpc ListTnxByTakerID(ListBidsByTakerIDReq) returns (ListBidsResp) {};
   rpc ListTnxByPetID(ListBidsByPetIDReq) returns (ListBidsResp) {};
