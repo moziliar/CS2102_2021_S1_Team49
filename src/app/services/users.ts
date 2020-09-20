@@ -1,12 +1,12 @@
 import { sendUnaryData, ServerUnaryCall } from "grpc";
 
-import { IUsersServer, UsersService } from "../protos/user_grpc_pb"
+import { IUsersServer, UsersService } from "../../protos/user_grpc_pb"
 import {
   User, UserReq,
   AddUserResp, UpdateUserResp, DeleteUserResp,
   ListAllCareTakersReq, ListAllCareTakersResp,
   ListAllPetOwnersReq, ListAllPetOwnersResp
-} from "../protos/user_pb"
+} from "../../protos/user_pb"
 
 class Users implements IUsersServer {
   public getUser(

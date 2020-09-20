@@ -1,10 +1,10 @@
 import { sendUnaryData, ServerUnaryCall } from "grpc";
 
-import { ITransactionsServer, TransactionsService } from "../protos/transaction_grpc_pb"
+import { ITransactionsServer, TransactionsService } from "../../protos/transaction_grpc_pb"
 import {
   ListTnxByOwnerIDReq, ListTnxByPetIDReq, ListTnxByTakerIDReq,
   ListTnxResp
-} from "../protos/transaction_pb"
+} from "../../protos/transaction_pb"
 
 class Transactions implements ITransactionsServer {
   public listTnxByOwnerID(
