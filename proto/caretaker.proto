@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+import "pet.proto";
+import "user.proto";
+
+package caretaker;
+
+message CareTakerReq {
+  user.User user = 1;
+}
+
+message CareTaker {
+  user.User user = 1;
+  Salary salary = 2;
+  repeated pet.Pet pets = 3;
+  
+  EmployeeStatus employeeStatus = 4;
+  enum EmployeeStatus {
+    FULL_TIME = 0; // default to full time
+    PART_TIME = 1;
+  }
+
+  bool on_leave = 5;
+
+  // a care_taker could either have leave as full-time staff
+  // or availability as part-time
+  repeated LeaveOrAvail leave_or_avail = 6;
+  message LeaveOrAvail {
+    string start_date = 1;
+    string end_date = 2;
+  }
+  
+  repeated Category categories = 7;
+
+  int32 num_pets = 8;
+  int32 ratings = 9;
+}
+
+message Category {
+  pet.Category category = 1;
+  int32 rate = 2; // in cents/day
+}
+
+message Salary {
+  float amount = 1;
+  YearMonths yearmonths = 2;
+}
+
+message YearMonths {
+    int32 year = 1;
+    int32 month = 2;
+}
+
+message AddPetResp {
+  bool success = 1;
+  string message = 2;
+  pet.Pet pet = 3;
+}
+
+message DeletePetResp {
+  bool success = 1;
+  string message = 2;
+  pet.Pet pet = 3;
+}
+
+message ListAllCareTakersPetsReq {}
+message ListAllCareTakersPetsResp {
+    repeated pet.Pet pets = 1;
+}
+
+service CareTakers {
+  rpc GetCareTaker(CareTakerReq) returns (CareTaker) {};
+  rpc AddPet(pet.Pet) returns (AddPetResp) {};
+  rpc DeletePet(pet.Pet) returns (DeletePetResp) {};
+
+  rpc ListAllCareTakersPets(ListAllCareTakersPetsReq) returns (ListAllCareTakersPetsResp) {};
+}

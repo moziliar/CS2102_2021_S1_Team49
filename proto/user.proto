@@ -23,21 +23,6 @@ message User {
   }
 
   CreditCard credit_card = 6;
-
-  // the following fields are ignored when a user is not a care_taker
-
-  // a care_taker could either have leave as full-time staff
-  // or availability as part-time
-  repeated LeaveOrAvail leave_or_avail = 7;
-  message LeaveOrAvail {
-    string start_date = 1;
-    string end_date = 2;
-  }
-  repeated Category categories = 8;
-  message Category {
-    pet.Category category = 1;
-    int32 rate = 2; // in cents/day
-  }
 }
 
 message UserProfile {
