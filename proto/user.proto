@@ -50,6 +50,13 @@ message CreditCard {
   string holder_name = 3; // might differ from the user's name
 }
 
+message Paycheck {
+  int32 user_id = 1;
+  int32 amount = 2;
+  int32 month = 3;
+  int32 year = 4;
+}
+
 message LoginReq {
   int32 email = 1;
   int32 password = 2;
@@ -85,6 +92,14 @@ message ListAllCareTakersResp {
   repeated User care_takers = 1;
 }
 
+message ListAllPaychecksByCareTakerReq {}
+
+message ListAllPaychecksByCareTakerResp {
+  bool success = 1;
+  string message = 2;
+  repeated Paycheck paychecks = 3;
+}
+
 service Users {
   rpc Login(LoginReq) returns (LoginResp) {};
   rpc AddUser(User) returns (AddUserResp) {};
@@ -92,4 +107,6 @@ service Users {
   rpc DeleteUser(User) returns (DeleteUserResp) {};
 
   rpc ListAllCareTakers(ListAllCareTakersReq) returns (ListAllCareTakersResp) {};
+
+  rpc ListAllPaychecksByCareTaker(ListAllPaychecksByCareTakerReq) returns (ListAllPaychecksByCareTakerResp) {};
 }
