@@ -7,10 +7,6 @@ message Pet {
   int32 owner_id = 2;
   PetProfile profile = 3;
   Category category = 4;
-  enum Status {
-    NOT_TAKEN = 0;
-    TAKEN = 1;
-  }
 }
 
 message PetProfile {
@@ -49,31 +45,8 @@ message DeletePetResp {
   Pet pet = 3;
 }
 
-message ListPetsByUserReq {
-  int32 user_id = 1;
-}
-
-message ListPetsByCatReq {
-  Category category = 1;
-}
-
-message ListPetsByUserResp {
-  repeated Pet pets_owned = 1;
-  repeated Pet pets_taking_care = 2;
-}
-
-message ListPetsResp {
-  repeated Pet pets = 1;
-}
-
-message ListAllPetsReq {}
-
 service Pets {
   rpc AddPet(Pet) returns (AddPetResp) {};
   rpc UpdatePet(Pet) returns (UpdatePetResp) {};
   rpc DeletePet(Pet) returns (DeletePetResp) {};
-
-  rpc ListAllPets(ListAllPetsReq) returns (ListPetsResp) {};
-  rpc ListPetsByUserID(ListPetsByUserReq) returns (ListPetsByUserResp) {};
-  rpc ListPetsByCategory(ListPetsByCatReq) returns (ListPetsResp) {};
 }

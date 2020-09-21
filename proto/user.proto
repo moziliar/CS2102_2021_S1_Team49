@@ -4,17 +4,12 @@ import "pet.proto";
 
 package user;
 
-message UserReq {
-  int32 user_id = 1;
-}
-
 message User {
   int32 user_id = 1;
-  string email = 2;
-  string password = 3;
-  UserProfile profile = 4;
+  string email = 2; // username
+  UserProfile profile = 3;
 
-  Status status = 5;
+  Status status = 4;
   enum Status {
     PET_OWNER = 0; // default to pet owner
     CARE_TAKER = 1;
@@ -22,18 +17,21 @@ message User {
     PCS_ADMIN = 3;
   }
 
+  repeated pet.Pet pets_owned = 5;
+
   CreditCard credit_card = 6;
 
   // the following fields are ignored when a user is not a care_taker
 
+  bool is_part_time = 7;
   // a care_taker could either have leave as full-time staff
   // or availability as part-time
-  repeated LeaveOrAvail leave_or_avail = 7;
+  repeated LeaveOrAvail leave_or_avail = 8;
   message LeaveOrAvail {
     string start_date = 1;
     string end_date = 2;
   }
-  repeated Category categories = 8;
+  repeated Category categories = 9;
   message Category {
     pet.Category category = 1;
     int32 rate = 2; // in cents/day
@@ -41,14 +39,26 @@ message User {
 }
 
 message UserProfile {
-  string picture_url = 1;
-  int32 phone = 2;
+  string name = 1;
+  string picture_url = 2;
+  int32 phone = 3;
 }
 
 message CreditCard {
   int32 card_number = 1;
   string expiry_date = 2;
   string holder_name = 3; // might differ from the user's name
+}
+
+message LoginReq {
+  int32 email = 1;
+  int32 password = 2;
+}
+
+message LoginResp {
+  bool success = 1;
+  string message = 2;
+  User user = 3;
 }
 
 message AddUserResp {
@@ -70,22 +80,16 @@ message DeleteUserResp {
 }
 
 message ListAllCareTakersReq {}
-message ListAllPetOwnersReq {}
 
 message ListAllCareTakersResp {
   repeated User care_takers = 1;
 }
 
-message ListAllPetOwnersResp {
-  repeated User pet_owners = 1;
-}
-
 service Users {
-  rpc GetUser(UserReq) returns (User) {};
+  rpc Login(LoginReq) returns (LoginResp) {};
   rpc AddUser(User) returns (AddUserResp) {};
   rpc UpdateUser(User) returns (UpdateUserResp) {};
   rpc DeleteUser(User) returns (DeleteUserResp) {};
 
   rpc ListAllCareTakers(ListAllCareTakersReq) returns (ListAllCareTakersResp) {};
-  rpc ListAllPetOwners(ListAllPetOwnersReq) returns (ListAllPetOwnersResp) {};
 }
