@@ -2,16 +2,17 @@ import { sendUnaryData, ServerUnaryCall } from "grpc";
 
 import { IUsersServer, UsersService } from "../../protos/user_grpc_pb"
 import {
-  User, UserReq,
+  User,
+  LoginReq, LoginResp,
   AddUserResp, UpdateUserResp, DeleteUserResp,
   ListAllCareTakersReq, ListAllCareTakersResp,
-  ListAllPetOwnersReq, ListAllPetOwnersResp
+  ListAllPaychecksByCareTakerReq, ListAllPaychecksByCareTakerResp
 } from "../../protos/user_pb"
 
 class Users implements IUsersServer {
-  public getUser(
-    call: ServerUnaryCall<UserReq>,
-    callback: sendUnaryData<User>): void {
+  public login(
+    call: ServerUnaryCall<LoginReq>,
+    callback: sendUnaryData<LoginResp>): void {
     // TODO: implement
   };
   public addUser(
@@ -34,9 +35,9 @@ class Users implements IUsersServer {
     callback: sendUnaryData<ListAllCareTakersResp>): void {
     // TODO: implement
   };
-  public listAllPetOwners(
-    call: ServerUnaryCall<ListAllPetOwnersReq>,
-    callback: sendUnaryData<ListAllPetOwnersResp>): void {
+  public listAllPaychecksByCareTaker(
+    call: ServerUnaryCall<ListAllPaychecksByCareTakerReq>,
+    callback: sendUnaryData<ListAllPaychecksByCareTakerResp>): void {
     // TODO: implement
   };
 }
