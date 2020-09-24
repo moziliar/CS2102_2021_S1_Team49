@@ -6,3 +6,9 @@
 src/protos/*
 
 yarn.lock
+package-lock.json
+
+node_modules
+dist
+
+.DS_Store

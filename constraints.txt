@@ -70,7 +70,7 @@ Transaction
 4.Every transaction might have a credit card number.
 
 Credit Card
-1.Pre-registered credit card info of a user; holds credit card number, holder name, expiry date. 
+1.Pre-registered credit card info of a user; holds credit card number, holder name, expiry date.
 
 Review
 1.Reviews are identified by tid, and must have a description and rating 

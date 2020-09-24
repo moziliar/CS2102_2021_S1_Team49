@@ -8,7 +8,6 @@ import "pet.proto";
 message Transaction {
   int32 t_id = 1;
   TransactionInfo info = 2;
-  bool is_done = 3;
   Review review = 4;
 }
 
@@ -39,16 +38,8 @@ message Review {
   int32 rating = 2;
 }
 
-message ListTnxByOwnerIDReq {
+message ListTnxByUserIDReq {
   int32 owner_id = 1;
-}
-
-message ListTnxByTakerIDReq {
-  int32 taker_id = 1;
-}
-
-message ListTnxByPetIDReq {
-  int32 pet_id = 1;
 }
 
 message ListTnxResp {
@@ -56,7 +47,5 @@ message ListTnxResp {
 }
 
 service Transactions {
-  rpc ListTnxByOwnerID(ListTnxByOwnerIDReq) returns (ListTnxResp) {};
-  rpc ListTnxByTakerID(ListTnxByTakerIDReq) returns (ListTnxResp) {};
-  rpc ListTnxByPetID(ListTnxByPetIDReq) returns (ListTnxResp) {};
+  rpc ListTnxByUserID(ListTnxByUserIDReq) returns (ListTnxResp) {};
 }
