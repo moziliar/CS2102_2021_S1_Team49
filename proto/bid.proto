@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package bid;
+
+import "transaction.proto";
+
+message Bid {
+  int32 bid_id = 1;
+  transaction.TransactionInfo info = 2;
+  bool is_selected = 3;
+  string bid_end_date = 4;
+  bool is_active = 5;
+}
+
+message AddBidResp {
+  bool success = 1;
+  string message = 2;
+  Bid bid = 3;
+}
+
+message UpdateBidResp {
+  bool success = 1;
+  string message = 2;
+  Bid bid = 3;
+}
+
+message DeleteBidResp {
+  bool success = 1;
+  string message = 2;
+  Bid bid = 3;
+}
+
+
+message ListBidsByOwnerIDReq {
+  int32 owner_id = 1;
+}
+
+message ListBidsByTakerIDReq {
+  int32 taker_id = 1;
+}
+
+message ListBidsByPetIDReq {
+  int32 pet_id = 1;
+}
+
+message ListAllBidsReq {}
+
+message ListBidsResp {
+  repeated Bid bids = 1;
+}
+
+service Bids {
+  rpc AddBid(Bid) returns (AddBidResp) {};
+  rpc UpdateBid(Bid) returns (UpdateBidResp) {};
+  rpc DeleteBid(Bid) returns (DeleteBidResp) {};
+
+  rpc ListAllBids(ListAllBidsReq) returns (ListBidsResp) {};
+  rpc ListTnxByOwnerID(ListBidsByOwnerIDReq) returns (ListBidsResp) {};
+  rpc ListTnxByTakerID(ListBidsByTakerIDReq) returns (ListBidsResp) {};
+  rpc ListTnxByPetID(ListBidsByPetIDReq) returns (ListBidsResp) {};
+}

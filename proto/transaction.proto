@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package transaction;
+
+import "user.proto";
+import "pet.proto";
+
+message Transaction {
+  int32 t_id = 1;
+  TransactionInfo info = 2;
+  bool is_done = 3;
+  Review review = 4;
+}
+
+message TransactionInfo {
+  user.User owner = 1;
+  user.User care_taker = 2;
+  pet.Pet pet = 3;
+  string location = 4;
+
+  string start_date = 5;
+  string end_date = 6;
+
+  int32 total_price = 7;
+
+  TransferMethod transfer_method = 8;
+  enum TransferMethod {
+    PCS_ON_SITE = 0;
+    OWNER_DELIVER = 1;
+    TAKER_PICKUP = 2;
+  }
+
+  bool use_card = 9;
+  user.CreditCard credit_card = 10;
+}
+
+message Review {
+  string description = 1;
+  int32 rating = 2;
+}
+
+message ListTnxByOwnerIDReq {
+  int32 owner_id = 1;
+}
+
+message ListTnxByTakerIDReq {
+  int32 taker_id = 1;
+}
+
+message ListTnxByPetIDReq {
+  int32 pet_id = 1;
+}
+
+message ListTnxResp {
+  repeated Transaction transactions = 1;
+}
+
+service Transactions {
+  rpc ListTnxByOwnerID(ListTnxByOwnerIDReq) returns (ListTnxResp) {};
+  rpc ListTnxByTakerID(ListTnxByTakerIDReq) returns (ListTnxResp) {};
+  rpc ListTnxByPetID(ListTnxByPetIDReq) returns (ListTnxResp) {};
+}
