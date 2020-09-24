@@ -7,9 +7,7 @@ import "transaction.proto";
 message Bid {
   int32 bid_id = 1;
   transaction.TransactionInfo info = 2;
-  bool is_selected = 3;
-  string bid_end_date = 4;
-  bool is_active = 5;
+  string bid_end_date = 3;
 }
 
 message AddBidResp {
@@ -30,20 +28,9 @@ message DeleteBidResp {
   Bid bid = 3;
 }
 
-
-message ListBidsByOwnerIDReq {
+message ListBidsByUserIDReq {
   int32 owner_id = 1;
 }
-
-message ListBidsByTakerIDReq {
-  int32 taker_id = 1;
-}
-
-message ListBidsByPetIDReq {
-  int32 pet_id = 1;
-}
-
-message ListAllBidsReq {}
 
 message ListBidsResp {
   repeated Bid bids = 1;
@@ -54,8 +41,5 @@ service Bids {
   rpc UpdateBid(Bid) returns (UpdateBidResp) {};
   rpc DeleteBid(Bid) returns (DeleteBidResp) {};
 
-  rpc ListAllBids(ListAllBidsReq) returns (ListBidsResp) {};
-  rpc ListTnxByOwnerID(ListBidsByOwnerIDReq) returns (ListBidsResp) {};
-  rpc ListTnxByTakerID(ListBidsByTakerIDReq) returns (ListBidsResp) {};
-  rpc ListTnxByPetID(ListBidsByPetIDReq) returns (ListBidsResp) {};
+  rpc ListBidsByUserId(ListBidsByUserIDReq) returns (ListBidsResp) {};
 }
