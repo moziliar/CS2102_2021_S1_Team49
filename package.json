@@ -7,6 +7,7 @@
   "dependencies": {
     "@types/google-protobuf": "^3.7.3",
     "@types/pg": "^7.14.5",
+    "dotenv": "^8.2.0",
     "grpc": "^1.24.3",
     "grpc-tools": "^1.9.1",
     "grpc_tools_node_protoc_ts": "^4.1.5",

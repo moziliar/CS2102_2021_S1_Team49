@@ -2,7 +2,8 @@ import { Server, ServerCredentials } from 'grpc';
 
 import { Users, UsersService } from './services/users'
 import { Transactions, TransactionsService } from './services/transactions'
-import pool from './dbconfig/db'
+import { Pets, PetsService } from './services/pets';
+import initDB from './dbconfig/db'
 
 const initServer = (port: number) => {
   const server: Server = new Server({
@@ -10,11 +11,12 @@ const initServer = (port: number) => {
     'grpc:max_send_message_length': 1,
   });
 
-  server.bind(`${port}`, ServerCredentials.createInsecure());
   server.addService(UsersService, new Users());
   server.addService(TransactionsService, new Transactions());
+  server.addService(PetsService, new Pets());
+  server.bind(`0.0.0.0:${port}`, ServerCredentials.createInsecure());
 
-  pool.connect((err, client, done) => {
+  initDB().connect((err, client, done) => {
     if (err) throw err;
     console.log('db connected');
   })
