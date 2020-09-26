@@ -2,25 +2,24 @@ import { sendUnaryData, ServerUnaryCall } from "grpc";
 
 import { ITransactionsServer, TransactionsService } from "../../protos/transaction_grpc_pb"
 import {
-  ListTnxByOwnerIDReq, ListTnxByPetIDReq, ListTnxByTakerIDReq,
+  Transaction,
+  ListTnxByUserIDReq,
   ListTnxResp
 } from "../../protos/transaction_pb"
+import { mockTxnMsgs } from '../models/mockTxns'
 
 class Transactions implements ITransactionsServer {
-  public listTnxByOwnerID(
-    call: ServerUnaryCall<ListTnxByOwnerIDReq>,
+  public listTnxByUserID(
+    call: ServerUnaryCall<ListTnxByUserIDReq>,
     callback: sendUnaryData<ListTnxResp>): void {
-    // TODO: implement
-  };
-  public listTnxByTakerID(
-    call: ServerUnaryCall<ListTnxByTakerIDReq>,
-    callback: sendUnaryData<ListTnxResp>): void {
-    // TODO: implement
-  };
-  public listTnxByPetID(
-    call: ServerUnaryCall<ListTnxByPetIDReq>,
-    callback: sendUnaryData<ListTnxResp>): void {
-    // TODO: implement
+    let userID: number = call.request.getOwnerId();
+
+    // TODO: get all transactions from the database by the user id
+
+    let resp = new ListTnxResp();
+    mockTxnMsgs.forEach((t: Transaction) => resp.addTransactions(t));
+
+    callback(null, resp);
   };
 }
 

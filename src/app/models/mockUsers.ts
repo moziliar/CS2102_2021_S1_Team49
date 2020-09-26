@@ -1,8 +1,8 @@
-import { User, UserProfile } from '../../protos/user_pb';
+import { User, UserProfile, CreditCard } from '../../protos/user_pb';
 import { Pet } from '../../protos/pet_pb';
-import { mockPets } from './mockPets';
+import { mockPets, PetObject, CategoryObject, fromPetObject } from './mockPets';
 
-export const mockUsers = [
+export const mockUsers: Array<UserObject> = [
   {
     userID: 1,
     email: 'example@google.com',
@@ -29,14 +29,14 @@ export const mockUsers = [
     ],
     categories: [
       {
-        category: null,
+        category: mockPets[0].category,
         rate: 5000
       }
     ]
   }
 ]
 
-export const mockUserMsgs = mockUsers.map((u: any) => {
+export const fromUserObject = (u: UserObject): User => {
   let user = new User();
   user.setUserId(u.userID);
   user.setEmail(u.email);
@@ -47,7 +47,50 @@ export const mockUserMsgs = mockUsers.map((u: any) => {
   user.setProfile(profile);
 
   user.setStatus(u.status);
-  u.pets_owned.forEach((pet: Pet) => user.addPetsOwned(pet));
+  u.pets_owned.forEach((pet: PetObject) => user.addPetsOwned(fromPetObject(pet)));
 
   return user
-});
+}
+
+export const fromCreditCardObject = (c: CreditCardObject): CreditCard => {
+  let creditCard = new CreditCard();
+  creditCard.setCardNumber(c.card_number);
+  creditCard.setExpiryDate(c.expiry_date);
+  creditCard.setHolderName(c.holder_name);
+
+  return creditCard;
+}
+
+export const mockUserMsgs = mockUsers.map(fromUserObject);
+
+export interface UserObject {
+  userID: number;
+  email: string;
+  profile: {
+    name: string;
+    picture_url: string;
+    phone: number;
+  },
+  status: number;
+  pets_owned: Array<PetObject>;
+  credit_card: CreditCardObject;
+  is_part_time: boolean;
+  leave_or_avail: Array<LeaveObject>;
+  categories: Array<CategoryRateObject>;
+}
+
+export interface CreditCardObject {
+  card_number: number;
+  expiry_date: string;
+  holder_name: string;
+}
+
+export interface LeaveObject {
+  start_date: string;
+  end_date: string;
+}
+
+export interface CategoryRateObject {
+  category: CategoryObject;
+  rate: number;
+}

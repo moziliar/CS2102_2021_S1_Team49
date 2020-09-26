@@ -7,10 +7,10 @@ export const mockCategories = [
   }
 ]
 
-export const mockCategoryMsgs = mockCategories.map((c: any) => {
+export const mockCategoryMsgs = mockCategories.map(c => {
   let cat = new Category();
   cat.setName(c.name);
-  cat.setParentCategory(c.patrent_category);
+  cat.setParentCategory(c.parent_category);
 
   return cat;
 })
@@ -33,7 +33,7 @@ export const mockPets = [
   }
 ]
 
-export const mockPetMsgs = mockPets.map((p: any) => {
+export const fromPetObject = (p: PetObject) => {
   let pet = new Pet();
   pet.setPetId(p.pet_id);
   pet.setOwnerId(p.owner_id);
@@ -49,9 +49,29 @@ export const mockPetMsgs = mockPets.map((p: any) => {
 
   let cat = new Category();
   cat.setName(p.category.name);
-  cat.setParentCategory(p.category.patrent_category);
+  cat.setParentCategory(p.category.parent_category);
   pet.setCategory(cat);
 
   return pet;
-})
+};
 
+export const mockPetMsgs = mockPets.map(fromPetObject);
+
+export interface PetObject {
+  pet_id: number;
+  owner_id: number;
+  profile: {
+    picture_url: string;
+    name: string;
+    special_reqs: Array<string>;
+    gender: number;
+    description: string;
+    date_of_birth: string;
+  };
+  category: CategoryObject;
+}
+
+export interface CategoryObject {
+  name: string;
+  parent_category: string;
+}
