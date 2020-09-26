@@ -1,11 +1,11 @@
 import { sendUnaryData, ServerUnaryCall } from "grpc";
 
-import { ITransactionsServer, TransactionsService } from "../../protos/transaction_grpc_pb"
+import { ITransactionsServer, TransactionsService } from "../protos/transaction_grpc_pb"
 import {
   Transaction,
   ListTnxByUserIDReq,
   ListTnxResp
-} from "../../protos/transaction_pb"
+} from "../protos/transaction_pb"
 import { mockTxnMsgs } from '../models/mockTxns'
 
 class Transactions implements ITransactionsServer {

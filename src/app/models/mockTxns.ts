@@ -1,4 +1,4 @@
-import { Transaction, TransactionInfo, Review } from '../../protos/transaction_pb';
+import { Transaction, TransactionInfo, Review } from '../protos/transaction_pb';
 import { mockUsers, fromUserObject, UserObject, fromCreditCardObject, CreditCardObject } from './mockUsers';
 import { mockPets, PetObject, fromPetObject } from './mockPets';
 
@@ -24,6 +24,14 @@ export const mockTransactions = [
   }
 ]
 
+const fromReviewObject = (r: ReviewObject): Review => {
+  let review = new Review();
+  review.setDescription(r.description);
+  review.setRating(r.rating);
+
+  return review
+}
+
 export const mockTxnMsgs: Array<Transaction> = mockTransactions.map(tnx => {
   let transaction = new Transaction();
 
@@ -46,14 +54,6 @@ export const mockTxnMsgs: Array<Transaction> = mockTransactions.map(tnx => {
 
   return transaction;
 })
-
-const fromReviewObject = (r: ReviewObject): Review => {
-  let review = new Review();
-  review.setDescription(r.description);
-  review.setRating(r.rating);
-
-  return review
-}
 
 export interface TransactionObject {
   t_id: number;

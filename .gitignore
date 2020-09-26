@@ -3,7 +3,7 @@
 .idea
 
 # protogen files
-src/protos/*
+src/app/protos/*
 
 yarn.lock
 package-lock.json

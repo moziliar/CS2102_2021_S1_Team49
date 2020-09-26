@@ -1,4 +1,4 @@
-import { Pet, PetProfile, Category } from '../../protos/pet_pb';
+import { Pet, PetProfile, Category } from '../protos/pet_pb';
 
 export const mockCategories = [
   {

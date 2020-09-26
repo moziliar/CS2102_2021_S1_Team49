@@ -1,10 +1,10 @@
 import { sendUnaryData, ServerUnaryCall } from "grpc";
 
-import { IPetsServer, PetsService } from "../../protos/pet_grpc_pb"
+import { IPetsServer, PetsService } from "../protos/pet_grpc_pb"
 import {
   Pet,
   AddPetResp, UpdatePetResp, DeletePetResp,
-} from "../../protos/pet_pb"
+} from "../protos/pet_pb"
 
 class Pets implements IPetsServer {
   public addPet(

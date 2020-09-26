@@ -1,5 +1,5 @@
-import { User, UserProfile, CreditCard } from '../../protos/user_pb';
-import { Pet } from '../../protos/pet_pb';
+import { User, UserProfile, CreditCard } from '../protos/user_pb';
+import { Pet } from '../protos/pet_pb';
 import { mockPets, PetObject, CategoryObject, fromPetObject } from './mockPets';
 
 export const mockUsers: Array<UserObject> = [

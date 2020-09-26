@@ -1,13 +1,13 @@
 import { sendUnaryData, ServerUnaryCall } from "grpc";
 
-import { IUsersServer, UsersService } from "../../protos/user_grpc_pb"
+import { IUsersServer, UsersService } from "../protos/user_grpc_pb"
 import {
   User,
   LoginReq, LoginResp,
   AddUserResp, UpdateUserResp, DeleteUserResp,
   ListAllCareTakersReq, ListAllCareTakersResp,
   ListAllPaychecksByCareTakerReq, ListAllPaychecksByCareTakerResp
-} from "../../protos/user_pb"
+} from "../protos/user_pb"
 import { mockUserMsgs } from '../models/mockUsers'
 
 class Users implements IUsersServer {
