@@ -10,6 +10,10 @@
 
 **DB**: PostgresSQL
 
+### Debugging tool for gRPC
+
+BlookRPC could behave like a gRPC query. https://github.com/uw-labs/bloomrpc
+
 ## Project Setup
 
 ### Step 1: Local Git Setup

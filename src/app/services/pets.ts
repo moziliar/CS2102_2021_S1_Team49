@@ -28,7 +28,7 @@ class Pets implements IPetsServer {
 
     // TODO: update pet in DB and return
 
-    let resp = new AddPetResp();
+    let resp: UpdatePetResp = new UpdatePetResp();
     resp.setSuccess(true);
     resp.setMessage('update pet')
     resp.setPet(pet);
@@ -42,7 +42,7 @@ class Pets implements IPetsServer {
 
     // TODO: delete pet in DB and return
 
-    let resp = new AddPetResp();
+    let resp: DeletePetResp = new DeletePetResp();
     resp.setSuccess(true);
     resp.setMessage('delete pet')
     resp.setPet(pet);

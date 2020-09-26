@@ -61,7 +61,7 @@ class Users implements IUsersServer {
 
     // TODO: delete user in DB layer and return
 
-    let resp = new AddUserResp();
+    let resp = new DeleteUserResp();
     resp.setSuccess(true);
     resp.setMessage("delete user");
     resp.setUser(newUser);
@@ -79,7 +79,6 @@ class Users implements IUsersServer {
   public listAllPaychecksByCareTaker(
     call: ServerUnaryCall<ListAllPaychecksByCareTakerReq>,
     callback: sendUnaryData<ListAllPaychecksByCareTakerResp>): void {
-    // TODO: implement
   };
 }
 
