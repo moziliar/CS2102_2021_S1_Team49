@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
 const initDB = () => {
-  const port = process.env.PORT
+  const port = process.env.DB_PORT
   const host = process.env.DB_HOST
   const user = process.env.DB_USER
   const password = process.env.DB_PASSWORD
