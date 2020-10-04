@@ -2,11 +2,13 @@ import initServer from './server'
 import dotenv from 'dotenv'
 
 // for local dev
-dotenv.config()
+if (process.env.ENV != "live") {
+  dotenv.config()
+}
 
 const port: number = parseInt(process.env.PORT || '4000');
 
-console.log('init server');
+console.log(`init server at port ${port} in env ${process.env.ENV}`);
 const server = initServer(port);
 
 console.log('starting server');
