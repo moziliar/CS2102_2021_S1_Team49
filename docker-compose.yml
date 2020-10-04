@@ -10,7 +10,7 @@ services:
       MYSQL_USER: user
       MYSQL_PASSWORD: password
     ports:
-      - 3306:3306
+      - 3305:3305
 
   psql:
     container_name: psql
@@ -18,7 +18,7 @@ services:
     restart: always
     environment:
       POSTGRES_DB: psql_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432

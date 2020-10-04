@@ -1,0 +1,28 @@
+.links a {
+    text-decoration: none;
+    padding: 10px;
+    color: black;
+    opacity: 0.5;
+}
+
+a:hover {
+    opacity: 1;
+}
+
+a.brand {
+    text-decoration: none;
+    color: #6bb4db;
+    font-family: 'Sansita Swashed', cursive;
+    font-size: 30px;
+    margin: 0 20px;
+    padding: 10px;
+}
+
+.navigation {
+    background-color: white !important;
+    border-bottom: 1px solid #D3D3D3;
+}
+
+nav.navbar {
+    padding: 0;
+}
