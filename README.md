@@ -49,7 +49,8 @@ If you choose to install DB server locally, feel free to do so.
 background.
 3. Refer to the output log (`docker-compose logs -f`) for DB password if unsure.
 4. Use `docker ps` to get the container ID
-5. Use `docker exec -ti [postgres container id] psql -U [username] -p` to enter the PostgreSQL server in the container.
+5. Use `docker exec -ti [postgres container id] psql -U [username] -d postgres` to enter the PostgreSQL server in the container.
+6. Inside the psql CLI, run `CREATE DATABASE pcs;`
 
 ### Step 3: ENV setup
 
