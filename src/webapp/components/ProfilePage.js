@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 
 import { UserContext } from '../contexts/UserContext';
 import '../styles/ProfilePage.css';
+// import { UsersClient } from '../../app/protos/user_grpc_pb'
 
 class ProfilePage extends Component {
 	static contextType = UserContext;

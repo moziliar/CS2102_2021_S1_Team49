@@ -33,12 +33,14 @@ module.exports = {
       {
         test: /\.(jpg|png|svg)$/,
         loader: 'url-loader',
+        exclude: /node_modules/,
         options: {
           limit: 25000,
         },
       },
       {
         test: /\.css$/i,
+        exclude: /node_modules/,
         use: ['style-loader', 'css-loader'],
       },
       {
