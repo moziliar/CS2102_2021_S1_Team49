@@ -1,24 +1,30 @@
 version: '3'
 services:
-  mysql:
-    container_name: mysql
-    image: mysql/mysql-server
-    restart: always
+  pcs-backend:
+    env_file:
+      - .env
+    build: .
+    container_name: pcs-backend
+    image: t00102546823/pcs-backend
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: mysql_db
-      MYSQL_USER: user
-      MYSQL_PASSWORD: password
+      PORT: 8080
+      DB_HOST: psql
+      DB_PORT: 5432
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
     ports:
-      - 3305:3305
+      - 9090:9090
+      - 8080:8080
 
   psql:
+    env_file:
+      - .env
     container_name: psql
     image: postgres
     restart: always
     environment:
-      POSTGRES_DB: psql_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: "${DB_NAME}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
     ports:
       - 5432:5432
