@@ -23,3 +23,6 @@ yarn run grpc_tools_node_protoc \
     --ts_out=${PROTO_DEST} \
     -I ./proto \
     proto/*.proto
+
+# FE code generation
+yarn run grpc_tools_node_protoc -I=./proto proto/*.proto --grpc-web_out=import_style=commonjs,mode=grpcwebtext:${PROTO_DEST}
