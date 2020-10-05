@@ -14,7 +14,7 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
     ports:
       - 9090:9090
-      - 8080:8080
+      - "${PORT}:8080"
 
   psql:
     env_file:

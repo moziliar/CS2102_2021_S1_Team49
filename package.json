@@ -1,7 +1,7 @@
 {
   "scripts": {
     "build": "./scripts/build-protos.sh && tsc --build ./src/app/tsconfig.json",
-    "start": "./scripts/build-protos.sh && npm run server",
+    "start": "sed -i -e 's/\r$//' ./scripts/build-protos.sh && ./scripts/build-protos.sh && npm run server",
     "server": "tsc --build ./src/app/tsconfig.json && node ./dist/server/app.js",
     "webapp-dev": "webpack-dev-server --open"
   },
