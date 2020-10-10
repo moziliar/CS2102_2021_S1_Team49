@@ -1,0 +1,21 @@
+.bg-container {
+    background-color: #e8ebed;
+    height: 100vh;
+    padding: 5% 25%;
+}
+
+.container {
+    background-color: white;
+    border-radius: 5px;
+    padding: 10%;
+}
+
+.signin-page h1 {
+    text-align: center;
+    margin-bottom: 5%;
+}
+
+.signin-page button {
+    margin: 5% 0;
+    width: 100%;
+}
