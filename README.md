@@ -56,4 +56,3 @@ background.
 Run `cp .env.example .env` and configure the environment variables inside to your local environment.
 
 We shall use the Heroku config for production/staging variable injection.
- 
