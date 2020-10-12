@@ -7,11 +7,11 @@ export const mockUsers: Array<UserObject> = [
     userID: 1,
     email: 'example@google.com',
     profile: {
-      name: 'Paul',
+      name: 'Paul Peterson',
       picture_url: '',
       phone: 12345678
     },
-    status: User.Status.PET_OWNER,
+    status: User.Status.BOTH,
     pets_owned: [
       mockPets[0],
     ],

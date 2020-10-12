@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Button } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
-import '../styles/HomePage.css';
+import '../styles/HomePage.scss';
 
 class HomePage extends Component {
 	render() {

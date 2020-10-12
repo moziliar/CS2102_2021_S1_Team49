@@ -1,0 +1,47 @@
+.profile-page {
+    background-color: #e8ebed;
+
+    .container {
+        padding: 5%;
+    }
+
+    div[class^="col"] {
+        background-color: white;
+        border-radius: 5px;
+        padding: 2%;
+    }
+
+    div.col-3 {
+        height: 100%;
+    }
+
+    .profile-section {
+        text-align: center;
+
+        h5 {
+            margin-top: 10px;
+        }
+    }
+
+    img {
+        width: 75px;
+        height: 75px;
+        border-radius: 100%;
+    }
+
+    .update-btn {
+        margin-top: 10px;
+    }
+
+    a {
+        display: inline-block;
+        color: black;
+        opacity: 0.5;
+        margin: 5px;
+    }
+
+    .is-active {
+        opacity: 1;
+        text-decoration: underline;
+    }
+}

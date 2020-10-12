@@ -3,7 +3,7 @@ import { Form, Button, Container } from 'react-bootstrap';
 import { Link, Redirect } from 'react-router-dom';
 
 import { UserContext } from '../contexts/UserContext';
-import '../styles/SignInPage.css';
+import '../styles/SignInPage.scss';
 
 const EMAIL = 'email';
 const PASSWORD = 'password';
@@ -45,7 +45,7 @@ class SignInPage extends Component {
 		const isSignIn = window.location.pathname === '/signin';
 		return(
 			<>
-				<div className="bg-container signin-page">
+				<div className="signin-page">
 					<Container>
 						<h1>{ isSignIn ? 'Sign In' : 'Sign Up' } to Care Taker</h1>
 						<Form>
@@ -57,6 +57,7 @@ class SignInPage extends Component {
 								<Form.Label>Password</Form.Label>
 								<Form.Control type="password" value={ password } onChange={ e => this.onHandleInputChange(PASSWORD, e.target.value) }/>
 							</Form.Group>
+							<small style={{ 'color': 'red' }}>{ this.context.errMessage }</small>
 							<Button variant="success" onClick={ isSignIn ? this.onSignIn : this.onSignUp }>
 								{ isSignIn ? 'Sign In' : 'Sign Up' }
 							</Button>
@@ -68,7 +69,7 @@ class SignInPage extends Component {
 								</Link>
 							</p>
 						</Form>
-				</Container>	
+					</Container>	
 				</div>
 			</>
 		);

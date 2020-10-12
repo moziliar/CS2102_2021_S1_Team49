@@ -3,7 +3,7 @@ import { Navbar, Nav } from 'react-bootstrap';
 import { Link, useLocation } from 'react-router-dom';
 
 import { UserContext } from '../contexts/UserContext';
-import '../styles/NavigationBar.css';
+import '../styles/NavigationBar.scss';
 
 const NavigationBar = (props) => {
 	const userContext = useContext(UserContext);
