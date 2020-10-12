@@ -30,6 +30,7 @@ class UserContextProvider extends Component {
 		})
 	}
 
+	// To sign in use email example@google.com
 	state = {
 		currentUser: mockUsers[0], // change to null if want to test login/signup flow
 		isLoggedIn: true, // change to false if want to test login /signup flow
