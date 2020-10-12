@@ -31,8 +31,8 @@ class UserContextProvider extends Component {
 	}
 
 	state = {
-		currentUser: mockUsers[0],
-		isLoggedIn: true,
+		currentUser: mockUsers[0], // change to null if want to test login/signup flow
+		isLoggedIn: true, // change to false if want to test login /signup flow
 		signinFunc: this.signinFunc,
 		signupFunc: this.signupFunc,
 		errMessage: null
