@@ -3,7 +3,8 @@
     "build": "./scripts/build-protos.sh && tsc --build ./src/app/tsconfig.json",
     "start": "sed -i -e 's/\r$//' ./scripts/build-protos.sh && ./scripts/build-protos.sh && npm run server",
     "server": "tsc --build ./src/app/tsconfig.json && node ./dist/server/app.js",
-    "webapp-dev": "webpack-dev-server --open"
+    "webapp-dev": "webpack-dev-server --open --host 0.0.0.0",
+    "client": "NODE_ENV=production node src/webapp/index.js"
   },
   "dependencies": {
     "@types/google-protobuf": "^3.7.3",

@@ -58,8 +58,8 @@ message Paycheck {
 }
 
 message LoginReq {
-  int32 email = 1;
-  int32 password = 2;
+  string email = 1;
+  string password = 2;
 }
 
 message LoginResp {
