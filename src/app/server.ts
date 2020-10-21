@@ -1,27 +1,25 @@
-import { Server, ServerCredentials,  } from 'grpc';
-
-import { Users, UsersService } from './services/users'
-import { Transactions, TransactionsService } from './services/transactions'
-import { Pets, PetsService } from './services/pets';
+import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler } from './controllers/user'
+import { CreatePetHandler, UpdatePetHandler, DeletePetHandler } from './controllers/pet'
+import { ListTxnByUserID } from './controllers/txn'
 import initDB from './dbconfig/db'
 
+import express from 'express';
+
 const initServer = (port: number) => {
-  const server: Server = new Server({
-    'grpc:max_receive_message_length': 1,
-    'grpc:max_send_message_length': 1,
-  });
+  const server = express();
 
-  server.addService(UsersService, new Users());
-  server.addService(TransactionsService, new Transactions());
-  server.addService(PetsService, new Pets());
-  server.bind(`0.0.0.0:${port}`, ServerCredentials.createInsecure());
+  server.get('/user/login', LoginHandler);
+  server.post('/user/create', CreateUserHandler);
+  server.put('/user/update', UpdateUserHandler);
+  server.delete('/user/delete', DeleteUserHandler);
 
-  initDB().connect((err, client, done) => {
-    if (err) throw err;
-    console.log('db connected');
-  })
+  server.post('/pet/create', CreatePetHandler)
+  server.put('/pet/update', UpdatePetHandler)
+  server.delete('/pet/delete', DeletePetHandler)
 
-  return server;
+  server.get('/txn/list', ListTxnByUserID)
+
+  return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }
 
 export default initServer;

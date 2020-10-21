@@ -1,10 +1,9 @@
-import { Transaction, TransactionInfo, Review } from '../protos/transaction_pb';
-import { mockUsers, fromUserObject, UserObject, fromCreditCardObject, CreditCardObject } from './mockUsers';
-import { mockPets, PetObject, fromPetObject } from './mockPets';
+import { Transaction, TransactionInfo, TransferMethod, Review } from './txns';
+import { mockUsers } from './mockUsers';
+import { mockPets } from './mockPets';
 
-export const mockTransactions = [
+export const mockTransactions: Array<Transaction> = [
   {
-    t_id: 1,
     info: {
       owner: mockUsers[0],
       care_taker: mockUsers[0],
@@ -13,7 +12,7 @@ export const mockTransactions = [
       start_date: '07.05.2020',
       end_date: '12.05.2020',
       total_price: 7000,
-      transfer_method: TransactionInfo.TransferMethod.OWNER_DELIVER,
+      transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
       credit_card: mockUsers[0].credit_card,
     },
@@ -23,58 +22,3 @@ export const mockTransactions = [
     }
   }
 ]
-
-const fromReviewObject = (r: ReviewObject): Review => {
-  let review = new Review();
-  review.setDescription(r.description);
-  review.setRating(r.rating);
-
-  return review
-}
-
-export const mockTxnMsgs: Array<Transaction> = mockTransactions.map(tnx => {
-  let transaction = new Transaction();
-
-  transaction.setTId(tnx.t_id);
-
-  let info = new TransactionInfo();
-  info.setOwner(fromUserObject(tnx.info.owner));
-  info.setCareTaker(fromUserObject(tnx.info.care_taker));
-  info.setPet(fromPetObject(tnx.info.pet));
-  info.setLocation(tnx.info.location);
-  info.setStartDate(tnx.info.start_date);
-  info.setEndDate(tnx.info.end_date);
-  info.setTotalPrice(tnx.info.total_price);
-  info.setTransferMethod(tnx.info.transfer_method);
-  info.setUseCard(tnx.info.use_card);
-  info.setCreditCard(fromCreditCardObject(tnx.info.credit_card));
-  transaction.setInfo(info);
-
-  transaction.setReview(fromReviewObject(tnx.review));
-
-  return transaction;
-})
-
-export interface TransactionObject {
-  t_id: number;
-  info: TransactionInfoObject;
-  review: ReviewObject;
-}
-
-export interface TransactionInfoObject {
-  owner: UserObject;
-  care_taker: UserObject;
-  pet: PetObject;
-  location: string;
-  start_date: string;
-  end_date: string
-  total_price: number
-  transfer_method: number;
-  use_card: boolean;
-  credit_card: CreditCardObject;
-}
-
-export interface ReviewObject {
-  description: string;
-  rating: number;
-}
