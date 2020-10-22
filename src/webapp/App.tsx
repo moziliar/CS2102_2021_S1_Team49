@@ -11,6 +11,7 @@ class App extends Component {
   componentDidMount = () => {
     API.get('/user/login')
       .then(res => { 
+        console.log(res.data);
         this.setState({data: res.data})
       })
   }

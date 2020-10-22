@@ -3,7 +3,8 @@
     "build": "./scripts/build-protos.sh && tsc --build ./src/app/tsconfig.json",
     "start": "sed -i -e 's/\r$//' ./scripts/build-protos.sh && ./scripts/build-protos.sh && npm run server",
     "server": "tsc --build ./src/app/tsconfig.json && node ./dist/server/app.js",
-    "webapp-dev": "node scripts/start.js",
+    "webapp-dev": "node ./src/webapp/scripts/start.js",
+    "webapp-build": "node ./src/webapp/scripts/build.js",
     "client": "NODE_ENV=production node src/webapp/index.js"
   },
   "dependencies": {
