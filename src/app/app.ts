@@ -12,6 +12,6 @@ console.log(`init server at port ${port} in env ${process.env.ENV}`);
 const server = initServer(port);
 
 console.log('starting server');
-server.start();
+server();
 
 console.log('server started');

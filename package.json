@@ -3,13 +3,15 @@
     "build": "./scripts/build-protos.sh && tsc --build ./src/app/tsconfig.json",
     "start": "sed -i -e 's/\r$//' ./scripts/build-protos.sh && ./scripts/build-protos.sh && npm run server",
     "server": "tsc --build ./src/app/tsconfig.json && node ./dist/server/app.js",
-    "webapp-dev": "webpack-dev-server --open"
+    "webapp-dev": "webpack-dev-server --open --host 0.0.0.0",
+    "client": "NODE_ENV=production node src/webapp/index.js"
   },
   "dependencies": {
     "@types/google-protobuf": "^3.7.3",
     "@types/pg": "^7.14.5",
     "bootstrap": "^4.5.2",
     "dotenv": "^8.2.0",
+    "express": "^4.17.1",
     "grpc": "^1.24.3",
     "grpc-tools": "^1.9.1",
     "grpc_tools_node_protoc_ts": "^4.1.5",
