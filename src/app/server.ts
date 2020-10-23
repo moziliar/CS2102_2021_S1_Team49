@@ -1,6 +1,7 @@
 import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler } from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler } from './controllers/pet'
 import { ListTxnByUserID } from './controllers/txn'
+import { ListAllBids, ListTnxByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
 
 import express from 'express';
@@ -18,6 +19,9 @@ const initServer = (port: number) => {
   server.delete('/pet/delete', DeletePetHandler)
 
   server.get('/txn/list', ListTxnByUserID)
+
+  server.get('/bid/list', ListAllBids)
+  server.get('/bid/tnx', ListTnxByOwnerID)
 
   return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }
