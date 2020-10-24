@@ -10,6 +10,10 @@
 
 **DB**: PostgresSQL
 
+### Debugging tool for gRPC
+
+BlookRPC could behave like a gRPC query. https://github.com/uw-labs/bloomrpc
+
 ## Project Setup
 
 ### Step 1: Local Git Setup
@@ -30,7 +34,7 @@ git branch -u upstream/master
 ```
 > Future PR make directly to the `upstream master`. Constantly pull from `upstream master`.
 
-### DB Setup
+### Step 2: DB Setup
 
 #### Local Setup: Docker Compose
 
@@ -45,5 +49,10 @@ If you choose to install DB server locally, feel free to do so.
 background.
 3. Refer to the output log (`docker-compose logs -f`) for DB password if unsure.
 4. Use `docker ps` to get the container ID
-5. Use `docker exec -ti [postgres container id] psql -U [username]` to enter the PostgreSQL server in the container.
- 
+5. Use `docker exec -ti [postgres container id] psql -U [username] -p` to enter the PostgreSQL server in the container.
+
+### Step 3: ENV setup
+
+Run `cp .env.example .env` and configure the environment variables inside to your local environment.
+
+We shall use the Heroku config for production/staging variable injection.

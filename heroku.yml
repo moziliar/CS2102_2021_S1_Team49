@@ -1,0 +1,12 @@
+setup:
+  addons:
+    - plan: heroku-postgresql
+build:
+  docker:
+    web: Dockerfile
+  config:
+    DATABASE_URL: DATABASE_URL
+    ENV: live
+    PORT: 8080
+run:
+  web: npm run start
