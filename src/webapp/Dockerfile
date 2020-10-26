@@ -2,12 +2,12 @@ FROM node
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY ./package.json ./
 
 RUN npm install
 
 COPY . .
 
-EXPOSE 80
+EXPOSE 4000
 
-CMD npm run server
+CMD npm run webapp-dev
