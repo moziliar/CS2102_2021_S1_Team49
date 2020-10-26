@@ -15,6 +15,7 @@ export const mockTransactions: Array<Transaction> = [
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
       credit_card: mockUsers[0].credit_card,
+      is_selected: true
     },
     review: {
       description: 'good care taker!',
@@ -33,6 +34,7 @@ export const mockTransactions: Array<Transaction> = [
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
       credit_card: mockUsers[0].credit_card,
+      is_selected: true
     },
     review: {
       description: '',
@@ -51,6 +53,26 @@ export const mockTransactions: Array<Transaction> = [
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
       credit_card: mockUsers[0].credit_card,
+      is_selected: true
+    },
+    review: {
+      description: '',
+      rating: 0
+    }
+  },
+  {
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2021',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+      is_selected: false
     },
     review: {
       description: '',

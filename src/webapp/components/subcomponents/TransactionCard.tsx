@@ -5,14 +5,15 @@ import { Transaction } from '../../../app/models/txns';
 
 type IProps = {
 	transaction: Transaction,
-	hasFinished: boolean
+	hasFinished: boolean,
+	isBid: boolean
 }
 
 const TransactionCard = (props: IProps) => {
 	return (
 		<div style={{ 'backgroundColor': '#CCFFE5', 'padding': '20px', 'borderRadius': '5px', 'margin': '15px' }}>
 			<p>Taker Name: { props.transaction.info.care_taker.name } </p>
-			<p>Period: { props.transaction.info.start_date } - { props.transaction.info.end_date } (${props.transaction.info.total_price})</p>
+			<p>Period: { props.transaction.info.start_date } - { props.transaction.info.end_date } ({ props.isBid ? 'You bid for: ' : '' }${props.transaction.info.total_price})</p>
 			<p>Pet Info: { props.transaction.info.pet.name } ({ props.transaction.info.pet.category.name })</p>
 			{ props.hasFinished 
 					? props.transaction.review.description

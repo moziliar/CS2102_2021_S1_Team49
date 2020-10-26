@@ -19,7 +19,7 @@ const PastTransactionsSection = () => {
 			<h4 style={{ 'margin': '15px' }}>You currently have { transaction.pastTransactions.length } past transaction(s)</h4>
 			{ transaction.pastTransactions.length !== 0
 					? transaction.pastTransactions.map((txn, index) => {
-							return <TransactionCard key={ index } transaction={ txn } hasFinished={ true }/>
+							return <TransactionCard key={ index } transaction={ txn } hasFinished={ true } isBid={ false }/>
 						})
 					: null
 			}

@@ -7,10 +7,11 @@ import { UserContext } from '../contexts/UserContext';
 import EditProfileSection from './subcomponents/EditProfileSection';
 import MyPetsSection from './subcomponents/MyPetsSection';
 import PastTransactionsSection from './subcomponents/PastTransactionsSection';
+import OngoingTransactionsSection from './subcomponents/OngoingTransactionsSection';
+import OngoingBidsSection from './subcomponents/OngoingBidsSection';
 import ProtectedRoute from './subcomponents/ProtectedRoute';
 
 import '../styles/ProfilePage.scss';
-import OngoingTransactionsSection from './subcomponents/OngoingTransactionsSection';
 
 class ProfilePage extends Component {
 	static contextType = UserContext;
@@ -38,7 +39,7 @@ class ProfilePage extends Component {
 							<ProtectedRoute path="/profile/past-transactions" component={ PastTransactionsSection }/>
 							<ProtectedRoute path="/profile/my-pets" component={ MyPetsSection }/>
 							<ProtectedRoute path="/profile/ongoing-transactions" component={ OngoingTransactionsSection }/>
-							<ProtectedRoute path="/profile/pending-bids" component={ EditProfileSection }/>
+							<ProtectedRoute path="/profile/pending-bids" component={ OngoingBidsSection }/>
 							<ProtectedRoute path="/profile/paycheck" component={ EditProfileSection }/>
 						</Col>
 					</Row>

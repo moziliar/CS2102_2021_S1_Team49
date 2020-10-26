@@ -33,7 +33,7 @@ class TransactionContextProvider extends Component<{}, contextState> {
     getPastTransactions = () => {
 			API.get('/txn/list')
 				.then(res => {
-					const pastTransactions = res.data.filter(t => new Date(t.info.end_date).getTime() < new Date(Date.now()).getTime());
+					const pastTransactions = res.data.filter(t => t.info.is_selected &&  new Date(t.info.end_date).getTime() < new Date(Date.now()).getTime());
 					this.setState({ pastTransactions: pastTransactions });
 				});
     }
@@ -46,14 +46,18 @@ class TransactionContextProvider extends Component<{}, contextState> {
 						const startDate = new Date(t.info.start_date).getTime();
 						const endDate = new Date(t.info.end_date).getTime();
 
-						return startDate <= todayDate && endDate >= todayDate;
+						return t.info.is_selected && startDate <= todayDate && endDate >= todayDate;
 					});
 					this.setState({ ongoingTransactions: ongoingTransactions });
 				});
     }
 
     getOngoingBids = () => {
-        
+			API.get('/txn/list')
+				.then(res => {
+					const onGoingBids = res.data.filter(t => !t.info.is_selected);
+					this.setState({ ongoingBids: onGoingBids });
+				});
     }
 
     render() {

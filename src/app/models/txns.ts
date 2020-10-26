@@ -17,6 +17,7 @@ export interface TransactionInfo {
   transfer_method: TransferMethod;
   use_card: boolean;
   credit_card: CreditCard;
+  is_selected: boolean;
 }
 
 export enum TransferMethod {
