@@ -73,7 +73,8 @@ checkBrowsers(paths.appPath, isInteractive)
   .then(port => {
     if (port == null) {
       // We have not found a port.
-      return;
+      port = DEFAULT_PORT;
+      // return;
     }
 
     const config = configFactory('development');
