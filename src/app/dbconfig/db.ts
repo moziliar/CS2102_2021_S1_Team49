@@ -7,7 +7,7 @@ const initDB = () => {
   const password = process.env.DB_PASSWORD;
   const dbname = 'pcs';
   var connectionString =`postgres://${user}:${password}@${host}:${port}/${dbname}`;
-  if (process.env.ENV === "live") {
+  if (process.env.ENV === "live" && process.env.DATABASE_URL) {
     connectionString = process.env.DATABASE_URL;
   }
   console.log("connecting to db at:", connectionString);
