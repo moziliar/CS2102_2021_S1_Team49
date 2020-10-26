@@ -9,6 +9,7 @@ export type userContextState = {
 	signInFunc: any,
 	signUpFunc: any,
 	signOutFunc: any,
+	applyLeave: any,
 	currentUser: User | null
 };
 
@@ -18,6 +19,7 @@ export const UserContext = createContext<userContextState>({
 	signInFunc: null,
 	signUpFunc: null,
 	signOutFunc: null,
+	applyLeave: null,
 	currentUser: null
 });
 
@@ -28,6 +30,7 @@ class UserContextProvider extends Component<{}, userContextState> {
 		signInFunc: null,
 		signUpFunc: null,
 		signOutFunc: null,
+		applyLeave: null,
 		currentUser: null
 	};
 
@@ -53,9 +56,28 @@ class UserContextProvider extends Component<{}, userContextState> {
 		})
 	}
 
+	// For user to apply as other account type.
+	applyAccountOtherType = (type: string) => {
+		if (type === "pet_onwer") {
+
+		} else if (type === "full_time") {
+
+		} else if (type === "part_time") {
+
+		}
+	}
+
+	applyLeave = (startDate: Date, endDate: Date) => {
+		console.log("Leave Applied");
+	}
+
 	render() {
 		return (
-			<UserContext.Provider value={{ ...this.state, signInFunc: this.signInFunc, signUpFunc: this.signUpFunc, signOutFunc: this.signOutFunc }}>
+			<UserContext.Provider value={{ ...this.state, 
+				signInFunc: this.signInFunc, 
+				signUpFunc: this.signUpFunc, 
+				signOutFunc: this.signOutFunc,
+				applyLeave: this.applyLeave }}>
 				{ this.props.children }
 			</UserContext.Provider>
 		);
