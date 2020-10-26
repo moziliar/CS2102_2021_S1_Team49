@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Row, Col, Button, Form } from 'react-bootstrap';
+import DatePicker from 'react-date-picker';
 
 import { UserContext } from '../../contexts/UserContext';
 import { CreditCard, User } from '../../../app/models/users';
@@ -105,10 +106,11 @@ class EditProfileSection extends Component<{}, IState> {
 						</Col>
 						<Col>
 							<Form.Label>Expiry Date</Form.Label>
-							<Form.Control 
-								type="text" 
-								value={ formData[CREDIT_CARD][EXPIRY_DATE] } 
-								onChange={ (e) => this.onHandleInputChange(EXPIRY_DATE, e.target.value) }/>
+							<br />
+							<DatePicker 
+								value={ new Date(formData[CREDIT_CARD][EXPIRY_DATE]) }
+								format="MM/dd/y"
+								onChange={ date => this.onHandleInputChange(EXPIRY_DATE, date) }/>
 						</Col>
 					</Row>
 					<Button variant="primary" onClick={ this.onUpdateUser } className="update-btn">

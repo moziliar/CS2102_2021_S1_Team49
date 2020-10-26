@@ -5,16 +5,18 @@ import { Link, NavLink } from 'react-router-dom';
 import { Status } from '../../app/models/users';
 import { UserContext } from '../contexts/UserContext';
 import EditProfileSection from './subcomponents/EditProfileSection';
+import MyPetsSection from './subcomponents/MyPetsSection';
+import PastTransactionsSection from './subcomponents/PastTransactionsSection';
 import ProtectedRoute from './subcomponents/ProtectedRoute';
 
 import '../styles/ProfilePage.scss';
-import MyPetsSection from './subcomponents/MyPetsSection';
+import OngoingTransactionsSection from './subcomponents/OngoingTransactionsSection';
 
 class ProfilePage extends Component {
 	static contextType = UserContext;
 
   render() {
-		const { currentUser } = this.context;
+		const { currentUser, signOutFunc } = this.context;
 		return(
 			<div className="profile-page">
 				<Container>
@@ -23,15 +25,19 @@ class ProfilePage extends Component {
 							<div className="profile-section">
 								<img src="https://i0.wp.com/www.oakridge.in/wp-content/uploads/2020/02/Sample-jpg-image-500kb.jpg"/>
 								<h5>{ currentUser.name }</h5>
-								<small style={{ 'color': '#06748A' }}>{ currentUser.email }</small>
+								<small style={{ 'color': '#06748A', 'marginBottom': '20px' }}>{ currentUser.email }</small>
+								<Button 
+									style={{ 'marginTop': '20px' }} 
+									variant="danger"
+									onClick={ signOutFunc }>Sign out</Button>
 							</div>
 							{ this._renderLinks() }
 						</Col>
 						<Col xs={{ span: 8, offset:1 }	}>
 							<ProtectedRoute path="/profile" component={ EditProfileSection } exact/>
-							<ProtectedRoute path="/profile/past-transactions" component={ EditProfileSection }/>
+							<ProtectedRoute path="/profile/past-transactions" component={ PastTransactionsSection }/>
 							<ProtectedRoute path="/profile/my-pets" component={ MyPetsSection }/>
-							<ProtectedRoute path="/profile/ongoing-transactions" component={ EditProfileSection }/>
+							<ProtectedRoute path="/profile/ongoing-transactions" component={ OngoingTransactionsSection }/>
 							<ProtectedRoute path="/profile/pending-bids" component={ EditProfileSection }/>
 							<ProtectedRoute path="/profile/paycheck" component={ EditProfileSection }/>
 						</Col>

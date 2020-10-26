@@ -13,14 +13,14 @@ export const mockUsers: Array<User> = [
     ],
     credit_card: {
       card_number: 5555444433332222,
-      expiry_date: '01.02.2021',
+      expiry_date: '01/02/2021',
       holder_name: 'Paul'
     },
     is_part_time: false,
     leave_or_avail: [
       {
-        start_date: '10.05.2020',
-        end_date: '12.05.2020'
+        start_date: '05/10/2020',
+        end_date: '05/12/2020'
       }
     ],
     categories: [

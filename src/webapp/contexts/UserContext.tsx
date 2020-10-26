@@ -3,28 +3,31 @@ import React, { createContext, Component } from 'react';
 import API from '../api';
 import { User } from '../../app/models/users';
 
-type contextState = {
+export type userContextState = {
 	isLoggedIn: boolean,
 	errMessage: string,
 	signInFunc: any,
 	signUpFunc: any,
-	currentUser: User | any
+	signOutFunc: any,
+	currentUser: User | null
 };
 
-export const UserContext = createContext<contextState>({
+export const UserContext = createContext<userContextState>({
 	isLoggedIn: false,
 	errMessage: '',
 	signInFunc: null,
 	signUpFunc: null,
+	signOutFunc: null,
 	currentUser: null
 });
 
-class UserContextProvider extends Component<{}, contextState> {
-	state: contextState = {
+class UserContextProvider extends Component<{}, userContextState> {
+	state: userContextState = {
 		isLoggedIn: false,
 		errMessage: '',
 		signInFunc: null,
 		signUpFunc: null,
+		signOutFunc: null,
 		currentUser: null
 	};
 
@@ -43,9 +46,16 @@ class UserContextProvider extends Component<{}, contextState> {
 		console.log("Sign Up")
 	};
 
+	signOutFunc = () => {
+		this.setState({
+			currentUser: null,
+			isLoggedIn: false
+		})
+	}
+
 	render() {
 		return (
-			<UserContext.Provider value={{ ...this.state, signInFunc: this.signInFunc, signUpFunc: this.signUpFunc }}>
+			<UserContext.Provider value={{ ...this.state, signInFunc: this.signInFunc, signUpFunc: this.signUpFunc, signOutFunc: this.signOutFunc }}>
 				{ this.props.children }
 			</UserContext.Provider>
 		);

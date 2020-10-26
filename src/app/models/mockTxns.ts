@@ -9,8 +9,8 @@ export const mockTransactions: Array<Transaction> = [
       care_taker: mockUsers[0],
       pet: mockPets[0],
       location: 'central',
-      start_date: '07.05.2020',
-      end_date: '12.05.2020',
+      start_date: '05/12/2020',
+      end_date: '07/12/2020',
       total_price: 7000,
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
@@ -19,6 +19,42 @@ export const mockTransactions: Array<Transaction> = [
     review: {
       description: 'good care taker!',
       rating: 5
+    }
+  },
+  {
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2020',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+    },
+    review: {
+      description: '',
+      rating: 0
+    }
+  },
+  {
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2021',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+    },
+    review: {
+      description: '',
+      rating: 0
     }
   }
 ]

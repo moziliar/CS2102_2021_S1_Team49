@@ -18,7 +18,7 @@ export const mockPets: Array<Pet> = [
     ],
     gender: Gender.FEMALE,
     description: 'likes to play a lot',
-    date_of_birth: '02.07.2018',
+    date_of_birth: '02/07/2018',
     category: mockCategories[0],
   }
 ]

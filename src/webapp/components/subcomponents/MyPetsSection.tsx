@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import DatePicker from "react-date-picker";
 import _ from 'lodash';
 
 import { User } from '../../../app/models/users';
@@ -70,10 +71,13 @@ class MyPetsSection extends Component<{}, IState> {
 					</Form.Group>
 					<Form.Group>
 						<Form.Label>Date of Birth</Form.Label>
-						<Form.Control 
-							type="text"
-							value={ "date_of_birth" in pet ? pet.date_of_birth : '' }
-							onChange={ e => this._onHandleInputChange(`[${index}].date_of_birth`, e.target.value) }/>
+						<br />
+						<DatePicker 
+							value={ "date_of_birth" in pet 
+								? new Date(pet.date_of_birth) 
+								: new Date(Date.now()) }
+							format="MM/dd/y"
+							onChange={ date => this._onHandleInputChange(`[${index}].date_of_birth`, date) }/>
 					</Form.Group>
 					<Form.Group>
 						<Form.Label>Gender</Form.Label>
