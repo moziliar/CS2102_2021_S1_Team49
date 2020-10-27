@@ -1,107 +1,105 @@
 
 // INPUT:
 // user -> {email, password}
-const loginQuery = " \
+export const loginQuery = " \
 SELECT *  \
 FROM users \
-WHERE email=${user.email} AND password=${user.password} \
+WHERE email=$1 AND password=$2 \
 ";
 
 // INPUT:
 // user -> {email, password, name, phone, pic_url, is_admin}
-const createUserQuery = " \
+export const createUserQuery = " \
 INSERT INTO users \
-VALUES (${user.email}, ${user.password}, ${user.name}, \
-    ${user.phone}, ${user.pic_url}, ${user.is_admin}) \
+VALUES ($1, $2, $3, $4, $5, $6) \
 ";
 
 // INPUT:
 // user -> {email, password, name, phone, pic_url, is_admin}
-const updateUserQuery = " \
+export const updateUserQuery = " \
 UPDATE users \
-SET email=${user.email}, password=${user.password}, name=${user.name}, \
-        phone=${user.phone}, pic_url=${user.pic_url}, is_admin=${user.is_admin} \
-WHERE email=${user.email} \
+SET email=$1, password=$2, name=$3, \
+        phone=$4, pic_url=$5, is_admin=$6 \
+WHERE email=$1 \
 ";
 
 // INPUT:
 // user -> {email}
-const deleteUserQuery = " \
+export const deleteUserQuery = " \
 DELETE FROM users \
-WHERE email=${user.email} \
+WHERE email=$1 \
 ";
 
 
 // INPUT:
 // pet -> {name, owner, description, special_requirements, gender, date_of_birth, category}
-const createPetQuery = " \
+export const createPetQuery = " \
 INSERT INTO pets \
-VALUES (${pet.name}, ${pet.owner}, ${pet.description}, \
-    ${pet.special_requirements}, ${pet.gender}, ${pet.date_of_birth}, ${pet.category}) \
+VALUES ($1, $2, $3, $4, $5, $6, $7) \
 ";
 
 
 // INPUT:
 // pet -> {name, owner, description, special_requirements, gender, date_of_birth, category}
 // user- > {email}
-const updatePetQuery = " \
+export const updatePetQuery = " \
 UPDATE pets \
-SET name=${pet.name}, owner=${pet.owner}, description=${pet.description}, \
-       special_requirements=${pet.special_requirements}, gender=${pet.gender}, \
-       date_of_birth=${pet.date_of_birth}, category=${pet.category} \
-WHERE name=${pet.name} AND owner=${user.email} \
+SET name=$1, owner=$2, description=$3, \
+       special_requirements=$4, gender=$5, \
+       date_of_birth=$6, category=$7 \
+WHERE name=$1 AND owner=$8 \
 ";
 
 // INPUT:
 // pet -> {name}
 // user- > {email}
-const deletePetQuery = " \
+export const deletePetQuery = " \
 DELETE FROM pets \
-WHERE name=${pet.name} AND owner=${user.email} \
+WHERE name=$1 AND owner=$2 \
 ";
 
-const listAllBids = " \
+export const listAllBids = " \
 SELECT * \
 FROM bids \
 ";
 
 // INPUT:
 // owner -> {email}
-const listTnxByOwnerId = " \
+export const listTnxByOwnerId = " \
 SELECT * \
 FROM bids \
-WHERE pet_owner=${owner.email} \
+WHERE pet_owner=$1 \
 ";
 
 // INPUT:
 // bid -> {price, payment_method, transfer_method, cc_number}
-const updateBid = " \
+// owner -> {email}
+export const updateBid = " \
 UPDATE bids \
-SET total_price=$(bid.price), payment_method=$(bid.payment_method) \
-    transfer_method=$(bid.transfer_method), cc_number=$(bid.cc_number) \
-WHERE pet_owner=${owner.email} \
+SET total_price=$1, payment_method=$2 \
+    transfer_method=$3, cc_number=$4 \
+WHERE pet_owner=$5 \
 ";
 
 // INPUT:
 // owner -> {email}
-const deleteBid = " \
+export const deleteBid = " \
 DELETE FROM bids \
-WHERE pet_owner=${owner.email} \
+WHERE pet_owner=$1 \
 "
 
 // OTHER QUERY
 
 // INPUT:
 // owner -> {email, cc_number, holder_name, expiry_date}
-const addCreditCard = " \
+export const addCreditCard = " \
 INSERT INTO credit_cards (email, cc_number, holder_name, expiry_date) \
-VALUES (${owner.email}, ${owner.cc_number}, ${owner.holder_name}, \
-    ${owner.expiry_date}) \
+VALUES ($1, $2, $3, $4) \
 ";
 
 // INPUT:
 // price -> {pcs_user, category, price}
-const addDailyPrice = " \
+export const addDailyPrice = " \
 INSERT INTO daily_prices (caretaker, category, price) \
-VALUES (${price.pcs_user}, ${price.category}, ${price.price}) \
+VALUES ($1, $2, $3) \
 ";
