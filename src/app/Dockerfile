@@ -2,12 +2,14 @@ FROM node
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY ./package.json ./
 
 RUN npm install
 
 COPY . .
 
-EXPOSE 80
+RUN npm run build
+
+EXPOSE 8080
 
 CMD npm run server
