@@ -12,6 +12,7 @@ const initServer = (port: number) => {
 
   // enable cors for local
   server.use(cors());
+  server.use(express.static('build'))
 
   server.get('/user/login', LoginHandler);
   server.post('/user/create', CreateUserHandler);

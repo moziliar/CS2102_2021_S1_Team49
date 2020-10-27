@@ -1,11 +1,7 @@
 import axios from 'axios';
 
 const backend_url = () => {
-  if (process.env.NODE_ENV === 'development') {
-     return 'http://localhost:8080/'
-  }
-
-  return 'http://localhost:80/'
+  return 'https://backend-2102.herokuapp.com';
 }
 
 export default axios.create({

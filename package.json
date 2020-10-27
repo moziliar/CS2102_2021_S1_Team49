@@ -1,7 +1,9 @@
 {
   "scripts": {
     "server": "tsc --build ./src/app/tsconfig.json && node ./dist/server/app.js",
-    "webapp-dev": "node ./src/webapp/scripts/start.js"
+    "webapp-dev": "node ./src/webapp/scripts/start.js",
+    "build": "node ./src/webapp/scripts/build.js",
+    "start": "npm run build && npm run server"
   },
   "dependencies": {
     "@svgr/webpack": "4.3.3",

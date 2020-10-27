@@ -7,6 +7,7 @@ services:
     env_file:
       - .env
     container_name: pcs-backend
+    image: registry.heroku.com/backend-2102/web
     environment:
       ENV: "dev"
       PORT: 8080
@@ -16,21 +17,6 @@ services:
       DB_PASSWORD: "${DB_PASSWORD}"
     ports:
       - 8080:8080
-
-  pcs-frontend:
-    env_file:
-      - .env
-    build:
-      context: .
-      dockerfile: src/webapp/Dockerfile
-    container_name: pcs-frontend
-    environment:
-      NODE_ENV: production
-      PORT: 4000
-      ENV: "dev"
-    ports:
-      - 5000:4000
-    stdin_open: true
 
   psql:
     env_file:
