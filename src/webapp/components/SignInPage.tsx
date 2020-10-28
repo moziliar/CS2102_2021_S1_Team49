@@ -8,7 +8,7 @@ import '../styles/SignInPage.scss';
 const EMAIL = 'email';
 const PASSWORD = 'password';
 
-interface Form {
+export interface Form {
 	[EMAIL]: string,
 	[PASSWORD]: string
 }
