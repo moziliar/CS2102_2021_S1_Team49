@@ -27,6 +27,29 @@ CREATE TABLE part_time_availabilities (
   PRIMARY KEY (caretaker, start_date, end_date)
 );
 
+CREATE OR REPLACE FUNCTION pt_no_overlaps()
+RETURNS TRIGGER AS
+$$ BEGIN
+     IF EXISTS (
+       SELECT 1 
+       FROM part_time_availabilities PTA 
+       WHERE NEW.caretaker = PTA.caretaker
+             AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
+             OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
+     THEN
+      RETURN NULL;
+     ELSE
+      RETURN NEW;
+     END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER validate_pt_no_overlap
+BEFORE INSERT OR UPDATE ON part_time_availabilities
+FOR EACH ROW EXECUTE PROCEDURE pt_no_overlaps()
+
+-- 2. only allow delete if no selected bids in that period
+-- 3. if availabilities is deleted, mark all active unselected bids as inactive
+
 CREATE TABLE full_time_leaves (
   caretaker VARCHAR(256) REFERENCES caretakers(pcs_user),
   start_date DATE,
@@ -38,6 +61,28 @@ CREATE TABLE full_time_leaves (
 -- 2 x 150 conseucitve days / yr. otherwise reject leave
 -- 2. ensure part time availabilities and full time leaves have no overlaps for
 -- the same user within the table.
+CREATE OR REPLACE FUNCTION ft_no_overlaps()
+RETURNS TRIGGER AS
+$$ BEGIN
+     IF EXISTS (
+       SELECT 1 
+       FROM full_time_leaves FTL 
+       WHERE NEW.caretaker = FTL.caretaker
+             AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
+             OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date)
+     THEN
+      RETURN NULL;
+     ELSE
+      RETURN NEW;
+     END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER validate_ft_no_overlap
+BEFORE INSERT OR UPDATE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE ft_no_overlaps();
+
+-- 3. only allow leave if they do not have any selected in that period
+-- 4. if leave is allowed, mark all active bids in that period as inactive
 
 CREATE TABLE credit_cards (
   cc_number VARCHAR(50),
