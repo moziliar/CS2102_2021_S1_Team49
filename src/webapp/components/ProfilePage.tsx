@@ -9,6 +9,7 @@ import MyPetsSection from './subcomponents/MyPetsSection';
 import PastTransactionsSection from './subcomponents/PastTransactionsSection';
 import OngoingTransactionsSection from './subcomponents/OngoingTransactionsSection';
 import OngoingBidsSection from './subcomponents/OngoingBidsSection';
+import MyAvailabilitySection from './subcomponents/MyAvailabilitySection';
 import ProtectedRoute from './subcomponents/ProtectedRoute';
 
 import '../styles/ProfilePage.scss';
@@ -26,13 +27,24 @@ class ProfilePage extends Component {
 							<div className="profile-section">
 								<img src="https://i0.wp.com/www.oakridge.in/wp-content/uploads/2020/02/Sample-jpg-image-500kb.jpg"/>
 								<h5>{ currentUser.name }</h5>
-								<small style={{ 'color': '#06748A', 'marginBottom': '20px' }}>{ currentUser.email }</small>
+								<small style={{ 'color': '#06748A', 'marginBottom': '20px' }}>{ currentUser.email }</small><br />
 								<Button 
 									style={{ 'marginTop': '20px' }} 
 									variant="danger"
 									onClick={ signOutFunc }>Sign out</Button>
 							</div>
 							{ this._renderLinks() }
+							{ currentUser.status === Status.CARE_TAKER 
+								? <Button style={{ 'padding': '0 20px' }} variant="success"><small>Apply Pet Owner</small></Button> 
+								: null
+							}
+							{ currentUser.status === Status.PET_OWNER
+								? <div style={{ 'margin': '0 20px', 'textAlign': 'center' }}>
+									<Button variant="success"><small>Apply Fulltime Taker</small></Button>
+									<Button variant="success" style={{ 'marginTop': '20px' }}><small>Apply Parttime Taker</small></Button>
+								  </div> 
+								: null
+							}
 						</Col>
 						<Col xs={{ span: 8, offset:1 }	}>
 							<ProtectedRoute path="/profile" component={ EditProfileSection } exact/>
@@ -40,6 +52,7 @@ class ProfilePage extends Component {
 							<ProtectedRoute path="/profile/my-pets" component={ MyPetsSection }/>
 							<ProtectedRoute path="/profile/ongoing-transactions" component={ OngoingTransactionsSection }/>
 							<ProtectedRoute path="/profile/pending-bids" component={ OngoingBidsSection }/>
+							<ProtectedRoute path="/profile/my-availability" component={ MyAvailabilitySection }/>
 							<ProtectedRoute path="/profile/paycheck" component={ EditProfileSection }/>
 						</Col>
 					</Row>
@@ -65,6 +78,7 @@ class ProfilePage extends Component {
 			links.push(
 				<NavLink activeClassName="is-active" to="/profile/ongoing-transactions" key="ongoing-transactions">Ongoing Transactions</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,
+				<NavLink activeClassName="is-active" to="/profile/my-availability" key="my-availability">My Availability</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>
 			);
 		}

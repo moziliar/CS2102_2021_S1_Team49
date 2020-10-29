@@ -21,7 +21,7 @@ export enum Status {
 }
 
 export interface CreditCard {
-  card_number: number;
+  cc_number: number;
   expiry_date: string;
   holder_name: string;
 }

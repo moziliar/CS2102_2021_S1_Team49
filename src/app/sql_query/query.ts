@@ -8,6 +8,14 @@ WHERE email=$1 AND password=$2 \
 ";
 
 // INPUT:
+// user -> {email}
+export const searchUserByEmailQuery = " \
+SELECT *  \
+FROM users \
+WHERE email=$1 \
+";
+
+// INPUT:
 // user -> {email, password, name, phone, pic_url, is_admin}
 export const createUserQuery = " \
 INSERT INTO users \
@@ -15,11 +23,10 @@ VALUES ($1, $2, $3, $4, $5, $6) \
 ";
 
 // INPUT:
-// user -> {email, password, name, phone, pic_url, is_admin}
+// user -> {email, name, phone, pic_url}
 export const updateUserQuery = " \
 UPDATE users \
-SET email=$1, password=$2, name=$3, \
-        phone=$4, pic_url=$5, is_admin=$6 \
+SET name=$2, phone=$3, pic_url=$4 \
 WHERE email=$1 \
 ";
 
