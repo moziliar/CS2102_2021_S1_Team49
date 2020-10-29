@@ -1,10 +1,14 @@
 -- DROP VIEW IF EXISTS salary, rating;
-DROP TRIGGER IF EXISTS ft1_validate_no_overlap, ft2_validate_no_selected_bids, 
-ft3_mark_active_bids_inactive ON full_time_leaves;
+DROP TRIGGER IF EXISTS ft1_validate_no_overlap ON full_time_leaves;
 DROP TRIGGER IF EXISTS ft2_validate_no_selected_bids ON full_time_leaves;
 DROP TRIGGER IF EXISTS ft3_mark_active_bids_inactive ON full_time_leaves;
 DROP TRIGGER IF EXISTS pt1_validate_no_overlap ON part_time_availabilities;
-DROP TRIGGER IF EXISTS bid1_validate_total_price ON bids;
+DROP TRIGGER IF EXISTS bid1_validate_starts_mt_2_days_later ON bids;
+DROP TRIGGER IF EXISTS bid2_validate_pet_belongs_to_owner ON bids;
+DROP TRIGGER IF EXISTS bid3_validate_caretaker_can_care_category ON bids;
+DROP TRIGGER IF EXISTS bid4_caretaker_is_available ON bids;
+DROP TRIGGER IF EXISTS bid5_caretaker_not_full ON bids;
+DROP TRIGGER IF EXISTS bid6_validate_total_price ON bids;
 DROP TABLE IF EXISTS bids, pets, daily_prices, min_daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
 DROP TYPE IF EXISTS payment_method, transfer_method;
@@ -99,7 +103,7 @@ CREATE TABLE bids (
   pet VARCHAR(256),
   caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) NOT NULL,
 
-  start_date DATE NOT NULL CHECK (date(start_date) >= CURRENT_DATE + 2),
+  start_date DATE NOT NULL,
   end_date DATE NOT NULL CHECK (date(start_date) <= date(end_date)),
 
   transfer_method transfer_method NOT NULL, 
@@ -122,7 +126,23 @@ CREATE TABLE bids (
 );
 -- note that is_active also acts as a soft delete
 
--- 1. pet should belong to pet_owner
+
+-- 1. bid can only be created if start date is at least 2 days later
+-- can't be a check as it is only on insert
+CREATE OR REPLACE FUNCTION bid_starts_mt_2_days_later()
+RETURNS TRIGGER AS
+$$ BEGIN
+  IF NEW.start_date <= CURRENT_DATE + 2
+  THEN RETURN NULL;
+  ELSE RETURN NEW;
+END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER bid1_validate_starts_mt_2_days_later
+BEFORE INSERT ON bids
+FOR EACH ROW EXECUTE PROCEDURE bid_starts_mt_2_days_later();
+
+-- 2. pet should belong to pet_owner
 CREATE OR REPLACE FUNCTION bids_pet_belongs_to_pet_owner()
 RETURNS TRIGGER AS
 $$ BEGIN
@@ -134,12 +154,13 @@ IF (SELECT COUNT(*)
 ELSE
   RETURN NULL;
 END IF; END; $$
+LANGUAGE plpgsql;
 
-CREATE TRIGGER bid1_validate_pet_belongs_to_owner
+CREATE TRIGGER bid2_validate_pet_belongs_to_owner
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE bids_pet_belongs_to_pet_owner();
 
--- 2. caretaker should be able to care for pet category
+-- 3. caretaker should be able to care for pet category
 CREATE OR REPLACE FUNCTION caretaker_can_care_category()
   RETURNS TRIGGER AS
   $$ BEGIN
@@ -153,12 +174,13 @@ CREATE OR REPLACE FUNCTION caretaker_can_care_category()
 ELSE
   RETURN NULL;
 END IF; END; $$
+LANGUAGE plpgsql;
 
-CREATE TRIGGER bid2_validate_caretaker_can_care_category
-BEFORE INSERT_OR_UPDATE ON bids
+CREATE TRIGGER bid3_validate_caretaker_can_care_category
+BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE caretaker_can_care_category();
 
-  -- 3. disallow bid if caretaker not available
+  -- 4. disallow bid if caretaker not available
 CREATE OR REPLACE FUNCTION caretaker_is_available()
 RETURNS TRIGGER AS
 $$ DECLARE is_part_time BOOLEAN;
@@ -192,23 +214,50 @@ BEGIN
   ELSE RETURN NEW;
   END IF;
 END IF; END; $$
-
-CREATE TRIGGER bid3_caretaker_is_available
-BEFORE INSERT OR UPDATE ON bids
-FOR EACH ROW EXECUTE PROCEDURE caretaker_is_available();
-
--- 4. bid cannot be created if caretaker is caring for max pets
-CREATE OR REPLACE FUNCTION caretaker_not_full()
-RETURNS TRIGGER AS
-$$ BEGIN
-RETURN NEW;
-END; $$
+LANGUAGE plpgsql;
 
 CREATE TRIGGER bid4_caretaker_is_available
 BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE caretaker_is_available();
+
+-- 5. bid cannot be created if caretaker is caring for max pets
+CREATE OR REPLACE FUNCTION caretaker_not_full()
+RETURNS TRIGGER AS
+$$ DECLARE max_pet INTEGER := 5;
+DECLARE i DATE = NEW.start_date;
+BEGIN
+  -- for part time, calculate rating then determine if 2 or 5 pets max
+  IF (SELECT C.is_part_time
+    FROM caretakers C
+    WHERE C.pcs_user = NEW.caretaker)
+    AND EXISTS (
+      SELECT 1
+      FROM bids B
+      WHERE B.caretaker = NEW.caretaker 
+      AND B.is_selected AND B.end_date <= CURRENT_DATE
+      HAVING COALESCE(AVG(B.rating), 0) >= 4)
+    THEN 
+    max_pet := 2;
+  END IF;
+  WHILE i <= NEW.end_date LOOP
+    IF (SELECT COUNT(*) 
+      FROM bids B
+      WHERE B.caretaker = NEW.caretaker 
+        AND B.is_selected 
+        AND i BETWEEN B.start_date AND B.end_date) > max_pet - 1
+    THEN RETURN NULL;
+    END IF;
+    i := i + 1;
+  END LOOP;
+  RETURN NEW;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER bid5_caretaker_not_full
+BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE caretaker_not_full();
 
--- 5. when a bid is created, check to ensure total_price > min_price
+-- 6. when a bid is created, check to ensure total_price > min_price
 CREATE OR REPLACE FUNCTION validate_bid_price()
 RETURNS TRIGGER AS
 $$ DECLARE cat VARCHAR(256);
@@ -232,67 +281,66 @@ BEGIN
 END IF; END; $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER bid5_validate_total_price
+CREATE TRIGGER bid6_validate_total_price
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE validate_bid_price();
 
-  -- 6. bid can only be created if start date is at least 2 days later
-  -- check constraint
-
-  -- 7. once a bid is selected, (AFTER UPDATE)
-  -- a. bids for the same pet should be marked inactive across this period
-  -- b. if bid causes caretaker to take care of the maximum number of 
-  -- pets, all bids for those full dates should be marked inactive
-
-  -- full time leave validation
-  -- 1. to check whether the fulltimer is taking care of 
-  -- a pet anywhere in the duration. If they are, reject the leave.
-
-  -- also need a cron job to
-  -- automatically select a bid two days before start date if still active
-
-  --CREATE VIEW salary (caretaker, month_year, amount) AS
-  --  SELECT B.caretaker, DATE_TRUNC('month', B.end_date), SUM(B.total_price)
-  --  FROM bids B
-  --  WHERE B.is_selected AND B.end_date < CURRENT_DATE
-  --  GROUP BY B.caretaker, DATE_TRUNC('month', B.end_date);
-  -- we likely need a function or something to query for an individual user,
-  -- if we cannot select a specific user from this view.
-
-  --CREATE VIEW rating (caretaker, rating) AS
-  --  SELECT B.caretaker, AVG(B.rating)
-  --  FROM bids B
-  --  WHERE B.is_selected AND B.end_date <= CURRENT_DATE
-  --  GROUP BY B.caretaker
-  --  UNION
-  --  (SELECT C.pcs_user, 0
-    --   FROM caretakers C
-    -- EXCEPT
-    -- SELECT B1.caretaker, 0
-    -- FROM bids B1);
-  -- Can we improve this?
 
 
-  -- TODO views for
-  -- min prices, available caretakers for some date
-  -- number of pets a caretaker can take
+-- 7. once a bid is selected, (AFTER UPDATE)
+-- a. bids for the same pet should be marked inactive across this period
+-- b. if bid causes caretaker to take care of the maximum number of 
+-- pets, all bids for those full dates should be marked inactive
+
+-- 8. After inserting, if bid is for full timer, select it immediately.
+
+-- full time leave validation
+-- 1. to check whether the fulltimer is taking care of 
+-- a pet anywhere in the duration. If they are, reject the leave.
+-- also need a cron job to
+-- automatically select a bid two days before start date if still active
+
+--CREATE VIEW salary (caretaker, month_year, amount) AS
+--  SELECT B.caretaker, DATE_TRUNC('month', B.end_date), SUM(B.total_price)
+--  FROM bids B
+--  WHERE B.is_selected AND B.end_date < CURRENT_DATE
+--  GROUP BY B.caretaker, DATE_TRUNC('month', B.end_date);
+-- we likely need a function or something to query for an individual user,
+-- if we cannot select a specific user from this view.
+
+--CREATE VIEW rating (caretaker, rating) AS
+--  SELECT B.caretaker, AVG(B.rating)
+--  FROM bids B
+--  WHERE B.is_selected AND B.end_date <= CURRENT_DATE
+--  GROUP BY B.caretaker
+--  UNION
+--  (SELECT C.pcs_user, 0
+--   FROM caretakers C
+-- EXCEPT
+-- SELECT B1.caretaker, 0
+-- FROM bids B1);
+-- Can we improve this?
 
 
-  -- part-time availabilities triggers
-  -- 1. no overlaps
-  CREATE OR REPLACE FUNCTION pt_no_overlaps()
-  RETURNS TRIGGER AS
-  $$ BEGIN
-  IF EXISTS (
-    SELECT 1 
-    FROM part_time_availabilities PTA 
-    WHERE NEW.caretaker = PTA.caretaker
-    AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
-      OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
-    THEN
-    RETURN NULL;
-  ELSE
-    RETURN NEW;
+-- TODO views for
+-- min prices, available caretakers for some date
+-- number of pets a caretaker can take
+
+-- part-time availabilities triggers
+-- 1. no overlaps
+CREATE OR REPLACE FUNCTION pt_no_overlaps()
+RETURNS TRIGGER AS
+$$ BEGIN
+IF EXISTS (
+  SELECT 1 
+  FROM part_time_availabilities PTA 
+  WHERE NEW.caretaker = PTA.caretaker
+  AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
+    OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
+  THEN
+  RETURN NULL;
+ELSE
+  RETURN NEW;
 END IF; END; $$
 LANGUAGE plpgsql;
 
@@ -301,17 +349,18 @@ BEFORE INSERT OR UPDATE ON part_time_availabilities
 FOR EACH ROW EXECUTE PROCEDURE pt_no_overlaps();
 
   -- 2. only allow delete if no selected bids in that period
-  CREATE OR REPLACE FUNCTION pt_reject_if_any_selected()
-  RETURNS TRIGGER AS 
-  $$ BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM bids B
-    WHERE OLD.caretaker = B.caretaker
-    AND B.is_selected AND B.is_active
-    AND (OLD.start_date between B.start_date AND B.end_date
-      OR OLD.end_date BETWEEN B.start_date AND B.end_date))
-    THEN 
+
+CREATE OR REPLACE FUNCTION pt_reject_if_any_selected()
+RETURNS TRIGGER AS 
+$$ BEGIN
+IF EXISTS (
+  SELECT 1
+  FROM bids B
+  WHERE OLD.caretaker = B.caretaker
+  AND B.is_selected AND B.is_active
+  AND (OLD.start_date between B.start_date AND B.end_date
+    OR OLD.end_date BETWEEN B.start_date AND B.end_date))
+  THEN 
     RETURN NULL;
   ELSE
     RETURN OLD;
@@ -322,16 +371,16 @@ CREATE TRIGGER pt2_validate_no_selected_bids
 BEFORE DELETE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE pt_reject_if_any_selected();
 
-  -- 3. if availabilities is deleted, mark all active unselected bids as inactive
-  CREATE OR REPLACE FUNCTION pt_deactive_active_bids()
-  RETURNS TRIGGER AS
-  $$ BEGIN
-  UPDATE bids B
-  SET is_active = false
-  WHERE OLD.caretaker = B.caretaker
-  AND B.is_active
-  AND (OLD.start_date BETWEEN B.start_date AND B.end_date
-    OR OLD.end_date BETWEEN B.start_date AND B.end_date);
+-- 3. if availabilities is deleted, mark all active unselected bids as inactive
+CREATE OR REPLACE FUNCTION pt_deactive_active_bids()
+RETURNS TRIGGER AS
+$$ BEGIN
+UPDATE bids B
+SET is_active = false
+WHERE OLD.caretaker = B.caretaker
+AND B.is_active
+AND (OLD.start_date BETWEEN B.start_date AND B.end_date
+  OR OLD.end_date BETWEEN B.start_date AND B.end_date);
 END; $$
 LANGUAGE plpgsql;
 
@@ -365,21 +414,21 @@ CREATE TRIGGER ft1_validate_no_overlap
 BEFORE INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_no_overlaps();
 
-  -- 3. only allow leave if they do not have any selected in that period
-  CREATE OR REPLACE FUNCTION ft_reject_if_any_selected()
-  RETURNS TRIGGER AS 
-  $$ BEGIN
-  IF EXISTS (
-    SELECT 1
-    FROM bids B
-    WHERE NEW.caretaker = B.caretaker
-    AND B.is_selected AND B.is_active
-    AND (NEW.start_date between B.start_date AND B.end_date
-      OR NEW.end_date BETWEEN B.start_date AND B.end_date))
-    THEN 
-    RETURN NULL;
-  ELSE
-    RETURN NEW;
+-- 3. only allow leave if they do not have any selected in that period
+CREATE OR REPLACE FUNCTION ft_reject_if_any_selected()
+RETURNS TRIGGER AS 
+$$ BEGIN
+IF EXISTS (
+  SELECT 1
+  FROM bids B
+  WHERE NEW.caretaker = B.caretaker
+  AND B.is_selected AND B.is_active
+  AND (NEW.start_date between B.start_date AND B.end_date
+    OR NEW.end_date BETWEEN B.start_date AND B.end_date))
+  THEN 
+  RETURN NULL;
+ELSE
+  RETURN NEW;
 END IF; END; $$
 LANGUAGE plpgsql;
 
@@ -387,16 +436,16 @@ CREATE TRIGGER ft2_validate_no_selected_bids
 BEFORE INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_reject_if_any_selected();
 
-  -- 4. if leave is allowed, mark all active bids in that period as inactive
-  CREATE OR REPLACE FUNCTION ft_deactive_active_bids()
-  RETURNS TRIGGER AS
-  $$ BEGIN
-  UPDATE bids B
-  SET is_active = false
-  WHERE NEW.caretaker = B.caretaker
-  AND B.is_active
-  AND (NEW.start_date BETWEEN B.start_date AND B.end_date
-    OR NEW.end_date BETWEEN B.start_date AND B.end_date);
+-- 4. if leave is allowed, mark all active bids in that period as inactive
+CREATE OR REPLACE FUNCTION ft_deactive_active_bids()
+RETURNS TRIGGER AS
+$$ BEGIN
+UPDATE bids B
+SET is_active = false
+WHERE NEW.caretaker = B.caretaker
+AND B.is_active
+AND (NEW.start_date BETWEEN B.start_date AND B.end_date
+  OR NEW.end_date BETWEEN B.start_date AND B.end_date);
 END; $$
 LANGUAGE plpgsql;
 
