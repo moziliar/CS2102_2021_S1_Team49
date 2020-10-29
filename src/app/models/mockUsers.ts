@@ -3,7 +3,7 @@ import { mockPets } from './mockPets';
 
 export const mockUsers: Array<User> = [
   {
-    email: 'example@google.com',
+    email: 'test',
     name: 'Paul Peterson',
     picture_url: '',
     phone: 12345678,
@@ -12,7 +12,7 @@ export const mockUsers: Array<User> = [
       mockPets[0],
     ],
     credit_card: {
-      card_number: 5555444433332222,
+      cc_number: 5555444433332222,
       expiry_date: '01/02/2021',
       holder_name: 'Paul'
     },
