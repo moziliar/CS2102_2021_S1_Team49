@@ -1,18 +1,90 @@
 import { mockUsers } from '../models/mockUsers';
 import { db } from '../dbconfig/db';
-import { loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery } from '../sql_query/query';
+import {
+  loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
+  queryPetQuery,
+  queryCreditCard,
+  queryCaretaker, queryAvailabiliies
+} from '../sql_query/query';
 
 export const LoginHandler = async (req, res) => {
-  const users = await db.query({
+  const usersRet = await db.query({
     text: loginQuery,
     values: [req.body.email, req.body.password],
   })
 
-  if (users.rows.length > 0) {
-    res.json(mockUsers[0]);
+  if (usersRet.rows.length === 0) {
+    res.status(401).json({ errMessage: 'No such user or Username and Password do not match' });
+  } else if (usersRet.rows.length > 1) {
+    res.status(502).json({ errMessage: 'More than one user found'});
   }
 
-  res.status(401).json({ errMessage: 'Username and Password do not match' });
+  const user = usersRet.rows[0];
+
+  const petsRet = await db.query({
+    text: queryPetQuery,
+    values: [user.email],
+  })
+
+  const creditCardRet = await db.query({
+    text: queryCreditCard,
+    values: [user.email],
+  })
+
+  const isCaretakerRet = await db.query({
+    text: queryCaretaker,
+    values: [user.email],
+  })
+
+  const isCaretaker = isCaretakerRet.rows.length > 0;
+
+  if (!isCaretaker) {
+    res.json({
+      ...user,
+      pets_owned: petsRet.rows,
+      credit_card: creditCardRet.rows[0],
+    });
+
+    return;
+  }
+
+  if (isCaretakerRet.rows[0].is_part_time) {
+    const availabilitiesRet = await db.query({
+      text: queryAvailabiliies,
+      values: [user.email],
+    })
+
+    res.json({
+      ...user,
+      pets_owned: petsRet.rows,
+      credit_card: creditCardRet.rows[0],
+      is_part_time: isCaretakerRet.rows[0],
+      leave_or_avail: availabilitiesRet.rows.map(ret => {
+        return {
+          start_date: ret.start_date,
+          end_date: ret.end_date,
+        }
+      })
+    });
+  } else {
+    const leavesRet = await db.query({
+      text: queryAvailabiliies,
+      values: [user.email],
+    })
+
+    res.json({
+      ...user,
+      pets_owned: petsRet.rows,
+      credit_card: creditCardRet.rows[0],
+      is_part_time: isCaretakerRet.rows[0].is_part_time,
+      leave_or_avail: leavesRet.rows.map(ret => {
+        return {
+          start_date: ret.start_date,
+          end_date: ret.end_date,
+        }
+      })
+    });
+  }
 };
 // user -> {email, password, name, phone, pic_url, is_admin}
 

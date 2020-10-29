@@ -47,6 +47,14 @@ VALUES ($1, $2, $3, $4, $5, $6, $7) \
 
 
 // INPUT:
+// user -> {name, owner, description, special_requirements, gender, date_of_birth, category}
+export const queryPetQuery = " \
+SELECT * FROM pets \
+WHERE owner=$1 \
+";
+
+
+// INPUT:
 // pet -> {name, owner, description, special_requirements, gender, date_of_birth, category}
 // user- > {email}
 export const updatePetQuery = " \
@@ -103,6 +111,39 @@ export const addCreditCard = " \
 INSERT INTO credit_cards (email, cc_number, holder_name, expiry_date) \
 VALUES ($1, $2, $3, $4) \
 ";
+
+
+// INPUT:
+// owner -> {email, cc_number, holder_name, expiry_date}
+export const queryCreditCard = " \
+SELECT * FROM credit_cards \
+WHERE owner=$1 \
+";
+
+
+// INPUT:
+// owner -> {email, cc_number, holder_name, expiry_date}
+export const queryCaretaker = " \
+SELECT * FROM caretakers \
+WHERE pcs_user=$1 \
+";
+
+
+// INPUT:
+// owner -> {email, cc_number, holder_name, expiry_date}
+export const queryAvailabiliies = " \
+SELECT * FROM part_time_availabilities \
+WHERE caretaker=$1 \
+";
+
+
+// INPUT:
+// owner -> {email, cc_number, holder_name, expiry_date}
+export const queryLeaves = " \
+SELECT * FROM full_time_leaves \
+WHERE caretaker=$1 \
+";
+
 
 // INPUT:
 // price -> {pcs_user, category, price}
