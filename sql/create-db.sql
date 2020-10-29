@@ -1,7 +1,16 @@
 -- DROP VIEW IF EXISTS salary, rating;
+DROP TRIGGER IF EXISTS ft1_validate_no_overlap, ft2_validate_no_selected_bids, 
+ft3_mark_active_bids_inactive ON full_time_leaves;
+DROP TRIGGER IF EXISTS ft2_validate_no_selected_bids ON full_time_leaves;
+DROP TRIGGER IF EXISTS ft3_mark_active_bids_inactive ON full_time_leaves;
+DROP TRIGGER IF EXISTS pt1_validate_no_overlap ON part_time_availabilities;
+DROP TRIGGER IF EXISTS bid1_validate_total_price ON bids;
 DROP TABLE IF EXISTS bids, pets, daily_prices, min_daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
 DROP TYPE IF EXISTS payment_method, transfer_method;
+
+-- note that for triggers that execute at the same stage, they execute
+-- in alphabetical order
 
 CREATE TABLE users (
   email VARCHAR(256) PRIMARY KEY,
@@ -27,62 +36,12 @@ CREATE TABLE part_time_availabilities (
   PRIMARY KEY (caretaker, start_date, end_date)
 );
 
-CREATE OR REPLACE FUNCTION pt_no_overlaps()
-RETURNS TRIGGER AS
-$$ BEGIN
-     IF EXISTS (
-       SELECT 1 
-       FROM part_time_availabilities PTA 
-       WHERE NEW.caretaker = PTA.caretaker
-             AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
-             OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
-     THEN
-      RETURN NULL;
-     ELSE
-      RETURN NEW;
-     END IF; END; $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER validate_pt_no_overlap
-BEFORE INSERT OR UPDATE ON part_time_availabilities
-FOR EACH ROW EXECUTE PROCEDURE pt_no_overlaps()
-
--- 2. only allow delete if no selected bids in that period
--- 3. if availabilities is deleted, mark all active unselected bids as inactive
-
 CREATE TABLE full_time_leaves (
   caretaker VARCHAR(256) REFERENCES caretakers(pcs_user),
   start_date DATE,
   end_date DATE CHECK (date(end_date) >= date(start_date)),
   PRIMARY KEY (caretaker, start_date, end_date)
 );
--- validation triggers
--- 1. check whether still possible to meet full-time requirement of
--- 2 x 150 conseucitve days / yr. otherwise reject leave
--- 2. ensure part time availabilities and full time leaves have no overlaps for
--- the same user within the table.
-CREATE OR REPLACE FUNCTION ft_no_overlaps()
-RETURNS TRIGGER AS
-$$ BEGIN
-     IF EXISTS (
-       SELECT 1 
-       FROM full_time_leaves FTL 
-       WHERE NEW.caretaker = FTL.caretaker
-             AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
-             OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date)
-     THEN
-      RETURN NULL;
-     ELSE
-      RETURN NEW;
-     END IF; END; $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER validate_ft_no_overlap
-BEFORE INSERT OR UPDATE ON full_time_leaves
-FOR EACH ROW EXECUTE PROCEDURE ft_no_overlaps();
-
--- 3. only allow leave if they do not have any selected in that period
--- 4. if leave is allowed, mark all active bids in that period as inactive
 
 CREATE TABLE credit_cards (
   cc_number VARCHAR(50),
@@ -133,8 +92,8 @@ CREATE TABLE bids (
   pet VARCHAR(256),
   caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) NOT NULL,
 
-  date_begin DATE NOT NULL,
-  date_end DATE NOT NULL CHECK (date(date_begin) <= date(date_end)),
+  start_date DATE NOT NULL CHECK (date(start_date) >= CURRENT_DATE + 2),
+  end_date DATE NOT NULL CHECK (date(start_date) <= date(end_date)),
 
   transfer_method transfer_method NOT NULL, 
   location VARCHAR(256) NOT NULL,
@@ -148,18 +107,14 @@ CREATE TABLE bids (
        OR (payment_method = 'cc' AND cc_number IS NOT NULL)),
 
   rating smallint
-    CHECK (rating IS NULL OR (rating IS NOT NULL AND date(date_end) <= CURRENT_DATE)),
+    CHECK (rating IS NULL OR (rating IS NOT NULL AND date(end_date) <= CURRENT_DATE)),
 
   FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name),
   FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number),
-  PRIMARY KEY (pet_owner, pet, caretaker, date_begin, date_end)
+  PRIMARY KEY (pet_owner, pet, caretaker, start_date, end_date)
 );
 -- note that is_active also acts as a soft delete
 -- we'll need a couple of triggers here
--- 1. once a bid is selected, 
-      -- a. bids for the same pet should be marked inactive across this period
-      -- b. if bid causes caretaker to take care of the maximum number of 
-      -- pets, all bids for those full dates should be marked inactive
 
 -- 2. when a bid is created, check to ensure total_price > min_price
 CREATE OR REPLACE FUNCTION validate_bid_price()
@@ -171,10 +126,10 @@ $$ DECLARE cat VARCHAR(256);
      SELECT P.category INTO cat
       FROM pets P
       WHERE P.owner = NEW.pet_owner AND P.name = NEW.pet;
-     SELECT D.price * (date(NEW.date_end) - date(NEW.date_begin) + 1) INTO global_min
+     SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1) INTO global_min
       FROM min_daily_prices D
       WHERE D.category = cat;
-     SELECT D.price * (date(NEW.date_end) - date(NEW.date_begin) + 1) INTO caretaker_min
+     SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1) INTO caretaker_min
       FROM daily_prices D
       WHERE D.caretaker = NEW.caretaker AND D.category = cat;
      IF NEW.total_price < global_min 
@@ -185,12 +140,19 @@ $$ DECLARE cat VARCHAR(256);
      END IF; END; $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER validate_bid_total_price
+CREATE TRIGGER bid1_validate_total_price
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE validate_bid_price();
 
--- 3. bid can only be created if start date is at least 2 days later
--- 4. bid cannot be created if caretaker is caring for max pets
+-- 2. bid can only be created if start date is at least 2 days later
+-- check constraint
+-- 3. bid cannot be created if caretaker is caring for max pets
+
+-- 4. disallow bid if caretaker not available
+-- 5. once a bid is selected, (AFTER UPDATE)
+      -- a. bids for the same pet should be marked inactive across this period
+      -- b. if bid causes caretaker to take care of the maximum number of 
+      -- pets, all bids for those full dates should be marked inactive
 
 -- full time leave validation
 -- 1. to check whether the fulltimer is taking care of 
@@ -200,17 +162,17 @@ FOR EACH ROW EXECUTE PROCEDURE validate_bid_price();
 -- automatically select a bid two days before start date if still active
 
 --CREATE VIEW salary (caretaker, month_year, amount) AS
---  SELECT B.caretaker, DATE_TRUNC('month', B.date_end), SUM(B.total_price)
+--  SELECT B.caretaker, DATE_TRUNC('month', B.end_date), SUM(B.total_price)
 --  FROM bids B
---  WHERE B.is_selected AND B.date_end < CURRENT_DATE
---  GROUP BY B.caretaker, DATE_TRUNC('month', B.date_end);
+--  WHERE B.is_selected AND B.end_date < CURRENT_DATE
+--  GROUP BY B.caretaker, DATE_TRUNC('month', B.end_date);
 -- we likely need a function or something to query for an individual user,
 -- if we cannot select a specific user from this view.
 
 --CREATE VIEW rating (caretaker, rating) AS
 --  SELECT B.caretaker, AVG(B.rating)
 --  FROM bids B
---  WHERE B.is_selected AND B.date_end <= CURRENT_DATE
+--  WHERE B.is_selected AND B.end_date <= CURRENT_DATE
 --  GROUP BY B.caretaker
 --  UNION
 --  (SELECT C.pcs_user, 0
@@ -226,6 +188,99 @@ FOR EACH ROW EXECUTE PROCEDURE validate_bid_price();
 -- number of pets a caretaker can take
 
 
+-- part-time availabilities triggers
+-- 1. no overlaps
 
--- throughout the database, only credit cards can be deleted, nothing else 
--- should be deletable.
+CREATE OR REPLACE FUNCTION pt_no_overlaps()
+RETURNS TRIGGER AS
+$$ BEGIN
+     IF EXISTS (
+       SELECT 1 
+       FROM part_time_availabilities PTA 
+       WHERE NEW.caretaker = PTA.caretaker
+             AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
+             OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
+     THEN
+      RETURN NULL;
+     ELSE
+      RETURN NEW;
+     END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER pt1_validate_no_overlap
+BEFORE INSERT OR UPDATE ON part_time_availabilities
+FOR EACH ROW EXECUTE PROCEDURE pt_no_overlaps();
+
+
+-- 2. only allow delete if no selected bids in that period
+-- 3. if availabilities is deleted, mark all active unselected bids as inactive
+
+-- full-time leaves triggers
+-- 1. check whether still possible to meet full-time requirement of
+-- 2 x 150 conseucitve days / yr. otherwise reject leave
+-- TODO
+-- 2. ensure no overlaps for the same user within the table.
+CREATE OR REPLACE FUNCTION ft_no_overlaps()
+RETURNS TRIGGER AS
+$$ BEGIN
+     IF EXISTS (
+       SELECT 1 
+       FROM full_time_leaves FTL 
+       WHERE NEW.caretaker = FTL.caretaker
+             AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
+             OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date))
+     THEN
+      RETURN NULL;
+     ELSE
+      RETURN NEW;
+     END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER ft1_validate_no_overlap
+BEFORE INSERT OR UPDATE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE ft_no_overlaps();
+
+-- 3. only allow leave if they do not have any selected in that period
+CREATE OR REPLACE FUNCTION ft_reject_if_any_selected()
+RETURNS TRIGGER AS 
+$$ BEGIN
+     IF EXISTS (
+       SELECT 1
+       FROM bids B
+       WHERE NEW.caretaker = B.caretaker
+             AND B.is_selected AND B.is_active
+             AND (NEW.start_date between B.start_date AND B.end_date
+               OR NEW.end_date BETWEEN B.start_date AND B.end_date))
+    THEN 
+      RETURN NULL;
+    ELSE
+      RETURN NEW;
+    END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER ft2_validate_no_selected_bids
+BEFORE INSERT OR UPDATE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE ft_reject_if_any_selected();
+
+-- 4. if leave is allowed, mark all active bids in that period as inactive
+CREATE OR REPLACE FUNCTION ft_deactive_active_bids()
+RETURNS TRIGGER AS
+$$ BEGIN
+     UPDATE bids B
+     SET is_active = false
+     WHERE NEW.caretaker = B.caretaker
+           AND B.is_active
+           AND (NEW.start_date BETWEEN B.start_date AND B.end_date
+             OR NEW.end_date BETWEEN B.start_date AND B.end_date);
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER ft3_mark_active_bids_inactive
+BEFORE INSERT OR UPDATE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
+
+-- deletable entities:
+-- credit cards, leaves
+-- conditionally deletable:
+-- availabilities (if no active bids)
+     
