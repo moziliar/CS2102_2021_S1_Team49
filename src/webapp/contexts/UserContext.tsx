@@ -2,6 +2,7 @@ import React, { createContext, Component } from 'react';
 
 import API from '../api';
 import { User } from '../../app/models/users';
+import { Form } from '../components/SignInPage'
 
 export type userContextState = {
 	isLoggedIn: boolean,
@@ -34,8 +35,8 @@ class UserContextProvider extends Component<{}, userContextState> {
 		currentUser: null
 	};
 
-	signInFunc = () => {
-		API.get('/user/login')
+	signInFunc = (form: Form) => {
+		API.post('/user/login', form)
 			.then(res => {
 				console.log(res);
 				this.setState({

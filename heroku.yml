@@ -3,10 +3,11 @@ setup:
     - plan: heroku-postgresql
 build:
   docker:
-    web: Dockerfile
+    app: src/app/Dockerfile
+    webapp: src/webapp/Dockerfile
   config:
     DATABASE_URL: DATABASE_URL
-    ENV: live
-    PORT: 8080
+    NODE_ENV: production
 run:
-  web: npm run start
+  app: npm run server
+  webapp: npm run webapp-dev
