@@ -211,9 +211,45 @@ CREATE TRIGGER pt1_validate_no_overlap
 BEFORE INSERT OR UPDATE ON part_time_availabilities
 FOR EACH ROW EXECUTE PROCEDURE pt_no_overlaps();
 
-
 -- 2. only allow delete if no selected bids in that period
+CREATE OR REPLACE FUNCTION pt_reject_if_any_selected()
+RETURNS TRIGGER AS 
+$$ BEGIN
+     IF EXISTS (
+       SELECT 1
+       FROM bids B
+       WHERE OLD.caretaker = B.caretaker
+             AND B.is_selected AND B.is_active
+             AND (OLD.start_date between B.start_date AND B.end_date
+               OR OLD.end_date BETWEEN B.start_date AND B.end_date))
+    THEN 
+      RETURN NULL;
+    ELSE
+      RETURN OLD;
+    END IF; END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER pt2_validate_no_selected_bids
+BEFORE DELETE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE pt_reject_if_any_selected();
+
 -- 3. if availabilities is deleted, mark all active unselected bids as inactive
+CREATE OR REPLACE FUNCTION pt_deactive_active_bids()
+RETURNS TRIGGER AS
+$$ BEGIN
+     UPDATE bids B
+     SET is_active = false
+     WHERE OLD.caretaker = B.caretaker
+           AND B.is_active
+           AND (OLD.start_date BETWEEN B.start_date AND B.end_date
+             OR OLD.end_date BETWEEN B.start_date AND B.end_date);
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER ft3_mark_active_bids_inactive
+AFTER DELETE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
+
 
 -- full-time leaves triggers
 -- 1. check whether still possible to meet full-time requirement of
@@ -276,7 +312,7 @@ END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER ft3_mark_active_bids_inactive
-BEFORE INSERT OR UPDATE ON full_time_leaves
+AFTER INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
 
 -- deletable entities:
