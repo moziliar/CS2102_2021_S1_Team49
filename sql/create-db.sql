@@ -9,6 +9,8 @@ DROP TRIGGER IF EXISTS bid3_validate_caretaker_can_care_category ON bids;
 DROP TRIGGER IF EXISTS bid4_caretaker_is_available ON bids;
 DROP TRIGGER IF EXISTS bid5_caretaker_not_full ON bids;
 DROP TRIGGER IF EXISTS bid6_validate_total_price ON bids;
+DROP TRIGGER IF EXISTS bid7_remove_others_if_selected ON bids;
+DROP TRIGGER IF EXISTS bid8_select_bid_if_full_timer ON bids;
 DROP TABLE IF EXISTS bids, pets, daily_prices, min_daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
 DROP TYPE IF EXISTS payment_method, transfer_method;
@@ -285,18 +287,111 @@ CREATE TRIGGER bid6_validate_total_price
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE validate_bid_price();
 
-
-
 -- 7. once a bid is selected, (AFTER UPDATE)
 -- a. bids for the same pet should be marked inactive across this period
 -- b. if bid causes caretaker to take care of the maximum number of 
 -- pets, all bids for those full dates should be marked inactive
+CREATE OR REPLACE FUNCTION remove_other_bids_if_selected()
+RETURNS TRIGGER AS
+$$ DECLARE max_pet INTEGER := 5;
+   DECLARE i DATE := NEW.start_date;
+BEGIN
+  IF (NOT OLD.is_selected) AND NEW.is_selected
+  THEN 
+    IF (SELECT C.is_part_time
+      FROM caretakers C
+      WHERE C.pcs_user = NEW.caretaker)
+      AND EXISTS (
+        SELECT 1
+        FROM bids B
+        WHERE B.caretaker = NEW.caretaker 
+        AND B.is_selected AND B.end_date <= CURRENT_DATE
+        HAVING COALESCE(AVG(B.rating), 0) >= 4)
+    THEN max_pet := 2;
+    END IF;
+    -- remove all bids for the pet on all days it is booked
+    UPDATE bids B
+    SET is_active = false
+    WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet
+    AND is_active = true AND (B.start_date BETWEEN NEW.start_date AND NEW.end_date
+      OR B.end_date BETWEEN NEW.start_date and NEW.end_date);
+    -- remove all bids involving days where caretaker is now full
+    WHILE i <= NEW.end_date LOOP
+      IF (
+        SELECT COUNT(*) 
+        FROM bids B
+        WHERE B.caretaker = NEW.caretaker 
+        AND B.is_selected 
+        AND i BETWEEN B.start_date AND B.end_date) = max_pet
+        -- not sure if this condition works, it is 
+        -- assuming that there will only be 1 update at a time.
+      THEN 
+        UPDATE bids B
+        SET is_active = false
+        WHERE B.is_active AND NOT B.is_selected
+          AND (i BETWEEN B.start_date AND B.end_date
+          OR i BETWEEN B.start_date and B.end_date);
+      END IF;
+      i := i + 1;
+    END LOOP;
+  END IF; 
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER bid7_remove_others_if_selected
+AFTER INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE remove_other_bids_if_selected();
 
 -- 8. After inserting, if bid is for full timer, select it immediately.
+CREATE OR REPLACE FUNCTION select_bid_if_full_timer()
+RETURNS TRIGGER AS
+$$ BEGIN
+-- if new entry that is for a full timer, select it
+-- at this point, the previous triggers would have guaranteed
+-- that the fulltimer is available
+  IF NEW.is_selected = false AND NOT (
+    SELECT C.is_part_time
+    FROM caretakers C
+    WHERE C.pcs_user = NEW.caretaker)
+  THEN 
+    UPDATE bids B
+    SET selected = true
+    WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet 
+    AND B.caretaker = NEW.caretaker AND B.start_date = NEW.start_date 
+    AND B.end_date = NEW.end_date;
+    -- THIS IS A COPY PASTE OF bid7's function
+    -- remove all bids for the pet on all days it is booked
+    UPDATE bids B
+    SET is_active = false
+    WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet
+    AND is_active = true AND (B.start_date BETWEEN NEW.start_date AND NEW.end_date
+      OR B.end_date BETWEEN NEW.start_date and NEW.end_date);
+    -- remove all bids involving days where caretaker is now full
+    WHILE i <= NEW.end_date LOOP
+      IF (
+        SELECT COUNT(*) 
+        FROM bids B
+        WHERE B.caretaker = NEW.caretaker 
+        AND B.is_selected 
+        AND i BETWEEN B.start_date AND B.end_date) = 5
+        -- not sure if this condition works, it is 
+        -- assuming that there will only be 1 update at a time.
+      THEN 
+        UPDATE bids B
+        SET is_active = false
+        WHERE B.is_active AND NOT B.is_selected
+          AND (i BETWEEN B.start_date AND B.end_date
+          OR i BETWEEN B.start_date and B.end_date);
+      END IF;
+      i := i + 1;
+    END LOOP;
+END IF; END; $$
+LANGUAGE plpgsql;
 
--- full time leave validation
--- 1. to check whether the fulltimer is taking care of 
--- a pet anywhere in the duration. If they are, reject the leave.
+CREATE TRIGGER bid8_select_bid_if_full_timer
+AFTER INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE select_bid_if_full_timer();
+
 -- also need a cron job to
 -- automatically select a bid two days before start date if still active
 
@@ -348,7 +443,7 @@ CREATE TRIGGER pt1_validate_no_overlap
 BEFORE INSERT OR UPDATE ON part_time_availabilities
 FOR EACH ROW EXECUTE PROCEDURE pt_no_overlaps();
 
-  -- 2. only allow delete if no selected bids in that period
+-- 2. only allow delete if no selected bids in that period
 
 CREATE OR REPLACE FUNCTION pt_reject_if_any_selected()
 RETURNS TRIGGER AS 
