@@ -107,9 +107,16 @@ WHERE pet_owner=$1 \
 
 // INPUT:
 // owner -> {email, cc_number, holder_name, expiry_date}
-export const addCreditCard = " \
-INSERT INTO credit_cards (email, cc_number, holder_name, expiry_date) \
+export const addCreditCardQuery = " \
+INSERT INTO credit_cards (owner, cc_number, holder_name, expiry_date) \
 VALUES ($1, $2, $3, $4) \
+";
+
+// INPUT:
+// owner -> {email, cc_number}
+export const deleteCreditCardQuery = " \
+DELETE FROM credit_cards \
+WHERE owner=$1 AND cc_number=$2 \
 ";
 
 

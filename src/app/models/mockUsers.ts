@@ -5,17 +5,17 @@ export const mockUsers: Array<User> = [
   {
     email: 'test',
     name: 'Paul Peterson',
-    picture_url: '',
+    pic_url: '',
     phone: 12345678,
     status: Status.BOTH,
     pets_owned: [
       mockPets[0],
     ],
-    credit_card: {
+    credit_card: [{
       cc_number: 5555444433332222,
       expiry_date: '01/02/2021',
       holder_name: 'Paul'
-    },
+    }],
     is_part_time: false,
     leave_or_avail: [
       {
