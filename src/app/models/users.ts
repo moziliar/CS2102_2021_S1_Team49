@@ -3,11 +3,11 @@ import { Pet, Category } from './pets';
 export interface User {
   email: string;
   name: string;
-  picture_url: string;
+  pic_url: string;
   phone: number;
   status: number;
   pets_owned: Array<Pet>;
-  credit_card: CreditCard;
+  credit_card: Array<CreditCard>;
   is_part_time: boolean;
   leave_or_avail: Array<Leave>;
   categories: Array<CategoryRate>;

@@ -14,7 +14,7 @@ export const mockTransactions: Array<Transaction> = [
       total_price: 7000,
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
-      credit_card: mockUsers[0].credit_card,
+      credit_card: mockUsers[0].credit_card[0],
       is_selected: true
     },
     review: {
@@ -33,7 +33,7 @@ export const mockTransactions: Array<Transaction> = [
       total_price: 7000,
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
-      credit_card: mockUsers[0].credit_card,
+      credit_card: mockUsers[0].credit_card[0],
       is_selected: true
     },
     review: {
@@ -52,7 +52,7 @@ export const mockTransactions: Array<Transaction> = [
       total_price: 7000,
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
-      credit_card: mockUsers[0].credit_card,
+      credit_card: mockUsers[0].credit_card[0],
       is_selected: true
     },
     review: {
@@ -71,7 +71,7 @@ export const mockTransactions: Array<Transaction> = [
       total_price: 7000,
       transfer_method: TransferMethod.OWNER_DELIVER,
       use_card: true,
-      credit_card: mockUsers[0].credit_card,
+      credit_card: mockUsers[0].credit_card[0],
       is_selected: false
     },
     review: {

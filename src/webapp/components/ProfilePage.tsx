@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Container, Row, Col, Button, Form } from 'react-bootstrap';
 import { Link, NavLink } from 'react-router-dom';
 
-import { Status } from '../../app/models/users';
 import { UserContext } from '../contexts/UserContext';
 import EditProfileSection from './subcomponents/EditProfileSection';
 import MyPetsSection from './subcomponents/MyPetsSection';
@@ -17,15 +16,17 @@ import '../styles/ProfilePage.scss';
 class ProfilePage extends Component {
 	static contextType = UserContext;
 
-  render() {
+  	render() {
 		const { currentUser, signOutFunc } = this.context;
+		const isCareTaker: boolean = "is_part_time" in currentUser;
+
 		return(
 			<div className="profile-page">
 				<Container>
 					<Row>
 						<Col xs={ 3 }>
 							<div className="profile-section">
-								<img src="https://i0.wp.com/www.oakridge.in/wp-content/uploads/2020/02/Sample-jpg-image-500kb.jpg"/>
+								<img src={ currentUser.pic_url }/>
 								<h5>{ currentUser.name }</h5>
 								<small style={{ 'color': '#06748A', 'marginBottom': '20px' }}>{ currentUser.email }</small><br />
 								<Button 
@@ -34,11 +35,7 @@ class ProfilePage extends Component {
 									onClick={ signOutFunc }>Sign out</Button>
 							</div>
 							{ this._renderLinks() }
-							{ currentUser.status === Status.CARE_TAKER 
-								? <Button style={{ 'padding': '0 20px' }} variant="success"><small>Apply Pet Owner</small></Button> 
-								: null
-							}
-							{ currentUser.status === Status.PET_OWNER
+							{ !isCareTaker
 								? <div style={{ 'margin': '0 20px', 'textAlign': 'center' }}>
 									<Button variant="success"><small>Apply Fulltime Taker</small></Button>
 									<Button variant="success" style={{ 'marginTop': '20px' }}><small>Apply Parttime Taker</small></Button>
@@ -62,19 +59,16 @@ class ProfilePage extends Component {
 	};
 
 	_renderLinks = () => {
-		const { status } = this.context.currentUser;
+		const isCareTaker: boolean = "is_part_time" in this.context.currentUser;
 
 		const links: any[] = [];
 		links.push(
 			<NavLink activeClassName="is-active" to="/profile" key="profile" exact>My Profile</NavLink>,
-			<NavLink activeClassName="is-active" to="/profile/past-transactions" key="past-transactions">Past Transactions</NavLink>
+			<NavLink activeClassName="is-active" to="/profile/past-transactions" key="past-transactions">Past Transactions</NavLink>,
+			<NavLink activeClassName="is-active" to="/profile/my-pets" key="pets">My Pets</NavLink>
 		);
-		if (status === Status.PET_OWNER || status === Status.BOTH) {
-			links.push(
-				<NavLink activeClassName="is-active" to="/profile/my-pets" key="pets">My Pets</NavLink>,
-			);
-		}
-		if (status === Status.CARE_TAKER || status === Status.BOTH) {
+
+		if (isCareTaker) {
 			links.push(
 				<NavLink activeClassName="is-active" to="/profile/ongoing-transactions" key="ongoing-transactions">Ongoing Transactions</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,

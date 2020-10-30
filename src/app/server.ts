@@ -1,4 +1,4 @@
-import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler } from './controllers/user'
+import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler } from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler } from './controllers/pet'
 import { ListTxnByUserID } from './controllers/txn'
 import { ListAllBids, ListTnxByOwnerID } from './controllers/bid';
@@ -23,6 +23,9 @@ const initServer = (port: number) => {
   router.post('/user/create', CreateUserHandler);
   router.put('/user/update', UpdateUserHandler);
   router.delete('/user/delete', DeleteUserHandler);
+
+  router.post('/card/create', AddCreditCardHandler);
+  router.delete('/card/delete', DeleteCreditCardHandler);
 
   router.post('/pet/create', CreatePetHandler)
   router.put('/pet/update', UpdatePetHandler)
