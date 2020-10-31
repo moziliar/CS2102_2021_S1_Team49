@@ -7,7 +7,7 @@ const backend_url = () => {
 
   // local testing
   console.log("hello");
-  return "http://localhost:8080";
+  return "http://127.0.0.1:8080";
 };
 
 export default axios.create({
