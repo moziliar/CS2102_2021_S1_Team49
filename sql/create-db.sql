@@ -104,6 +104,7 @@ CREATE TABLE bids (
 
   rating smallint
     CHECK (rating IS NULL OR (rating IS NOT NULL AND date(date_end) <= CURRENT_DATE)),
+  review TEXT
 
   FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name),
   FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number),
