@@ -19,7 +19,7 @@ const OngoingBidsSection = () => {
 			<h4 style={{ 'margin': '15px' }}>You currently have { transaction.ongoingBids.length } ongoing bid(s)</h4>
 			{ transaction.ongoingBids.length !== 0
 					? transaction.ongoingBids.map((txn, index) => {
-							return <TransactionCard key={ index } transaction={ txn } hasFinished={ false } isBid={ true }/>
+							return <TransactionCard key={ index } transaction={ txn }/>
 						})
 					: null
 			}
