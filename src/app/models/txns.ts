@@ -1,32 +1,22 @@
-import { User, CreditCard } from './users';
-import { Pet } from './pets';
-
 export interface Transaction {
-  info: TransactionInfo;
-  review: Review;
-}
-
-export interface TransactionInfo {
-  owner: User;
-  care_taker: User;
-  pet: Pet;
+  pet_owner: string;
+  pet_name: string;
+  care_taker: string;
   location: string;
-  start_date: string;
-  end_date: string
-  total_price: number
-  transfer_method: TransferMethod;
-  use_card: boolean;
-  credit_card: CreditCard;
+  date_begin: string;
+  date_end: string;
+  total_price: number;
+  transfer_method: string;
   is_selected: boolean;
+  is_active: boolean;
+  payment_method: string;
+  cc_number: number
+  rating: number
+  review: string
 }
 
-export enum TransferMethod {
-  PCS_ON_SITE,
-  OWNER_DELIVER,
-  TAKER_PICKUP,
-}
-
-export interface Review {
-  description: string;
-  rating: number;
+export const TransferMethod = {
+  PCS_ON_SITE: 'pcs',
+  OWNER_DELIVER: 'deliver',
+  TAKER_PICKUP: 'pickup',
 }
