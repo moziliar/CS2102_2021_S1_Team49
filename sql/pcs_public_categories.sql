@@ -8,3 +8,4 @@ INSERT INTO public.categories (name, parent) VALUES ('Javan gold-spotted mongoos
 INSERT INTO public.categories (name, parent) VALUES ('Mouse, four-striped grass', null);
 INSERT INTO public.categories (name, parent) VALUES ('Spectacled caiman', null);
 INSERT INTO public.categories (name, parent) VALUES ('Painted stork', null);
+INSERT INTO public.categories (name, parent) VALUES ('Dog', null);

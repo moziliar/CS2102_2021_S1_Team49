@@ -59,10 +59,9 @@ WHERE owner=$1 \
 // user- > {email}
 export const updatePetQuery = " \
 UPDATE pets \
-SET name=$1, owner=$2, description=$3, \
-       special_requirements=$4, gender=$5, \
-       date_of_birth=$6, category=$7 \
-WHERE name=$1 AND owner=$8 \
+SET description=$3, special_requirements=$4, gender=$5, \
+    date_of_birth=$6, category=$7 \
+WHERE name=$1 AND owner=$2 \
 ";
 
 // INPUT:
@@ -127,6 +126,12 @@ SELECT * FROM credit_cards \
 WHERE owner=$1 \
 ";
 
+// INPUT:
+// owner -> {email, is_part_time}
+export const applyCareTakerQuery = " \
+INSERT INTO caretakers \
+VALUES ($1, $2) \
+";
 
 // INPUT:
 // owner -> {email, cc_number, holder_name, expiry_date}
@@ -157,4 +162,8 @@ WHERE caretaker=$1 \
 export const addDailyPrice = " \
 INSERT INTO daily_prices (caretaker, category, price) \
 VALUES ($1, $2, $3) \
+";
+
+export const getAllAvailCategories = " \
+SELECT name FROM categories \
 ";

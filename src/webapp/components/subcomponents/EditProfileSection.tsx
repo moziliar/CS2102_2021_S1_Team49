@@ -62,7 +62,6 @@ class EditProfileSection extends Component<{}, IState> {
 	}
 
 	componentDidUpdate = () => {
-		console.log(this.context.currentUser.credit_card, this.state.formData[CREDIT_CARD]);
 		if (this.context.currentUser.credit_card.length !== this.state.formData[CREDIT_CARD].length) {
 			const newForm: UpdateForm = _.cloneDeep(this.state.formData);
 			_.set(newForm, CREDIT_CARD, this.context.currentUser.credit_card);

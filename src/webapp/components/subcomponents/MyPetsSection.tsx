@@ -4,11 +4,16 @@ import DatePicker from "react-date-picker";
 import _ from 'lodash';
 
 import { User } from '../../../app/models/users';
-import { Pet, Gender } from '../../../app/models/pets';
+import { Pet, Category } from '../../../app/models/pets';
 import { UserContext } from '../../contexts/UserContext';
+import API from '../../api';
+
+const FEMALE = "Female";
+const MALE = "Male";
 
 type IState = {
-	pets_owned: Array<Pet | object>
+	pets_owned: Array<Pet | object>,
+	categories: Array<Category> | null,
 }
 
 class MyPetsSection extends Component<{}, IState> {
@@ -16,19 +21,44 @@ class MyPetsSection extends Component<{}, IState> {
 	currentUser: User = this.context.currentUser;
 
 	state: IState = {
-		pets_owned: this.currentUser.pets_owned
+		pets_owned: this.currentUser.pets_owned,
+		categories: null
 	};
 
 	_onHandleInputChange = (field: string, value: any) => {
+		console.log(field, value)
 		const pets_owned_copy: Array<Pet | object> = _.cloneDeep(this.state.pets_owned);
 		_.set(pets_owned_copy, field, value);
 		this.setState({ pets_owned: pets_owned_copy });
 	}
 
+	_addNewPet = (index: number) => {
+		const { pets_owned } = this.state;
+		this.context.addNewPet(this.currentUser.email, pets_owned[index]);
+	}
+
+	_updatePet = (pet: Pet) => {
+		this.context.updatePet(this.currentUser.email, pet);
+	}
+
+	_deletePet = (name: string) => {
+		this.context.deletePet(name, this.currentUser.email);
+	}
+
+	componentDidUpdate = () => {
+		if (this.context.currentUser.pets_owned.length !== this.state.pets_owned.length) {
+			this.setState({ pets_owned: this.context.currentUser.pets_owned });
+		}
+	}
+
 	componentDidMount = () => {
-		const pets_owned_copy: Array<Pet | object> = _.cloneDeep(this.state.pets_owned);
-		pets_owned_copy.push({}); //For adding a new pet
-		this.setState({ pets_owned: pets_owned_copy });
+		API.get('/categories/list')
+			.then(res => {
+				this.setState({ categories: res.data });
+			})
+			.catch(err => {
+				alert(err);
+			})
 	}
 
 	render() {
@@ -51,16 +81,32 @@ class MyPetsSection extends Component<{}, IState> {
 
 	// TODO: change pet.profile, to pet
 	_renderPetProfile(index: number, pet: Pet | object, totalPets: number) {
+		const { categories } = this.state;
+
 		return (
 			<div key={ index }>
-				<img src="https://i0.wp.com/www.oakridge.in/wp-content/uploads/2020/02/Sample-jpg-image-500kb.jpg" style={{ 'width': '100%', 'borderRadius': '5px', 'height': '250px', 'marginBottom': '20px' }}/>
 				<Form>
 					<Form.Group>
-						<Form.Label>Name</Form.Label>
+						<Form.Label>Name <small style={{ 'color': 'red' }}>(Once added, can't be change)</small></Form.Label>
 						<Form.Control 
 							type="text" 
+							disabled= { index !== totalPets - 1 }
 							value={ "name" in pet ? pet.name : '' }
 							onChange={ e => this._onHandleInputChange(`[${index}].name`, e.target.value) }/>
+					</Form.Group>
+					<Form.Group>
+						<Form.Label>Category</Form.Label><br />
+						{ categories?.map(c => {
+							return (
+								<Form.Check 
+									key={ c.name }
+									inline
+									type="radio"
+									label={ c.name }
+									checked={ "category" in pet ? pet.category === c.name : false }
+									onChange={ e => this._onHandleInputChange(`[${index}].category`, c.name) }/>
+							);
+						}) }
 					</Form.Group>
 					<Form.Group>
 						<Form.Label>Description</Form.Label>
@@ -68,6 +114,13 @@ class MyPetsSection extends Component<{}, IState> {
 							type="text"
 							value={ "description" in pet ? pet.description : '' }
 							onChange={ e => this._onHandleInputChange(`[${index}].description`, e.target.value) }/>
+					</Form.Group>
+					<Form.Group>
+						<Form.Label>Special Requirements</Form.Label>
+						<Form.Control 
+							type="text"
+							value={ "special_requirements" in pet ? pet.special_requirements : '' }
+							onChange={ e => this._onHandleInputChange(`[${index}].special_requirements`, e.target.value) }/>
 					</Form.Group>
 					<Form.Group>
 						<Form.Label>Date of Birth</Form.Label>
@@ -83,33 +136,24 @@ class MyPetsSection extends Component<{}, IState> {
 						<Form.Label>Gender</Form.Label>
 						<Form.Check 
 							type="radio"
-							label="Male"
-							checked={ "gender" in pet ? pet.gender === Gender.MALE : false }
-							onChange={ e => this._onHandleInputChange(`[${index}].gender`, Gender.MALE) }/>
+							label={ MALE }
+							checked={ "gender" in pet ? pet.gender === MALE : false }
+							onChange={ e => this._onHandleInputChange(`[${index}].gender`, MALE) }/>
 						<Form.Check 
 							type="radio"
-							label="Female"
-							value={ Gender.FEMALE }
-							checked={ "gender" in pet ? pet.gender === Gender.FEMALE : false }
-							onChange={ e => this._onHandleInputChange(`[${index}].gender`, Gender.FEMALE) }/>
-					</Form.Group>
-					<Form.Group>
-						<Form.Label>Picture Url</Form.Label>
-						<Form.Control 
-							type="text"
-							value={ "picture_url" in pet ? pet.picture_url : '' }
-							onChange={ e => this._onHandleInputChange(`[${index}].picture_url`, e.target.value) }/>
+							label={ FEMALE }
+							checked={ "gender" in pet ? pet.gender === FEMALE : false }
+							onChange={ e => this._onHandleInputChange(`[${index}].gender`, FEMALE) }/>
 					</Form.Group>
 				</Form>
 				{ index !== totalPets - 1 
-					? <div>
-							<Button variant="primary" style={{ 'marginRight': '20px'}}>Update Pet</Button>
-							<Button variant="danger">Delete Pet</Button>
+					? 	<div>
+							<Button variant="primary"  onClick={ () => this._updatePet(pet) } style={{ 'marginRight': '20px'}}>Update Pet</Button>
+							<Button variant="danger" onClick={ () => this._deletePet(pet.name) }>Delete Pet</Button>
+							<hr style={{ 'margin': '50px 0', 'border': '1px solid black' }}/> 
 						</div>
-					: <Button variant="success">Add New Pet</Button>}
-				{ index !== totalPets - 1 
-					? <hr style={{ 'margin': '50px 0', 'border': '1px solid black' }}/> 
-					: null }
+					: <Button variant="success" onClick={ () => this._addNewPet(index) }>Add New Pet</Button> 
+				}
 			</div>
 		);
 	}
