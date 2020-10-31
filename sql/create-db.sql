@@ -132,13 +132,13 @@ CREATE TABLE bids (
 -- note that is_active also acts as a soft delete
 
 
--- 1. bid can only be created if start date is at least 2 days later
+-- 1. bid can only be created if start date is more than 2 days later
 -- can't be a check as it is only on insert
 CREATE OR REPLACE FUNCTION bid_starts_mt_2_days_later()
 RETURNS TRIGGER AS
 $$ BEGIN
   IF NEW.start_date <= CURRENT_DATE + 2
-  THEN RETURN NULL;
+  THEN RAISE EXCEPTION 'cannot create bid that starts less than 2 days from today';
   ELSE RETURN NEW;
 END IF; END; $$
 LANGUAGE plpgsql;
@@ -157,7 +157,7 @@ IF (SELECT COUNT(*)
   THEN 
   RETURN NEW;
 ELSE
-  RETURN NULL;
+  RAISE EXCEPTION 'pet should belong to pet owner';
 END IF; END; $$
 LANGUAGE plpgsql;
 
@@ -177,7 +177,7 @@ CREATE OR REPLACE FUNCTION caretaker_can_care_category()
   ) THEN
   RETURN NEW;
 ELSE
-  RETURN NULL;
+  RAISE EXCEPTION 'caretaker % cannot care for this pet', NEW.caretaker;
 END IF; END; $$
 LANGUAGE plpgsql;
 
@@ -204,7 +204,7 @@ BEGIN
       THEN
       RETURN NEW;
     ELSE
-      RETURN NULL;
+      RAISE EXCEPTION 'caretaker is not available';
     END IF;
   ELSE
   IF EXISTS (
@@ -215,7 +215,7 @@ BEGIN
     WHERE F.caretaker = NEW.caretaker 
     AND ((F.end_date BETWEEN NEW.start_date AND NEW.end_date)
       OR (F.start_date BETWEEN NEW.start_date AND NEW.end_date)))
-  THEN RETURN NULL;
+  THEN RAISE EXCEPTION 'caretaker is not available';
   ELSE RETURN NEW;
   END IF;
 END IF; END; $$
@@ -250,7 +250,7 @@ BEGIN
       WHERE B.caretaker = NEW.caretaker 
         AND B.is_selected 
         AND i BETWEEN B.start_date AND B.end_date) > max_pet - 1
-    THEN RETURN NULL;
+    THEN RAISE EXCEPTION 'caretaker is already caring for max pets';
     END IF;
     i := i + 1;
   END LOOP;
@@ -280,7 +280,7 @@ BEGIN
   WHERE D.caretaker = NEW.caretaker AND D.category = cat;
   IF NEW.total_price < global_min 
     OR NEW.total_price < caretaker_min THEN
-    RETURN NULL;
+    RAISE EXCEPTION 'price % is less than minimum possible price', NEW.price;
   ELSE
     RETURN NEW;
 END IF; END; $$
@@ -437,7 +437,7 @@ IF EXISTS (
   AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
     OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
   THEN
-  RETURN NULL;
+  RAISE EXCEPTION 'this availability overlaps with an existing availability';
 ELSE
   RETURN NEW;
 END IF; END; $$
@@ -460,7 +460,7 @@ IF EXISTS (
   AND (OLD.start_date between B.start_date AND B.end_date
     OR OLD.end_date BETWEEN B.start_date AND B.end_date))
   THEN 
-    RETURN NULL;
+    RAISE EXCEPTION 'cannot remove availability when there is already an accepted bid';
   ELSE
     RETURN OLD;
 END IF; END; $$
@@ -500,7 +500,7 @@ IF EXISTS (
   AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
     OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date))
 THEN
-  RETURN NULL;
+  RAISE EXCEPTION 'this leave overlaps with an existing leave';
 ELSE
   RETURN NEW;
 END IF; END; $$
@@ -522,7 +522,7 @@ IF EXISTS (
   AND (NEW.start_date between B.start_date AND B.end_date
     OR NEW.end_date BETWEEN B.start_date AND B.end_date))
 THEN 
-  RETURN NULL;
+  RAISE EXCEPTION 'cannot take leave there is already a bid for this period';
 ELSE
   RETURN NEW;
 END IF; END; $$
@@ -587,7 +587,7 @@ $$ BEGIN
 -- reject if more than 365 days, as that would mean fail to 
 -- meet requirement in one of the years.
 IF NEW.end_date - NEW.start_date + 1 >= 365
-THEN RETURN NULL;
+THEN RAISE EXCEPTION 'full time requirements will fail if this leave is accepted';
 END IF;
 -- same year
 IF date_trunc('year', NEW.start_date) = date_trunc('year', NEW.end_date)
@@ -601,7 +601,7 @@ ELSIF date_trunc('year', NEW.start_date) != date_trunc('year', NEW.end_date)
 THEN
   RETURN NEW;
 ELSE 
-  RETURN NULL;
+  RAISE EXCEPTION 'full time requirements will fail if this leave is accepted';
 END IF;
 END; $$
 LANGUAGE plpgsql;
