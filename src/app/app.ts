@@ -1,10 +1,13 @@
 import initServer from './server'
 import dotenv from 'dotenv'
+import initDB from './dbconfig/db'
 
 // for local dev
 if (process.env.ENV != "live") {
   dotenv.config()
 }
+
+initDB();
 
 const port: number = parseInt(process.env.PORT || '4000');
 

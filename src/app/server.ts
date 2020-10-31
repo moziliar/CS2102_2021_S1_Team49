@@ -5,28 +5,33 @@ import { ListAllBids, ListTnxByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
 
 import express from 'express';
+import Router from 'express-promise-router';
+import bodyParser from 'body-parser';
 import cors from 'cors';
 
 const initServer = (port: number) => {
   const server = express();
+  const router = Router();
 
   // enable cors for local
   server.use(cors());
-  server.use(express.static('build'))
+  server.use(express.static('build'));
+  server.use(bodyParser.json());
+  server.use(router);
 
-  server.get('/user/login', LoginHandler);
-  server.post('/user/create', CreateUserHandler);
-  server.put('/user/update', UpdateUserHandler);
-  server.delete('/user/delete', DeleteUserHandler);
+  router.post('/user/login', LoginHandler);
+  router.post('/user/create', CreateUserHandler);
+  router.put('/user/update', UpdateUserHandler);
+  router.delete('/user/delete', DeleteUserHandler);
 
-  server.post('/pet/create', CreatePetHandler)
-  server.put('/pet/update', UpdatePetHandler)
-  server.delete('/pet/delete', DeletePetHandler)
+  router.post('/pet/create', CreatePetHandler)
+  router.put('/pet/update', UpdatePetHandler)
+  router.delete('/pet/delete', DeletePetHandler)
 
-  server.get('/txn/list', ListTxnByUserID)
+  router.get('/txn/list', ListTxnByUserID)
 
-  server.get('/bid/list', ListAllBids)
-  server.get('/bid/tnx', ListTnxByOwnerID)
+  router.get('/bid/list', ListAllBids)
+  router.get('/bid/tnx', ListTnxByOwnerID)
 
   return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }

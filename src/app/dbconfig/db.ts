@@ -1,6 +1,8 @@
-import { Pool } from 'pg';
+import { Client } from 'pg';
 
-const initDB = () => {
+export let db: Client;
+
+const initDB = async () => {
   const host = process.env.DB_HOST;
   const port = process.env.DB_PORT;
   const user = process.env.DB_USER;
@@ -10,15 +12,15 @@ const initDB = () => {
   if (process.env.ENV === "live" && process.env.DATABASE_URL) {
     connectionString = process.env.DATABASE_URL;
   }
-  console.log("connecting to db at:", connectionString);
+  console.log('connecting to db at:', connectionString);
 
-  const pool = new Pool({
-    max: 20,
+  db = new Client({
     connectionString: connectionString,
-    idleTimeoutMillis: 30000
   });
 
-  return pool;
+  db.connect().then(() => {
+    console.log('db initialized');
+  });
 }
 
 export default initDB;
