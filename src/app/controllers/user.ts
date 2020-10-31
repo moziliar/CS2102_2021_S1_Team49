@@ -4,7 +4,7 @@ import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
   queryPetQuery,
   queryCreditCard,
-  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery
+  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery
 } from '../sql_query/query';
 
 // ================================ USER =========================================
@@ -26,7 +26,7 @@ export const LoginHandler = async (req, res) => {
 };
 
 export const CreateUserHandler = async (req, res) => {
-  const newUser = await db.query({
+  await db.query({
     text: createUserQuery,
     values: [req.body.email, 
              req.body.password, 
@@ -42,7 +42,7 @@ export const CreateUserHandler = async (req, res) => {
       res.json(user);
     }
   }).catch(err => {
-    res.status(401).json({ errMessage: 'Email has been taken. User other email' });
+    res.status(404).json({ errMessage: 'Email has been taken. User other email' });
   })
 }
 
@@ -60,8 +60,24 @@ export const UpdateUserHandler = async (req, res) => {
       })
     })
     .catch(err => {
-      res.status(401).json({ errMessage: 'Fail updating basic information' });
+      res.status(404).json({ errMessage: 'Fail updating basic information' });
     })
+}
+
+export const ApplyCareTakerHandler = async (req, res) => {
+  await db.query({
+    text: applyCareTakerQuery,
+    values: [req.body.email,
+             req.body.is_part_time
+            ]
+  }).then(async r => {
+    await GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
+      })
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Error applying to be Care Taker. Please try again later!' });
+  })
 }
 
 export const DeleteUserHandler = (req, res) => {
@@ -71,7 +87,7 @@ export const DeleteUserHandler = (req, res) => {
 // ================================ CREDIT CARD =========================================
 
 export const AddCreditCardHandler = async (req, res) => {
-  const cardsRet = await db.query({
+  await db.query({
     text: addCreditCardQuery,
     values: [req.body.email,
              req.body.cc_number,
@@ -85,18 +101,16 @@ export const AddCreditCardHandler = async (req, res) => {
       })
   })
   .catch(err => {
-    res.status(401).json({ errMessage: 'Please ensure all fields are not empty, card number is unique, and expiry date is after today\' date' });
+    res.status(404).json({ errMessage: 'Please ensure all fields are not empty, card number is unique, and expiry date is after today\' date' });
   })
 
 }
 
 export const DeleteCreditCardHandler = async (req, res) => {
-  console.log(req.query);
-  const cardsRet = await db.query({
+  await db.query({
     text: deleteCreditCardQuery,
     values: [req.query.email, req.query.cc_number]
   }).then(async r => {
-    console.log(req.query);
     await GetUserByEmail(req.query.email)
       .then(user => {
         res.json(user);
@@ -104,7 +118,7 @@ export const DeleteCreditCardHandler = async (req, res) => {
   })
   .catch(err => {
     console.log(err)
-    res.status(401).json({ errMessage: 'Fail removing card. Please try again later.' });
+    res.status(404).json({ errMessage: 'Fail removing card. Please try again later.' });
   })
 }
 
@@ -138,7 +152,7 @@ export const GetUserByEmail = async (email: string) => {
   if (!isCaretaker) {
     return {
       ...user,
-      pets_owned: petsRet.rows || [],
+      pets_owned: petsRet.rows.concat({}) || [{}],
       credit_card: creditCardRet.rows.concat({}) || [{}],
     };
   }
@@ -151,7 +165,7 @@ export const GetUserByEmail = async (email: string) => {
 
     return {
       ...user,
-      pets_owned: petsRet.rows || [],
+      pets_owned: petsRet.rows.concat({}) || [{}],
       credit_card: creditCardRet.rows.concat({}) || [{}],
       is_part_time: isCaretakerRet.rows[0],
       leave_or_avail: availabilitiesRet.rows.map(ret => {
@@ -169,7 +183,7 @@ export const GetUserByEmail = async (email: string) => {
 
     return {
       ...user,
-      pets_owned: petsRet.rows || [],
+      pets_owned: petsRet.rows.concat({}) || [{}],
       credit_card: creditCardRet.rows.concat({}) || [{}],
       is_part_time: isCaretakerRet.rows[0].is_part_time,
       leave_or_avail: leavesRet.rows.map(ret => {

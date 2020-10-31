@@ -25,7 +25,7 @@ export const mockUsers: Array<User> = [
     ],
     categories: [
       {
-        category: mockPets[0].category,
+        category: { name: mockPets[0].category, parent_category: '' },
         rate: 5000
       }
     ]

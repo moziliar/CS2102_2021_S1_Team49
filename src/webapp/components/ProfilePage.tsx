@@ -17,7 +17,7 @@ class ProfilePage extends Component {
 	static contextType = UserContext;
 
   	render() {
-		const { currentUser, signOutFunc } = this.context;
+		const { currentUser, signOutFunc, applyCareTaker } = this.context;
 		const isCareTaker: boolean = "is_part_time" in currentUser;
 
 		return(
@@ -37,8 +37,8 @@ class ProfilePage extends Component {
 							{ this._renderLinks() }
 							{ !isCareTaker
 								? <div style={{ 'margin': '0 20px', 'textAlign': 'center' }}>
-									<Button variant="success"><small>Apply Fulltime Taker</small></Button>
-									<Button variant="success" style={{ 'marginTop': '20px' }}><small>Apply Parttime Taker</small></Button>
+									<Button variant="success" onClick={ () => applyCareTaker(currentUser.email, false) }><small>Apply Fulltime Taker</small></Button>
+									<Button variant="success" onClick={ () => applyCareTaker(currentUser.email, true) } style={{ 'marginTop': '20px' }}><small>Apply Parttime Taker</small></Button>
 								  </div> 
 								: null
 							}

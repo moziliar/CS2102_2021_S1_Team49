@@ -4,6 +4,7 @@ import API from '../api';
 import { CreditCard, User } from '../../app/models/users';
 import { Form } from '../components/SignInPage';
 import { UpdateForm } from '../components/subcomponents/EditProfileSection';
+import { Pet } from '../../app/models/pets';
 
 export type userContextState = {
 	isLoggedIn: boolean,
@@ -13,8 +14,12 @@ export type userContextState = {
 	signUpFunc: any,
 	signOutFunc: any,
 	updateUserFunc: any,
+	applyCareTaker: any,
 	addCreditCard: any,
 	deleteCreditCard: any,
+	addNewPet: any,
+	deletePet: any,
+	updatePet: any,
 	applyLeave: any,
 	currentUser: User | null
 };
@@ -27,8 +32,12 @@ export const UserContext = createContext<userContextState>({
 	signUpFunc: null,
 	signOutFunc: null,
 	updateUserFunc: null,
+	applyCareTaker: null,
 	addCreditCard: null,
 	deleteCreditCard: null,
+	addNewPet: null,
+	deletePet: null,
+	updatePet: null,
 	applyLeave: null,
 	currentUser: null
 });
@@ -42,8 +51,12 @@ class UserContextProvider extends Component<{}, userContextState> {
 		signUpFunc: null,
 		signOutFunc: null,
 		updateUserFunc: null,
+		applyCareTaker: null,
 		addCreditCard: null,
 		deleteCreditCard: null,
+		addNewPet: null,
+		deletePet: null,
+		updatePet: null,
 		applyLeave: null,
 		currentUser: null
 	};
@@ -94,7 +107,6 @@ class UserContextProvider extends Component<{}, userContextState> {
 
 	updateUserFunc = (updateForm: UpdateForm) => {
 		const req = updateForm;
-		console.log(req)
 		API.put('/user/update', req)
 			.then(res => {
 				console.log(res.data)
@@ -102,6 +114,25 @@ class UserContextProvider extends Component<{}, userContextState> {
 					currentUser: res.data,
 					errMessage: '',
 					succMessage: 'User updated Successfully!'
+				});
+			})
+			.catch(err => {
+				this.setState({ errMessage: err.response.data.errMessage });
+			})
+	}
+
+	applyCareTaker = (email: string, is_part_time: boolean) => {
+		const req = {
+			email: email,
+			is_part_time: is_part_time
+		};
+		
+		API.post('/apply/caretaker', req)
+			.then(res => {
+				this.setState({
+					currentUser: res.data,
+					errMessage: '',
+					succMessage: ''
 				});
 			})
 			.catch(err => {
@@ -147,6 +178,68 @@ class UserContextProvider extends Component<{}, userContextState> {
 			})
 	}
 
+	addNewPet = (email: string, newPet: Pet) => {
+		const req = {
+			owner: email,
+			...newPet
+		};
+		console.log(req)
+
+		API.post('/pet/create', req)
+			.then(res => {
+				console.log(res.data);
+				this.setState({
+					currentUser: res.data,
+					errMessage: '',
+					succMessage: ''
+				});
+			})
+			.catch(err => {
+				alert(err.response.data.errMessage);
+			})
+	}
+	
+	updatePet = (owner: string, pet: Pet) => {
+		const req = {
+			owner: owner,
+			...pet
+		};
+
+		API.put('/pet/update', req)
+			.then(res => {
+				this.setState({
+					currentUser: res.data,
+					errMessage: '',
+					succMessage: ''
+				});
+			})
+			.catch(err => {
+				console.log(err)
+				alert(err.reponse.message.errMessage);
+			})
+	}
+
+
+	deletePet = (name: string, owner: string) => {
+		const data = {
+			name: name,
+			owner: owner
+		};
+
+		API.delete('/pet/delete', { params: data })
+			.then(res => {
+				this.setState({
+					currentUser: res.data,
+					errMessage: '',
+					succMessage: ''
+				});
+			})
+			.catch(err => {
+				console.log(err)
+				alert(err.reponse.message.errMessage);
+			})
+	}
+
 	applyLeave = (startDate: Date, endDate: Date) => {
 		console.log("Leave Applied");
 	}
@@ -159,8 +252,12 @@ class UserContextProvider extends Component<{}, userContextState> {
 				signOutFunc: this.signOutFunc,
 				applyLeave: this.applyLeave,
 				updateUserFunc: this.updateUserFunc,
+				applyCareTaker: this.applyCareTaker,
 				addCreditCard: this.addCreditCard,
-				deleteCreditCard: this.deleteCreditCard }}>
+				deleteCreditCard: this.deleteCreditCard,
+				addNewPet: this.addNewPet,
+				deletePet: this.deletePet,
+				updatePet: this.updatePet }}>
 				{ this.props.children }
 			</UserContext.Provider>
 		);
