@@ -1,8 +1,11 @@
 -- DROP VIEW IF EXISTS salary, rating;
 DROP TRIGGER IF EXISTS ft1_validate_no_overlap ON full_time_leaves;
 DROP TRIGGER IF EXISTS ft2_validate_no_selected_bids ON full_time_leaves;
-DROP TRIGGER IF EXISTS ft3_mark_active_bids_inactive ON full_time_leaves;
+DROP TRIGGER IF EXISTS ft3_validate_meet_reqs ON full_time_leaves;
+DROP TRIGGER IF EXISTS ft4_mark_active_bids_inactive ON full_time_leaves;
 DROP TRIGGER IF EXISTS pt1_validate_no_overlap ON part_time_availabilities;
+DROP TRIGGER IF EXISTS pt2_validate_no_selected_bids ON part_time_availabilities;
+DROP TRIGGER IF EXISTS pt3_mark_active_bids_inactive ON part_time_availabilities;
 DROP TRIGGER IF EXISTS bid1_validate_starts_mt_2_days_later ON bids;
 DROP TRIGGER IF EXISTS bid2_validate_pet_belongs_to_owner ON bids;
 DROP TRIGGER IF EXISTS bid3_validate_caretaker_can_care_category ON bids;
@@ -345,7 +348,8 @@ FOR EACH ROW EXECUTE PROCEDURE remove_other_bids_if_selected();
 -- 8. After inserting, if bid is for full timer, select it immediately.
 CREATE OR REPLACE FUNCTION select_bid_if_full_timer()
 RETURNS TRIGGER AS
-$$ BEGIN
+$$ DECLARE i DATE := NEW.start_date;
+BEGIN
 -- if new entry that is for a full timer, select it
 -- at this point, the previous triggers would have guaranteed
 -- that the fulltimer is available
@@ -463,7 +467,7 @@ END IF; END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER pt2_validate_no_selected_bids
-BEFORE DELETE ON full_time_leaves
+BEFORE DELETE ON part_time_availabilities
 FOR EACH ROW EXECUTE PROCEDURE pt_reject_if_any_selected();
 
 -- 3. if availabilities is deleted, mark all active unselected bids as inactive
@@ -479,29 +483,26 @@ AND (OLD.start_date BETWEEN B.start_date AND B.end_date
 END; $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER ft3_mark_active_bids_inactive
-AFTER DELETE ON full_time_leaves
-FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
+CREATE TRIGGER pt3_mark_active_bids_inactive
+AFTER DELETE ON part_time_availabilities
+FOR EACH ROW EXECUTE PROCEDURE pt_deactive_active_bids();
 
 
-  -- full-time leaves triggers
-  -- 1. check whether still possible to meet full-time requirement of
-  -- 2 x 150 conseucitve days / yr. otherwise reject leave
-  -- TODO
-  -- 2. ensure no overlaps for the same user within the table.
-  CREATE OR REPLACE FUNCTION ft_no_overlaps()
-  RETURNS TRIGGER AS
-  $$ BEGIN
-  IF EXISTS (
-    SELECT 1 
-    FROM full_time_leaves FTL 
-    WHERE NEW.caretaker = FTL.caretaker
-    AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
-      OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date))
-    THEN
-    RETURN NULL;
-  ELSE
-    RETURN NEW;
+-- full-time leaves triggers
+-- 1. ensure no overlaps for the same user within the table.
+CREATE OR REPLACE FUNCTION ft_no_overlaps()
+RETURNS TRIGGER AS
+$$ BEGIN
+IF EXISTS (
+  SELECT 1 
+  FROM full_time_leaves FTL 
+  WHERE NEW.caretaker = FTL.caretaker
+  AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
+    OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date))
+THEN
+  RETURN NULL;
+ELSE
+  RETURN NEW;
 END IF; END; $$
 LANGUAGE plpgsql;
 
@@ -509,7 +510,7 @@ CREATE TRIGGER ft1_validate_no_overlap
 BEFORE INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_no_overlaps();
 
--- 3. only allow leave if they do not have any selected in that period
+-- 2. only allow leave if they do not have any selected in that period
 CREATE OR REPLACE FUNCTION ft_reject_if_any_selected()
 RETURNS TRIGGER AS 
 $$ BEGIN
@@ -520,7 +521,7 @@ IF EXISTS (
   AND B.is_selected AND B.is_active
   AND (NEW.start_date between B.start_date AND B.end_date
     OR NEW.end_date BETWEEN B.start_date AND B.end_date))
-  THEN 
+THEN 
   RETURN NULL;
 ELSE
   RETURN NEW;
@@ -530,6 +531,84 @@ LANGUAGE plpgsql;
 CREATE TRIGGER ft2_validate_no_selected_bids
 BEFORE INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_reject_if_any_selected();
+
+-- cur year is the first day of the current year (1st Jan XXXX)
+CREATE OR REPLACE FUNCTION ft_year_can_meet_req(year_to_check DATE, caretaker_user VARCHAR(256))
+RETURNS BOOLEAN
+AS 
+$$ DECLARE num_match INTEGER := 0;
+   DECLARE prev_end DATE; -- day before working day, so if working day was 1st jan, this would be 31st dec
+   DECLARE first_iter BOOLEAN := true;
+   DECLARE temprow full_time_leaves%ROWTYPE;
+BEGIN
+  FOR temprow IN (
+    SELECT F.start_date, F.end_date
+    FROM full_time_leaves F
+    WHERE F.caretaker = caretaker_user
+    AND (year_to_check = date_trunc('year', F.start_date)
+    OR year_to_check = date_trunc('year', F.end_date))
+    ORDER BY F.start_date
+  ) LOOP
+    IF first_iter AND date_trunc('year', temprow.start_date) != year_to_check
+    THEN 
+      prev_end := temprow.end_date;
+      first_iter := false;
+      CONTINUE;
+    ELSE 
+      prev_end := year_to_check - interval '1 day';
+      first_iter := false;
+    END IF;
+    IF temprow.start_date - prev_end - interval '1 day' >= interval '150 days'
+    THEN num_match := num_match + 1;
+    END IF;
+    prev_end := temprow.end_date;
+  END LOOP;
+  -- to count remaining days in the year after the last leave
+  IF date_trunc('year', prev_end) = year_to_check 
+  AND year_to_check + interval '1 year' - prev_end - interval '1 day' >= interval '150 days'
+  THEN num_match := num_match + 1;
+  END IF;
+  IF date_trunc('year', prev_end) = year_to_check 
+  AND year_to_check + interval '1 year' - prev_end - interval '1 day' >= interval '300 days'
+  THEN num_match := num_match + 1;
+  END IF;
+  IF num_match >= 2 OR first_iter
+  THEN RETURN true;
+  ELSE RETURN false;
+  END IF;
+END; $$
+LANGUAGE plpgsql;
+
+-- 1. check whether still possible to meet full-time requirement of
+-- 2 x 150 conseucitve days / yr. otherwise reject leave
+CREATE OR REPLACE FUNCTION ft_meets_req()
+RETURNS TRIGGER AS
+$$ BEGIN
+-- reject if more than 365 days, as that would mean fail to 
+-- meet requirement in one of the years.
+IF NEW.end_date - NEW.start_date + 1 >= 365
+THEN RETURN NULL;
+END IF;
+-- same year
+IF date_trunc('year', NEW.start_date) = date_trunc('year', NEW.end_date)
+  AND ft_year_can_meet_req(date(date_trunc('year', NEW.start_date)), NEW.caretaker)
+THEN
+  RETURN NEW;
+-- different years
+ELSIF date_trunc('year', NEW.start_date) != date_trunc('year', NEW.end_date)
+  AND ft_year_can_meet_req(date(date_trunc('year', NEW.start_date)), NEW.caretaker)
+  AND ft_year_can_meet_req(date(date_trunc('year', NEW.end_date)), NEW.caretaker)
+THEN
+  RETURN NEW;
+ELSE 
+  RETURN NULL;
+END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER ft3_validate_meet_reqs
+BEFORE INSERT OR UPDATE ON full_time_leaves
+FOR EACH ROW EXECUTE PROCEDURE ft_meets_req();
 
 -- 4. if leave is allowed, mark all active bids in that period as inactive
 CREATE OR REPLACE FUNCTION ft_deactive_active_bids()
@@ -544,7 +623,7 @@ AND (NEW.start_date BETWEEN B.start_date AND B.end_date
 END; $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER ft3_mark_active_bids_inactive
+CREATE TRIGGER ft4_mark_active_bids_inactive
 AFTER INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
 
