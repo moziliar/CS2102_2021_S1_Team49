@@ -1,5 +1,21 @@
 import { Pet, Category } from './pets';
 
+export interface CareTaker {
+  email: string;
+  name: string;
+  pic_url: string;
+  phone: number;
+  rating: number;
+  rate: Array<CategoryRate>;
+  reviews?: Array<Review>;
+}
+
+export interface Review {
+  owner_name: string;
+  review: string;
+  rating: number;
+}
+
 export interface User {
   email: string;
   name: string;
@@ -32,7 +48,7 @@ export interface Leave {
 }
 
 export interface CategoryRate {
-  category: Category;
+  category_name: string;
   rate: number;
 }
 

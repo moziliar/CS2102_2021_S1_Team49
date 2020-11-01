@@ -129,7 +129,7 @@ class MyPetsSection extends Component<{}, IState> {
 							value={ "date_of_birth" in pet 
 								? new Date(pet.date_of_birth) 
 								: new Date(Date.now()) }
-							format="MM/dd/y"
+							format="y-MM-dd"
 							onChange={ date => this._onHandleInputChange(`[${index}].date_of_birth`, date) }/>
 					</Form.Group>
 					<Form.Group>
