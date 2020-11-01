@@ -338,6 +338,7 @@ BEGIN
       i := i + 1;
     END LOOP;
   END IF; 
+  RETURN NEW;
 END; $$
 LANGUAGE plpgsql;
 
@@ -389,6 +390,7 @@ BEGIN
       END IF;
       i := i + 1;
     END LOOP;
+    RETURN NEW;
 END IF; END; $$
 LANGUAGE plpgsql;
 
@@ -480,6 +482,7 @@ WHERE OLD.caretaker = B.caretaker
 AND B.is_active
 AND (OLD.start_date BETWEEN B.start_date AND B.end_date
   OR OLD.end_date BETWEEN B.start_date AND B.end_date);
+RETURN OLD;
 END; $$
 LANGUAGE plpgsql;
 
@@ -620,6 +623,7 @@ WHERE NEW.caretaker = B.caretaker
 AND B.is_active
 AND (NEW.start_date BETWEEN B.start_date AND B.end_date
   OR NEW.end_date BETWEEN B.start_date AND B.end_date);
+RETURN NEW;
 END; $$
 LANGUAGE plpgsql;
 
