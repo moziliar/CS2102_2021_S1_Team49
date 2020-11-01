@@ -43,7 +43,7 @@ class ProfilePage extends Component {
 								: null
 							}
 						</Col>
-						<Col xs={{ span: 8, offset:1 }	}>
+						<Col xs={{ span: 8, offset: 1 }}>
 							<ProtectedRoute path="/profile" component={ EditProfileSection } exact/>
 							<ProtectedRoute path="/profile/past-transactions" component={ PastTransactionsSection }/>
 							<ProtectedRoute path="/profile/my-pets" component={ MyPetsSection }/>
@@ -64,13 +64,13 @@ class ProfilePage extends Component {
 		const links: any[] = [];
 		links.push(
 			<NavLink activeClassName="is-active" to="/profile" key="profile" exact>My Profile</NavLink>,
+			<NavLink activeClassName="is-active" to="/profile/ongoing-transactions" key="ongoing-transactions">Ongoing Transactions</NavLink>,
 			<NavLink activeClassName="is-active" to="/profile/past-transactions" key="past-transactions">Past Transactions</NavLink>,
-			<NavLink activeClassName="is-active" to="/profile/my-pets" key="pets">My Pets</NavLink>
+			<NavLink activeClassName="is-active" to="/profile/my-pets" key="pets">My Pets</NavLink>,
 		);
 
 		if (isCareTaker) {
 			links.push(
-				<NavLink activeClassName="is-active" to="/profile/ongoing-transactions" key="ongoing-transactions">Ongoing Transactions</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/my-availability" key="my-availability">My Availability</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>

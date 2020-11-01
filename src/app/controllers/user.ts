@@ -1,4 +1,4 @@
-import { mockUsers } from '../models/mockUsers';
+import { mockTakers, mockUsers } from '../models/mockUsers';
 import { db } from '../dbconfig/db';
 import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
@@ -120,6 +120,12 @@ export const DeleteCreditCardHandler = async (req, res) => {
     console.log(err)
     res.status(404).json({ errMessage: 'Fail removing card. Please try again later.' });
   })
+}
+
+// ================================ SEARCH TAKER ========================================
+
+export const ListCareTakerHandler = async (req, res) => {
+  res.json(mockTakers);
 }
 
 // ================================== HELPERS ===========================================

@@ -1,5 +1,61 @@
-import { User, Status, CreditCard } from './users';
+import { User, Status, CreditCard, CareTaker } from './users';
 import { mockPets } from './mockPets';
+
+export const mockTakers: Array<CareTaker> = [
+  {
+    email: 'example@google.com',
+    name: 'Paul Peterson',
+    pic_url: 'https://media.macphun.com/img/uploads/customer/how-to/579/15531840725c93b5489d84e9.43781620.jpg?q=85&w=1340',
+    phone: 12345678,
+    rating: 3.9,
+    rate: [
+      {
+        category_name: 'Dog',
+        rate: 30
+      },
+      {
+        category_name: 'Cat',
+        rate: 70
+      }
+    ],
+    reviews: [
+      {
+        owner_name: 'Paul Guy',
+        rating: 3.8,
+        review: 'Very Cool Guy!'
+      },
+      {
+        owner_name: 'Varian Vir',
+        rating: 3.8,
+        review: 'Very a good and kind person'
+      }
+    ]
+  },
+  {
+    email: 'example@google.com',
+    name: 'Amy Reisha',
+    pic_url: 'https://media.macphun.com/img/uploads/customer/how-to/579/15531840725c93b5489d84e9.43781620.jpg?q=85&w=1340',
+    phone: 12345678,
+    rating: 3.9,
+    rate: [
+      {
+        category_name: 'Dog',
+        rate: 30
+      },
+      {
+        category_name: 'Cat',
+        rate: 70
+      }
+    ],
+    reviews: [
+      {
+        owner_name: 'text',
+        rating: 3.8,
+        review: 'Very Cool Guy!'
+      }
+    ]
+  }
+]
 
 export const mockUsers: Array<User> = [
   {
@@ -25,7 +81,7 @@ export const mockUsers: Array<User> = [
     ],
     categories: [
       {
-        category: { name: mockPets[0].category, parent_category: '' },
+        category_name: mockPets[0].category,
         rate: 5000
       }
     ]

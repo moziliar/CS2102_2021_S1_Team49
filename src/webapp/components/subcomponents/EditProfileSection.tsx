@@ -149,7 +149,7 @@ class EditProfileSection extends Component<{}, IState> {
 						<br />
 						<DatePicker 
 							value={ "expiry_date" in card ? new Date(card[EXPIRY_DATE]) : new Date(Date.now()) }
-							format="y/MM/dd"
+							format="y-MM-dd"
 							disabled={ !isNewCard }
 							onChange={ date => this._onHandleInputChange(`credit_card[${index}].expiry_date`, date) }/>
 					</Col>

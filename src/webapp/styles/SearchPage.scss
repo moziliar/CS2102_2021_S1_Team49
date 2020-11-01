@@ -1,0 +1,36 @@
+.search-page {
+    background-color: #e8ebed;
+    min-height: 90vh;
+
+    .container {
+        padding: 5%;
+    }
+
+    div.section {
+        background-color: white;
+        border-radius: 5px;
+        padding: 2%;
+        min-height: 70vh;
+    }
+
+    div.detail{
+        padding: 0;
+
+        p {
+            margin-bottom: 5px;
+        }
+    }
+
+    .caretaker-card {
+        background-color: #e8ebed;
+        cursor: pointer;
+        opacity: 0.8;
+        border: 1px solid grey;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+
+    .caretaker-card:hover {
+        opacity: 1;
+    }
+}
