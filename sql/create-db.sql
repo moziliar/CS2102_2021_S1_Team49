@@ -35,7 +35,7 @@ CREATE TABLE full_time_leaves (
 );
 -- validation triggers
 -- 1. check whether still possible to meet full-time requirement of
--- 2 x 150 conseucitve days / yr. otherwise reject leave
+-- 2 x 150 consecutive days / yr. otherwise reject leave
 -- 2. ensure part time availabilities and full time leaves have no overlaps for
 -- the same user within the table.
 
