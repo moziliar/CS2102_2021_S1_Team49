@@ -8,6 +8,7 @@ import { CareTaker } from '../../app/models/users';
 import API from '../api';
 
 import '../styles/SearchPage.scss';
+import BidModal from './subcomponents/BidModal';
 
 const CATEGORY = 'category';
 const START_DATE = 'startDate';
@@ -27,6 +28,7 @@ type SearchForm = {
 
 type IState = {
     modalShow: boolean,
+    bidModalShow: boolean,
     categories: Array<Category> | null,
     careTakers: Array<CareTaker> | null,
     selectedCareTaker: number | null,
@@ -36,6 +38,7 @@ type IState = {
 class SearchPage extends Component<{}, IState> {
     state: IState = {
         modalShow: true,
+        bidModalShow: false,
         categories: null,
         careTakers: null,
         selectedCareTaker: null,
@@ -56,6 +59,10 @@ class SearchPage extends Component<{}, IState> {
                 [field]: value
             }
         })
+    }
+
+    _setBidModalShow = (setShow: boolean) => {
+        this.setState({ bidModalShow: setShow });
     }
     
     _onDateRangeChange = (type: string, data: object | string | null) => {
@@ -119,12 +126,16 @@ class SearchPage extends Component<{}, IState> {
 	}
 
     render() {
-        const { careTakers, selectedCareTaker } = this.state;
+        const { careTakers, selectedCareTaker, bidModalShow } = this.state;
 
         return (
             <div className="search-page">
                 <Container>
                     { this._renderSearchModal() }
+                    <BidModal 
+                        modalShow={ bidModalShow } 
+                        careTaker={ selectedCareTaker !== null ? careTakers[selectedCareTaker] : null }
+                        setBidModalShow={ this._setBidModalShow }/>
                     <Row>
                         <Col xs={ 7 } className="section">
                             <Button variant="info" onClick={ () => this._setModalShow(true) }>Search Care Taker</Button>
@@ -244,13 +255,17 @@ class SearchPage extends Component<{}, IState> {
         return (
             <>
                 <div>
+                    <Button 
+                        style={{ 'margin': '10px 0' }}
+                        variant="primary" 
+                        onClick={ () => this._setBidModalShow(true) }>Place Bid</Button>
                     <h6>Rates:</h6>
                     { rates.map((rate, index) => {
                         return (
                             <p key={ rate.category_name }>{ rate.category_name } - ${ rate.rate }/night</p>
                         );
                     }) }
-                    <h6>Reviews:</h6>
+                    <h6>Past Reviews:</h6>
                     { reviews 
                         ? reviews.map((review, index) => {
                             return (
