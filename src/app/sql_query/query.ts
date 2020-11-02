@@ -82,7 +82,7 @@ FROM bids \
 export const listTnxByOwnerId = " \
 SELECT * \
 FROM bids \
-WHERE pet_owner=$1 \
+WHERE pet_owner=$1 AND is_selected=true\
 ";
 
 // INPUT:
@@ -94,6 +94,23 @@ SET total_price=$1, payment_method=$2 \
     transfer_method=$3, cc_number=$4 \
 WHERE pet_owner=$5 \
 ";
+
+
+export const createTransactionInfo = " \
+INSERT INTO bids \
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) \
+";
+
+
+export const updateTransactionInfo = " \
+UPDATE bids \
+SET pet_owner=$1, pet=$2, caretaker=$3, date_begin=$4, \
+    date_end=$5, transfer_method=$6, location=$7, total_price=$8, \
+    is_active=$9, is_selected=$10, payment_method=$11, cc_number=$12, \
+    rating=$13, review=$14 \
+WHERE pet_owner=$1 AND caretaker=$3 AND date_begin=$4 AND date_end=$5 AND is_selected=true AND $10=true \
+";
+
 
 // INPUT:
 // owner -> {email}
