@@ -390,8 +390,9 @@ BEGIN
       END IF;
       i := i + 1;
     END LOOP;
-    RETURN NEW;
-END IF; END; $$
+  END IF; 
+RETURN NEW;
+END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER bid8_select_bid_if_full_timer
