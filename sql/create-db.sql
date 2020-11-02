@@ -125,8 +125,9 @@ CREATE TABLE bids (
   CHECK ((payment_method = 'cash' AND cc_number IS NULL)
     OR (payment_method = 'cc' AND cc_number IS NOT NULL)),
 
-  rating smallint
+  rating SMALLINT
   CHECK (rating IS NULL OR (rating IS NOT NULL AND date(end_date) <= CURRENT_DATE)),
+  review TEXT CHECK ((rating IS NULL AND review IS NULL) OR (rating IS NOT NULL AND review IS NOT NULL)),
 
   FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name) ON DELETE RESTRICT ON UPDATE CASCADE,
   FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number) ON DELETE RESTRICT ON UPDATE RESTRICT,
