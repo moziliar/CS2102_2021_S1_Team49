@@ -14,6 +14,9 @@ DROP TRIGGER IF EXISTS bid5_caretaker_not_full ON bids;
 DROP TRIGGER IF EXISTS bid6_validate_total_price ON bids;
 DROP TRIGGER IF EXISTS bid7_remove_others_if_selected ON bids;
 DROP TRIGGER IF EXISTS bid8_select_bid_if_full_timer ON bids;
+DROP TRIGGER IF EXISTS mdp1_update_daily_price ON min_daily_prices;
+DROP TRIGGER IF EXISTS dp1_check_more_than_global ON daily_prices;
+DROP TRIGGER IF EXISTS cat1_add_global_min_price ON categories;
 DROP TABLE IF EXISTS bids, pets, daily_prices, min_daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
 DROP TYPE IF EXISTS payment_method, transfer_method;
@@ -631,4 +634,54 @@ LANGUAGE plpgsql;
 CREATE TRIGGER ft4_mark_active_bids_inactive
 AFTER INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
+
+-- categories trigger
+-- after creating a category, set a min price of 1, and have admin update it afterwards
+CREATE OR REPLACE FUNCTION add_global_min_price()
+RETURNS TRIGGER AS
+$$ BEGIN
+INSERT into min_daily_prices D
+VALUES (NEW.name, 1);
+RETURN NEW;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER cat1_add_global_min_price
+AFTER INSERT ON categories
+FOR EACH ROW EXECUTE PROCEDURE add_global_min_price();
+
+-- daily prices trigger
+-- before inserting or updating, ensure that it is greater than or equal to the global rpice
+CREATE OR REPLACE FUNCTION check_daily_price()
+RETURNS TRIGGER AS
+$$ DECLARE min_price NUMERIC;
+BEGIN
+SELECT price INTO min_price FROM min_daily_prices WHERE category = NEW.category;
+IF NEW.price < min_price
+THEN RAISE EXCEPTION 'Entered daily price is less than minimum set by PCS %', min_price;
+ELSE RETURN NEW;
+END IF;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER dp1_check_more_than_global
+BEFORE INSERT OR UPDATE ON daily_prices
+FOR EACH ROW EXECUTE PROCEDURE check_daily_price();
+
+-- min_daily_prices trigger
+-- after inserting or updating, update all daily_prices for the same categories that is less than it to be equals to it
+CREATE OR REPLACE FUNCTION update_daily_price()
+RETURNS TRIGGER AS
+$$ 
+BEGIN
+UPDATE daily_prices D
+SET price = NEW.price
+WHERE D.price < NEW.price;
+RETURN NEW;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER mdp1_update_daily_price
+AFTER INSERT OR UPDATE ON daily_prices
+FOR EACH ROW EXECUTE PROCEDURE check_daily_price();
 
