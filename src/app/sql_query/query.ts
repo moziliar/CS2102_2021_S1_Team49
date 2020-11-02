@@ -184,3 +184,17 @@ VALUES ($1, $2, $3) \
 export const getAllAvailCategories = " \
 SELECT name FROM categories \
 ";
+
+
+
+// ==================================
+export const getHighRatingCaretakerDetails = " \
+SELECT U.name, U.phone, C.pcs_user, C.is_part_time  \
+FROM (bids B INNER JOIN caretakers C ON B.caretaker = C.pcs_user) \
+    INNER JOIN users U ON C.pcs_user = U.email \
+WHERE (rating != NULL) AND ( \
+    SELECT COUNT(*) \
+    FROM caretakers C2 INNER JOIN bids B2 ON C2.caretaker = B2.caretaker \
+    WHERE rating = 1) = 0 \
+HAVING AVG(rating) >= 4 \
+"
