@@ -40,20 +40,20 @@ CREATE TABLE users (
 -- do not let user update their email.
 
 CREATE TABLE caretakers (
-  pcs_user VARCHAR(256) REFERENCES users(email) PRIMARY KEY,
+  pcs_user VARCHAR(256) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY,
   is_part_time BOOLEAN NOT NULL
 );
 -- caretaker is opt in
 
 CREATE TABLE part_time_availabilities (
-  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user),
+  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON DELETE CASCADE ON UPDATE CASCADE,
   start_date DATE,
   end_date DATE CHECK (date(end_date) >= date(start_date)),
   PRIMARY KEY (caretaker, start_date, end_date)
 );
 
 CREATE TABLE full_time_leaves (
-  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user),
+  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON DELETE CASCADE ON UPDATE CASCADE,
   start_date DATE,
   end_date DATE CHECK (date(end_date) >= date(start_date)),
   PRIMARY KEY (caretaker, start_date, end_date)
@@ -63,27 +63,27 @@ CREATE TABLE credit_cards (
   cc_number VARCHAR(50),
   holder_name VARCHAR(256) NOT NULL,
   expiry_date DATE NOT NULL CHECK (date(expiry_date) > CURRENT_DATE),
-  owner VARCHAR(256) REFERENCES users(email) ON DELETE CASCADE,
+  owner VARCHAR(256) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
   PRIMARY KEY (owner, cc_number)
 );
 
 CREATE TABLE categories (
   name VARCHAR(256) PRIMARY KEY,
-  parent VARCHAR(256) REFERENCES categories(name)
+  parent VARCHAR(256) REFERENCES categories(name) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 -- this should never be deleted. if it is deleted, there should be a 
 -- trigger that updates all pets belonging to the category to the 
 -- parent category. If there isn't a parent category, disallow the deletion
 
 CREATE TABLE daily_prices (
-  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user),
-  category VARCHAR(256) REFERENCES categories(name),
+  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON DELETE CASCADE ON UPDATE CASCADE,
+  category VARCHAR(256) REFERENCES categories(name) ON DELETE CASCADE ON UPDATE CASCADE,
   price INT NOT NULL CHECK (price > 0),
   PRIMARY KEY (caretaker, category)
 );
 
 CREATE TABLE min_daily_prices (
-  category VARCHAR(256) REFERENCES categories(name) PRIMARY KEY,
+  category VARCHAR(256) REFERENCES categories(name) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY,
   price INT NOT NULL CHECK (price > 0)
 );
 -- should only be set and updated by admin.
@@ -91,12 +91,12 @@ CREATE TABLE min_daily_prices (
 
 CREATE TABLE pets (
   name VARCHAR(256),
-  owner VARCHAR(256) REFERENCES users(email) ON DELETE CASCADE,
+  owner VARCHAR(256) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,
   description TEXT,
   special_requirements TEXT,
   gender VARCHAR(20),
   date_of_birth DATE,
-  category VARCHAR(256) REFERENCES categories(name) NOT NULL,
+  category VARCHAR(256) REFERENCES categories(name) ON DELETE RESTRICT ON UPDATE CASCADE NOT NULL,
   PRIMARY KEY (name, owner)
 );
 
@@ -106,7 +106,7 @@ CREATE TYPE payment_method AS ENUM ('cash', 'cc');
 CREATE TABLE bids (
   pet_owner VARCHAR(256),
   pet VARCHAR(256),
-  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) NOT NULL,
+  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON DELETE RESTRICT ON UPDATE CASCADE NOT NULL,
 
   start_date DATE NOT NULL,
   end_date DATE NOT NULL CHECK (date(start_date) <= date(end_date)),
@@ -125,8 +125,8 @@ CREATE TABLE bids (
   rating smallint
   CHECK (rating IS NULL OR (rating IS NOT NULL AND date(end_date) <= CURRENT_DATE)),
 
-  FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name),
-  FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number),
+  FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name) ON DELETE RESTRICT ON UPDATE CASCADE,
+  FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number) ON DELETE RESTRICT ON UPDATE RESTRICT,
   PRIMARY KEY (pet_owner, pet, caretaker, start_date, end_date)
 );
 -- note that is_active also acts as a soft delete
