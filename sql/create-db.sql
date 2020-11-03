@@ -116,7 +116,7 @@ CREATE TABLE bids (
   review TEXT CHECK ((rating IS NULL AND review IS NULL) OR (rating IS NOT NULL AND review IS NOT NULL)),
 
   FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name) ON DELETE RESTRICT ON UPDATE CASCADE,
-  FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  FOREIGN KEY (pet_owner, cc_number) REFERENCES credit_cards(owner, cc_number),
   PRIMARY KEY (pet_owner, pet, caretaker, start_date, end_date)
 );
 -- note that is_active also acts as a soft delete
