@@ -10,8 +10,8 @@ export interface Transaction {
   is_selected: boolean;
   is_active: boolean;
   payment_method: string;
-  cc_number: number
-  rating: number
+  cc_number: number | null
+  rating: number | null
   review: string
 }
 
