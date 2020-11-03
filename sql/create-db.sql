@@ -7,7 +7,6 @@ DROP TRIGGER IF EXISTS pt1_validate_no_overlap ON part_time_availabilities;
 DROP TRIGGER IF EXISTS pt2_validate_no_selected_bids ON part_time_availabilities;
 DROP TRIGGER IF EXISTS pt3_mark_active_bids_inactive ON part_time_availabilities;
 DROP TRIGGER IF EXISTS bid1_validate_starts_mt_2_days_later ON bids;
-DROP TRIGGER IF EXISTS bid2_validate_pet_belongs_to_owner ON bids;
 DROP TRIGGER IF EXISTS bid3_validate_caretaker_can_care_category ON bids;
 DROP TRIGGER IF EXISTS bid4_caretaker_is_available ON bids;
 DROP TRIGGER IF EXISTS bid5_caretaker_not_full ON bids;
@@ -150,24 +149,6 @@ LANGUAGE plpgsql;
 CREATE TRIGGER bid1_validate_starts_mt_2_days_later
 BEFORE INSERT ON bids
 FOR EACH ROW EXECUTE PROCEDURE bid_starts_mt_2_days_later();
-
--- 2. pet should belong to pet_owner
-CREATE OR REPLACE FUNCTION bids_pet_belongs_to_pet_owner()
-RETURNS TRIGGER AS
-$$ BEGIN
-IF (SELECT COUNT(*)
-  FROM pets P
-  WHERE P.name = NEW.pet AND P.owner = NEW.pet_owner) = 1
-  THEN 
-  RETURN NEW;
-ELSE
-  RAISE EXCEPTION 'pet should belong to pet owner';
-END IF; END; $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER bid2_validate_pet_belongs_to_owner
-BEFORE INSERT OR UPDATE ON bids
-FOR EACH ROW EXECUTE PROCEDURE bids_pet_belongs_to_pet_owner();
 
 -- 3. caretaker should be able to care for pet category
 CREATE OR REPLACE FUNCTION caretaker_can_care_category()
