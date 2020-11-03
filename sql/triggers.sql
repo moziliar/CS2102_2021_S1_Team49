@@ -158,7 +158,12 @@ BEGIN
       SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
       FROM min_daily_prices D
       WHERE D.category = cat
-    )
+    ) * (SELECT CASE 
+            WHEN get_average_rating(NEW.caretaker) > 4.5 THEN 1.15
+            WHEN get_average_rating(NEW.caretaker) > 4 THEN 1.1
+            WHEN get_average_rating(NEW.caretaker) > 3 THEN 1.05
+            ELSE 1
+            END)
     OR NEW.total_price < (
       SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
       FROM daily_prices D
