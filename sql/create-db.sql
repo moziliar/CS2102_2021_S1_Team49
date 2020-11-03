@@ -327,14 +327,12 @@ BEGIN
         FROM bids B
         WHERE B.caretaker = NEW.caretaker 
         AND B.is_selected 
-        AND i BETWEEN B.start_date AND B.end_date) = max_pet
-        -- not sure if this condition works, it is 
-        -- assuming that there will only be 1 update at a time.
+        AND i BETWEEN B.start_date AND B.end_date) >= max_pet
       THEN 
         UPDATE bids B
         SET is_active = false
         WHERE B.caretaker = NEW.caretaker 
-          AND B.is_active AND NOT B.is_selected
+          AND B.is_active
           AND (i BETWEEN B.start_date AND B.end_date
           OR i BETWEEN B.start_date and B.end_date);
       END IF;
