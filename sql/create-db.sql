@@ -7,6 +7,7 @@ DROP TRIGGER IF EXISTS pt1_validate_no_overlap ON part_time_availabilities;
 DROP TRIGGER IF EXISTS pt2_validate_no_selected_bids ON part_time_availabilities;
 DROP TRIGGER IF EXISTS pt3_mark_active_bids_inactive ON part_time_availabilities;
 DROP TRIGGER IF EXISTS bid1_validate_starts_mt_2_days_later ON bids;
+DROP TRIGGER IF EXISTS bid2_selected_make_inactive ON bids;
 DROP TRIGGER IF EXISTS bid3_validate_caretaker_can_care_category ON bids;
 DROP TRIGGER IF EXISTS bid4_caretaker_is_available ON bids;
 DROP TRIGGER IF EXISTS bid5_caretaker_not_full ON bids;
@@ -25,9 +26,13 @@ DROP TYPE IF EXISTS payment_method, transfer_method;
 -- in alphabetical order, if order is important, by <table><num>_<validation>
 
 -- deletable entities:
--- credit cards, leaves
+-- leaves
 -- conditionally deletable:
--- availabilities (if no active bids)
+-- availabilities (if no selected bids), credit cards (if no bids)
+
+-- also need a cron job to
+-- automatically select a bid two days before start date if still active
+-- make is_selected bids in_active
 
 
 CREATE TABLE users (
@@ -125,7 +130,7 @@ CREATE TABLE bids (
     OR (payment_method = 'cc' AND cc_number IS NOT NULL)),
 
   rating SMALLINT
-  CHECK (rating IS NULL OR (rating IS NOT NULL AND date(end_date) <= CURRENT_DATE)),
+  CHECK (rating IS NULL OR (rating IS NOT NULL AND date(end_date) <= CURRENT_DATE AND is_selected)),
   review TEXT CHECK ((rating IS NULL AND review IS NULL) OR (rating IS NOT NULL AND review IS NOT NULL)),
 
   FOREIGN KEY (pet_owner, pet) REFERENCES pets(owner, name) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -134,13 +139,12 @@ CREATE TABLE bids (
 );
 -- note that is_active also acts as a soft delete
 
-
 -- 1. bid can only be created if start date is more than 2 days later
 -- can't be a check as it is only on insert
 CREATE OR REPLACE FUNCTION bid_starts_mt_2_days_later()
 RETURNS TRIGGER AS
 $$ BEGIN
-  IF NEW.start_date <= CURRENT_DATE + 2
+  IF NEW.is_active AND NEW.start_date <= CURRENT_DATE + 2
   THEN RAISE EXCEPTION 'cannot create bid that starts less than 2 days from today';
   ELSE RETURN NEW;
 END IF; END; $$
@@ -150,11 +154,26 @@ CREATE TRIGGER bid1_validate_starts_mt_2_days_later
 BEFORE INSERT ON bids
 FOR EACH ROW EXECUTE PROCEDURE bid_starts_mt_2_days_later();
 
+CREATE OR REPLACE FUNCTION bid_selected_make_inactive()
+RETURNS TRIGGER AS
+$$ BEGIN
+  IF NEW.is_selected AND NEW.is_active
+  THEN NEW.is_active = false;
+  END IF;
+  RETURN NEW;
+END; $$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER bid2_selected_make_inactive
+BEFORE INSERT OR UPDATE ON bids
+FOR EACH ROW EXECUTE PROCEDURE bid_selected_make_inactive();
+
 -- 3. caretaker should be able to care for pet category
 CREATE OR REPLACE FUNCTION caretaker_can_care_category()
-  RETURNS TRIGGER AS
-  $$ BEGIN
-  IF EXISTS (
+RETURNS TRIGGER AS
+$$ BEGIN
+  IF NOT NEW.is_active THEN RETURN NEW; END IF;
+  IF NEW.start_date <= (CURRENT_DATE + 2) OR EXISTS (
     SELECT 1 
     FROM pets P, daily_prices D
     WHERE P.name = NEW.pet AND P.owner = NEW.pet_owner 
@@ -173,37 +192,32 @@ FOR EACH ROW EXECUTE PROCEDURE caretaker_can_care_category();
 -- 4. disallow bid if caretaker not available
 CREATE OR REPLACE FUNCTION caretaker_is_available()
 RETURNS TRIGGER AS
-$$ DECLARE is_part_time BOOLEAN;
+$$ DECLARE i DATE := NEW.start_date;
 BEGIN
-  IF (
-    SELECT C.is_part_time
-    FROM caretakers C
-    WHERE C.pcs_user = NEW.caretaker)
-    THEN
-    -- look for an availability that fully contains the bid
-    -- TODO or maybe we should instead check to make sure every single day has an availability?
-    -- that way it would allow for availability as 1-2, 3-4, and a bid for 1-4.
-    IF EXISTS (
-      SELECT 1
-      FROM part_time_availabilities P
-      WHERE P.caretaker = NEW.caretaker 
-      AND P.start_date <= NEW.start_date AND NEW.end_date <= P.end_date)
-      THEN
-      RETURN NEW;
-    ELSE
-      RAISE EXCEPTION 'caretaker is not available';
-    END IF;
-  ELSE
-  IF EXISTS (
+  IF (SELECT C.is_part_time
+  FROM caretakers C
+  WHERE C.pcs_user = NEW.caretaker)
+  THEN 
+    WHILE i <= NEW.end_date LOOP
+      IF NOT EXISTS (
+        SELECT 1
+        FROM part_time_availabilities P
+        WHERE P.caretaker = NEW.caretaker 
+        AND i BETWEEN P.start_date AND P.end_date)
+      THEN RAISE EXCEPTION 'caretaker is not available';
+      END IF;
+      i := i + 1;
+    END LOOP;
+  ELSIF EXISTS (
     -- reject if any overlapping. we + 1 on both ends because we want it to be inclusive
-    SELECT 1
-    FROM full_time_leaves F
-    WHERE F.caretaker = NEW.caretaker 
-    AND (F.start_date, F.end_date + 1) OVERLAPS (NEW.start_date, NEW.end_date + 1)
+      SELECT 1
+      FROM full_time_leaves F
+      WHERE F.caretaker = NEW.caretaker 
+      AND (F.start_date, F.end_date + 1) OVERLAPS (NEW.start_date, NEW.end_date + 1))
   THEN RAISE EXCEPTION 'caretaker is not available';
-  ELSE RETURN NEW;
   END IF;
-END IF; END; $$
+  RETURN NEW;
+END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER bid4_caretaker_is_available
@@ -228,7 +242,6 @@ RETURNS TRIGGER AS
 $$ DECLARE max_pet INTEGER := 5;
 DECLARE i DATE = NEW.start_date;
 BEGIN
-  -- for part time, calculate rating then determine if 2 or 5 pets max
   IF (SELECT C.is_part_time
     FROM caretakers C
     WHERE C.pcs_user = NEW.caretaker)
@@ -259,6 +272,7 @@ CREATE OR REPLACE FUNCTION validate_bid_price()
 RETURNS TRIGGER AS
 $$ DECLARE cat VARCHAR(256);
 BEGIN
+  IF NOT NEW.is_active THEN RETURN NEW; END IF;
   SELECT P.category INTO cat
   FROM pets P
   WHERE P.owner = NEW.pet_owner AND P.name = NEW.pet;
@@ -270,7 +284,7 @@ BEGIN
     OR NEW.total_price < (
       SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
       FROM daily_prices D
-      WHERE D.caretaker = NEW.caretaker AND D.category = cat;
+      WHERE D.caretaker = NEW.caretaker AND D.category = cat
     ) 
   THEN
     RAISE EXCEPTION 'price % is less than minimum possible price', NEW.price;
@@ -359,11 +373,9 @@ END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER bid8_select_bid_if_full_timer
-AFTER INSERT OR UPDATE ON bids
+AFTER INSERT ON bids
 FOR EACH ROW EXECUTE PROCEDURE select_bid_if_full_timer();
 
--- also need a cron job to
--- automatically select a bid two days before start date if still active
 
 --CREATE VIEW salary (caretaker, month_year, amount) AS
 --  SELECT B.caretaker, DATE_TRUNC('month', B.end_date), SUM(B.total_price)
@@ -382,7 +394,7 @@ IF EXISTS (
   SELECT 1 
   FROM part_time_availabilities PTA 
   WHERE NEW.caretaker = PTA.caretaker
-  AND (NEW.start_date, NEW.end_date + 1) OVERLAPS (PTA.start_date, PTA.end_date + 1)
+  AND (NEW.start_date, NEW.end_date + 1) OVERLAPS (PTA.start_date, PTA.end_date + 1))
   THEN
   RAISE EXCEPTION 'this availability overlaps with an existing availability';
 ELSE
@@ -404,7 +416,7 @@ IF EXISTS (
   FROM bids B
   WHERE OLD.caretaker = B.caretaker
   AND B.is_selected AND B.is_active
-  AND (B.start_date, B.end_date + 1) OVERLAPS (OLD.start_date, OLD.end_date + 1)
+  AND (B.start_date, B.end_date + 1) OVERLAPS (OLD.start_date, OLD.end_date + 1))
   THEN 
     RAISE EXCEPTION 'cannot remove availability when there is already an accepted bid';
   ELSE
