@@ -10,12 +10,12 @@ export const mockTakers: Array<CareTaker> = [
     rating: 3.9,
     rate: [
       {
-        category_name: 'Dog',
-        rate: 30
+        category: 'Dog',
+        price: 30
       },
       {
-        category_name: 'Cat',
-        rate: 70
+        category: 'Cat',
+        price: 70
       }
     ],
     reviews: [
@@ -39,12 +39,12 @@ export const mockTakers: Array<CareTaker> = [
     rating: 3.9,
     rate: [
       {
-        category_name: 'Dog',
-        rate: 30
+        category: 'Dog',
+        price: 30
       },
       {
-        category_name: 'Cat',
-        rate: 70
+        category: 'Cat',
+        price: 70
       }
     ],
     reviews: [
@@ -73,6 +73,7 @@ export const mockUsers: Array<User> = [
       holder_name: 'Paul'
     }],
     is_part_time: false,
+    is_admin: false,
     leave_or_avail: [
       {
         start_date: '05/10/2020',
@@ -81,8 +82,8 @@ export const mockUsers: Array<User> = [
     ],
     categories: [
       {
-        category_name: mockPets[0].category,
-        rate: 5000
+        category: mockPets[0].category,
+        price: 5000
       }
     ]
   }

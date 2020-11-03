@@ -17,6 +17,7 @@ export interface Review {
 }
 
 export interface User {
+  is_admin: boolean;
   email: string;
   name: string;
   pic_url: string;
@@ -48,7 +49,7 @@ export interface Leave {
 }
 
 export interface CategoryRate {
-  category_name: string;
-  rate: number;
+  category: string;
+  price: number;
 }
 

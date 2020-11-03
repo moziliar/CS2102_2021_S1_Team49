@@ -169,8 +169,7 @@ class SearchPage extends Component<{}, IState> {
                 onHide={ () => this._setModalShow(false) }
                 size="lg"
                 aria-labelledby="contained-modal-title-vcenter"
-                centered
-                >
+                centered>
                 <Modal.Header closeButton>
                     <Modal.Title id="contained-modal-title-vcenter">
                         <h3>Find the Perfect Match</h3>
@@ -262,7 +261,7 @@ class SearchPage extends Component<{}, IState> {
                     <h6>Rates:</h6>
                     { rates.map((rate, index) => {
                         return (
-                            <p key={ rate.category_name }>{ rate.category_name } - ${ rate.rate }/night</p>
+                            <p key={ rate.category }>{ rate.category } - ${ rate.rate }/night</p>
                         );
                     }) }
                     <h6>Past Reviews:</h6>

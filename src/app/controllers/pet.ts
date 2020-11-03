@@ -1,7 +1,7 @@
 import { mockPets } from '../models/mockPets'
 import { GetUserByEmail } from './user';
 import { db } from '../dbconfig/db';
-import { createPetQuery, deletePetQuery, getAllAvailCategories, updatePetQuery } from '../sql_query/query';
+import { addCategoryQuery, createPetQuery, deletePetQuery, getAllAvailCategories, getAllCategoryPrices, updateCategoryQuery, updatePetQuery } from '../sql_query/query';
 
 // pet -> {name, owner, description, special_requirements, gender, date_of_birth, category}
 export const CreatePetHandler = async (req, res) => {
@@ -63,7 +63,7 @@ export const DeletePetHandler = async (req, res) => {
   })
 }
 
-export const GetAllPetCategories = async (req, res) => {
+export const GetAllPetCategoriesHandler = async (req, res) => {
   await db.query({
     text: getAllAvailCategories
   }).then(async query => {
@@ -71,4 +71,51 @@ export const GetAllPetCategories = async (req, res) => {
   }).catch(err => {
     res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
   })
+}
+
+export const CreateCategoryHandler = async (req, res) => {
+  await db.query({
+    text: addCategoryQuery,
+    values: [req.body.name, req.body.parent_category ? req.body.parent_category : null]
+  }).then(async query => {
+    if (query.rowCount > 0) {
+      await GetAllCategoryHelper()
+        .then(query => {
+          res.json(query.categoryList);
+        })
+    }
+  }).catch(err => {
+    console.log(err)
+    res.status(404).json({ errMessage: 'Duplicate category detected. Change the category name.' })
+  })
+}
+
+export const UpdateCategoryHandler = async (req, res) => {
+  await db.query({
+    text: updateCategoryQuery,
+    values: [req.body.category, req.body.price]
+  }).then(async q => {
+      await GetAllCategoryHelper()
+        .then(query => {
+          res.json(query.categoryList);
+        })
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Please Check that price is not null and > 0' })
+  })
+}
+
+export const GetAllCategoryPricesHandler = async (req, res) => {
+  await GetAllCategoryHelper()
+    .then(query => {
+      res.json(query.categoryList);
+    }).catch(err => {
+      res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+    })
+}
+
+export const GetAllCategoryHelper = async () => {
+  const categoriesRet = await db.query({
+    text: getAllCategoryPrices
+  });
+  return { categoryList: categoriesRet.rows }
 }

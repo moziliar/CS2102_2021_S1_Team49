@@ -60,7 +60,11 @@ class SignInPage extends Component<{}, IState> {
 		const { email, password, name, phone, pic_url } = this.state.formData;
 
 		if (this.context.isLoggedIn) {
-			return <Redirect to='/profile'/>;
+			if (this.context.currentUser.is_admin) {
+				return <Redirect to='/pcs-dashboard'/>;
+			} else {
+				return <Redirect to='/profile'/>;
+			}
 		}
 
 		const isSignIn: boolean = window.location.pathname === '/signin';

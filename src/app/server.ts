@@ -1,5 +1,5 @@
 import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler } from './controllers/user'
-import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllPetCategories } from './controllers/pet'
+import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
 import { ListTxnByUserID } from './controllers/txn'
 import { ListAllBids, ListTnxByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
@@ -29,10 +29,14 @@ const initServer = (port: number) => {
   router.post('/card/create', AddCreditCardHandler);
   router.delete('/card/delete', DeleteCreditCardHandler);
 
-  router.get('/categories/list', GetAllPetCategories);
+  router.get('/categories/list', GetAllPetCategoriesHandler);
+  router.get('/categories/pricelist', GetAllCategoryPricesHandler);
+  router.post('/category/create', CreateCategoryHandler);
+  router.put('/category/update', UpdateCategoryHandler);
   router.post('/pet/create', CreatePetHandler)
   router.put('/pet/update', UpdatePetHandler)
   router.delete('/pet/delete', DeletePetHandler)
+
 
   router.get('/txn/list', ListTxnByUserID)
 

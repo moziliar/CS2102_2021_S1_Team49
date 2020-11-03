@@ -185,7 +185,25 @@ export const getAllAvailCategories = " \
 SELECT name FROM categories \
 ";
 
+export const getAllCategoryPrices = " \
+SELECT * FROM min_daily_prices \
+ORDER BY category \
+";
 
+// INPUT:
+// category -> {name, parent_category}
+export const addCategoryQuery = " \
+INSERT INTO categories \
+VALUES ($1, $2) \
+";
+
+// INPUT:
+// category -> {category, price}
+export const updateCategoryQuery = " \
+UPDATE min_daily_prices \
+SET price=$2 \
+WHERE category=$1 \
+";
 
 // ==================================
 export const getHighRatingCaretakerDetails = " \

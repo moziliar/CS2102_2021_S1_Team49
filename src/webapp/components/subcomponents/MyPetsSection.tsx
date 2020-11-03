@@ -26,7 +26,6 @@ class MyPetsSection extends Component<{}, IState> {
 	};
 
 	_onHandleInputChange = (field: string, value: any) => {
-		console.log(field, value)
 		const pets_owned_copy: Array<Pet | object> = _.cloneDeep(this.state.pets_owned);
 		_.set(pets_owned_copy, field, value);
 		this.setState({ pets_owned: pets_owned_copy });
