@@ -1,6 +1,8 @@
 version: '3'
 services:
   pcs-backend:
+    depends_on:
+      - psql
     build:
       context: .
       dockerfile: src/app/Dockerfile
