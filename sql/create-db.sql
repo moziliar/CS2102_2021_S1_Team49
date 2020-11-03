@@ -170,7 +170,7 @@ CREATE TRIGGER bid3_validate_caretaker_can_care_category
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE caretaker_can_care_category();
 
-  -- 4. disallow bid if caretaker not available
+-- 4. disallow bid if caretaker not available
 CREATE OR REPLACE FUNCTION caretaker_is_available()
 RETURNS TRIGGER AS
 $$ DECLARE is_part_time BOOLEAN;
@@ -181,6 +181,8 @@ BEGIN
     WHERE C.pcs_user = NEW.caretaker)
     THEN
     -- look for an availability that fully contains the bid
+    -- TODO or maybe we should instead check to make sure every single day has an availability?
+    -- that way it would allow for availability as 1-2, 3-4, and a bid for 1-4.
     IF EXISTS (
       SELECT 1
       FROM part_time_availabilities P
@@ -193,13 +195,11 @@ BEGIN
     END IF;
   ELSE
   IF EXISTS (
-    -- likewise, if there is some leave that starts or ends inside the
-    -- bid, reject
+    -- reject if any overlapping. we + 1 on both ends because we want it to be inclusive
     SELECT 1
     FROM full_time_leaves F
     WHERE F.caretaker = NEW.caretaker 
-    AND ((F.end_date BETWEEN NEW.start_date AND NEW.end_date)
-      OR (F.start_date BETWEEN NEW.start_date AND NEW.end_date)))
+    AND (F.start_date, F.end_date + 1) OVERLAPS (NEW.start_date, NEW.end_date + 1)
   THEN RAISE EXCEPTION 'caretaker is not available';
   ELSE RETURN NEW;
   END IF;
@@ -210,7 +210,19 @@ CREATE TRIGGER bid4_caretaker_is_available
 BEFORE INSERT OR UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE caretaker_is_available();
 
+CREATE OR REPLACE FUNCTION get_average_rating(caretaker_user VARCHAR(256))
+RETURNS NUMERIC AS
+$$ BEGIN
+RETURN (SELECT COALESCE(AVG(rating), 0)
+  FROM bids B
+  WHERE B.caretaker = caretaker_user AND B.is_selected AND B.end_date <= CURRENT_DATE);
+END; $$
+LANGUAGE plpgsql;
+
 -- 5. bid cannot be created if caretaker is caring for max pets
+-- once bid is created, but rating dips below requirement, then 
+-- caretaker cannot accept the bid unless they increase their rating
+-- if we reach the 2 day mark, then the bid will be marked inactive
 CREATE OR REPLACE FUNCTION caretaker_not_full()
 RETURNS TRIGGER AS
 $$ DECLARE max_pet INTEGER := 5;
@@ -220,12 +232,7 @@ BEGIN
   IF (SELECT C.is_part_time
     FROM caretakers C
     WHERE C.pcs_user = NEW.caretaker)
-    AND EXISTS (
-      SELECT 1
-      FROM bids B
-      WHERE B.caretaker = NEW.caretaker 
-      AND B.is_selected AND B.end_date <= CURRENT_DATE
-      HAVING COALESCE(AVG(B.rating), 0) >= 4)
+    AND get_average_rating(NEW.caretaker) < 4
     THEN 
     max_pet := 2;
   END IF;
@@ -234,7 +241,7 @@ BEGIN
       FROM bids B
       WHERE B.caretaker = NEW.caretaker 
         AND B.is_selected 
-        AND i BETWEEN B.start_date AND B.end_date) > max_pet - 1
+        AND i BETWEEN B.start_date AND B.end_date) >= max_pet
     THEN RAISE EXCEPTION 'caretaker is already caring for max pets';
     END IF;
     i := i + 1;
@@ -244,27 +251,28 @@ END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER bid5_caretaker_not_full
-BEFORE INSERT OR UPDATE ON bids
+BEFORE INSERT ON bids
 FOR EACH ROW EXECUTE PROCEDURE caretaker_not_full();
 
 -- 6. when a bid is created, check to ensure total_price > min_price
 CREATE OR REPLACE FUNCTION validate_bid_price()
 RETURNS TRIGGER AS
 $$ DECLARE cat VARCHAR(256);
-DECLARE global_min NUMERIC;
-DECLARE caretaker_min NUMERIC;
 BEGIN
   SELECT P.category INTO cat
   FROM pets P
   WHERE P.owner = NEW.pet_owner AND P.name = NEW.pet;
-  SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1) INTO global_min
-  FROM min_daily_prices D
-  WHERE D.category = cat;
-  SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1) INTO caretaker_min
-  FROM daily_prices D
-  WHERE D.caretaker = NEW.caretaker AND D.category = cat;
-  IF NEW.total_price < global_min 
-    OR NEW.total_price < caretaker_min THEN
+  IF NEW.total_price < (
+      SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
+      FROM min_daily_prices D
+      WHERE D.category = cat
+    )
+    OR NEW.total_price < (
+      SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
+      FROM daily_prices D
+      WHERE D.caretaker = NEW.caretaker AND D.category = cat;
+    ) 
+  THEN
     RAISE EXCEPTION 'price % is less than minimum possible price', NEW.price;
   ELSE
     RETURN NEW;
@@ -289,20 +297,15 @@ BEGIN
     IF (SELECT C.is_part_time
       FROM caretakers C
       WHERE C.pcs_user = NEW.caretaker)
-      AND EXISTS (
-        SELECT 1
-        FROM bids B
-        WHERE B.caretaker = NEW.caretaker 
-        AND B.is_selected AND B.end_date <= CURRENT_DATE
-        HAVING COALESCE(AVG(B.rating), 0) >= 4)
+      AND get_average_rating(NEW.caretaker) < 4
     THEN max_pet := 2;
     END IF;
-    -- remove all bids for the pet on all days it is booked
+    -- remove all bids for the pet where there is an overlap
     UPDATE bids B
     SET is_active = false
     WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet
-    AND is_active = true AND (B.start_date BETWEEN NEW.start_date AND NEW.end_date
-      OR B.end_date BETWEEN NEW.start_date and NEW.end_date);
+    AND is_active = true 
+    AND (B.start_date, B.end_date + 1) OVERLAPS (NEW.start_date, NEW.end_date + 1);
     -- remove all bids involving days where caretaker is now full
     WHILE i <= NEW.end_date LOOP
       IF (
@@ -316,7 +319,8 @@ BEGIN
       THEN 
         UPDATE bids B
         SET is_active = false
-        WHERE B.is_active AND NOT B.is_selected
+        WHERE B.caretaker = NEW.caretaker 
+          AND B.is_active AND NOT B.is_selected
           AND (i BETWEEN B.start_date AND B.end_date
           OR i BETWEEN B.start_date and B.end_date);
       END IF;
@@ -328,14 +332,13 @@ END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER bid7_remove_others_if_selected
-AFTER INSERT OR UPDATE ON bids
+AFTER UPDATE ON bids
 FOR EACH ROW EXECUTE PROCEDURE remove_other_bids_if_selected();
 
 -- 8. After inserting, if bid is for full timer, select it immediately.
 CREATE OR REPLACE FUNCTION select_bid_if_full_timer()
 RETURNS TRIGGER AS
-$$ DECLARE i DATE := NEW.start_date;
-BEGIN
+$$ BEGIN
 -- if new entry that is for a full timer, select it
 -- at this point, the previous triggers would have guaranteed
 -- that the fulltimer is available
@@ -344,37 +347,12 @@ BEGIN
     FROM caretakers C
     WHERE C.pcs_user = NEW.caretaker)
   THEN 
+    -- this should trigger the other triggers again
     UPDATE bids B
     SET selected = true
     WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet 
     AND B.caretaker = NEW.caretaker AND B.start_date = NEW.start_date 
     AND B.end_date = NEW.end_date;
-    -- THIS IS A COPY PASTE OF bid7's function
-    -- remove all bids for the pet on all days it is booked
-    UPDATE bids B
-    SET is_active = false
-    WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet
-    AND is_active = true AND (B.start_date BETWEEN NEW.start_date AND NEW.end_date
-      OR B.end_date BETWEEN NEW.start_date and NEW.end_date);
-    -- remove all bids involving days where caretaker is now full
-    WHILE i <= NEW.end_date LOOP
-      IF (
-        SELECT COUNT(*) 
-        FROM bids B
-        WHERE B.caretaker = NEW.caretaker 
-        AND B.is_selected 
-        AND i BETWEEN B.start_date AND B.end_date) = 5
-        -- not sure if this condition works, it is 
-        -- assuming that there will only be 1 update at a time.
-      THEN 
-        UPDATE bids B
-        SET is_active = false
-        WHERE B.is_active AND NOT B.is_selected
-          AND (i BETWEEN B.start_date AND B.end_date
-          OR i BETWEEN B.start_date and B.end_date);
-      END IF;
-      i := i + 1;
-    END LOOP;
   END IF; 
 RETURN NEW;
 END; $$
@@ -395,24 +373,6 @@ FOR EACH ROW EXECUTE PROCEDURE select_bid_if_full_timer();
 -- we likely need a function or something to query for an individual user,
 -- if we cannot select a specific user from this view.
 
---CREATE VIEW rating (caretaker, rating) AS
---  SELECT B.caretaker, AVG(B.rating)
---  FROM bids B
---  WHERE B.is_selected AND B.end_date <= CURRENT_DATE
---  GROUP BY B.caretaker
---  UNION
---  (SELECT C.pcs_user, 0
---   FROM caretakers C
--- EXCEPT
--- SELECT B1.caretaker, 0
--- FROM bids B1);
--- Can we improve this?
-
-
--- TODO views for
--- min prices, available caretakers for some date
--- number of pets a caretaker can take
-
 -- part-time availabilities triggers
 -- 1. no overlaps
 CREATE OR REPLACE FUNCTION pt_no_overlaps()
@@ -422,8 +382,7 @@ IF EXISTS (
   SELECT 1 
   FROM part_time_availabilities PTA 
   WHERE NEW.caretaker = PTA.caretaker
-  AND (NEW.start_date BETWEEN PTA.start_date AND PTA.end_date
-    OR NEW.end_date BETWEEN PTA.start_date AND PTA.end_date))
+  AND (NEW.start_date, NEW.end_date + 1) OVERLAPS (PTA.start_date, PTA.end_date + 1)
   THEN
   RAISE EXCEPTION 'this availability overlaps with an existing availability';
 ELSE
@@ -445,8 +404,7 @@ IF EXISTS (
   FROM bids B
   WHERE OLD.caretaker = B.caretaker
   AND B.is_selected AND B.is_active
-  AND (OLD.start_date between B.start_date AND B.end_date
-    OR OLD.end_date BETWEEN B.start_date AND B.end_date))
+  AND (B.start_date, B.end_date + 1) OVERLAPS (OLD.start_date, OLD.end_date + 1)
   THEN 
     RAISE EXCEPTION 'cannot remove availability when there is already an accepted bid';
   ELSE
@@ -466,8 +424,7 @@ UPDATE bids B
 SET is_active = false
 WHERE OLD.caretaker = B.caretaker
 AND B.is_active
-AND (OLD.start_date BETWEEN B.start_date AND B.end_date
-  OR OLD.end_date BETWEEN B.start_date AND B.end_date);
+AND (OLD.start_date, OLD.end_date + 1) OVERLAPS (B.start_date, B.end_date);
 RETURN OLD;
 END; $$
 LANGUAGE plpgsql;
@@ -486,8 +443,7 @@ IF EXISTS (
   SELECT 1 
   FROM full_time_leaves FTL 
   WHERE NEW.caretaker = FTL.caretaker
-  AND (NEW.start_date BETWEEN FTL.start_date AND FTL.end_date
-    OR NEW.end_date BETWEEN FTL.start_date AND FTL.end_date))
+  AND (NEW.start_date, NEW.end_date + 1) OVERLAPS (FTL.start_date, FTL.end_date + 1))
 THEN
   RAISE EXCEPTION 'this leave overlaps with an existing leave';
 ELSE
@@ -508,8 +464,7 @@ IF EXISTS (
   FROM bids B
   WHERE NEW.caretaker = B.caretaker
   AND B.is_selected AND B.is_active
-  AND (NEW.start_date between B.start_date AND B.end_date
-    OR NEW.end_date BETWEEN B.start_date AND B.end_date))
+  AND (NEW.start_date, NEW.end_date + 1) OVERLAPS (B.start_date, B.end_date + 1))
 THEN 
   RAISE EXCEPTION 'cannot take leave there is already a bid for this period';
 ELSE
@@ -599,7 +554,8 @@ CREATE TRIGGER ft3_validate_meet_reqs
 BEFORE INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_meets_req();
 
--- 4. if leave is allowed, mark all active bids in that period as inactive
+-- 4. if leave is allowed, mark all active bids in that period as inactive. there shouldn't be
+-- any selected by the previous trigger
 CREATE OR REPLACE FUNCTION ft_deactive_active_bids()
 RETURNS TRIGGER AS
 $$ BEGIN
@@ -607,8 +563,7 @@ UPDATE bids B
 SET is_active = false
 WHERE NEW.caretaker = B.caretaker
 AND B.is_active
-AND (NEW.start_date BETWEEN B.start_date AND B.end_date
-  OR NEW.end_date BETWEEN B.start_date AND B.end_date);
+AND (NEW.start_date, NEW.end_date + 1) OVERLAPS (B.start_date, B.end_date + 1);
 RETURN NEW;
 END; $$
 LANGUAGE plpgsql;
@@ -622,7 +577,7 @@ FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
 CREATE OR REPLACE FUNCTION add_global_min_price()
 RETURNS TRIGGER AS
 $$ BEGIN
-INSERT into min_daily_prices D
+INSERT into min_daily_prices
 VALUES (NEW.name, 1);
 RETURN NEW;
 END; $$
@@ -636,10 +591,8 @@ FOR EACH ROW EXECUTE PROCEDURE add_global_min_price();
 -- before inserting or updating, ensure that it is greater than or equal to the global rpice
 CREATE OR REPLACE FUNCTION check_daily_price()
 RETURNS TRIGGER AS
-$$ DECLARE min_price NUMERIC;
-BEGIN
-SELECT price INTO min_price FROM min_daily_prices WHERE category = NEW.category;
-IF NEW.price < min_price
+$$ BEGIN
+IF NEW.price < (SELECT price FROM min_daily_prices WHERE category = NEW.category)
 THEN RAISE EXCEPTION 'Entered daily price is less than minimum set by PCS %', min_price;
 ELSE RETURN NEW;
 END IF;
@@ -658,12 +611,12 @@ $$
 BEGIN
 UPDATE daily_prices D
 SET price = NEW.price
-WHERE D.price < NEW.price;
+WHERE NEW.category = D.category AND D.price < NEW.price;
 RETURN NEW;
 END; $$
 LANGUAGE plpgsql;
 
 CREATE TRIGGER mdp1_update_daily_price
-AFTER INSERT OR UPDATE ON daily_prices
+AFTER INSERT OR UPDATE ON min_daily_prices
 FOR EACH ROW EXECUTE PROCEDURE check_daily_price();
 
