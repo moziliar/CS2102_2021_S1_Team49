@@ -1,5 +1,5 @@
 -- DROP VIEW IF EXISTS salary, rating;
-DROP TABLE IF EXISTS bids, pets, daily_prices, min_daily_prices, categories, credit_cards,
+DROP TABLE IF EXISTS bids, pets, daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
 DROP TYPE IF EXISTS payment_method, transfer_method;
 
@@ -58,8 +58,10 @@ CREATE TABLE credit_cards (
 
 CREATE TABLE categories (
   name VARCHAR(256) PRIMARY KEY,
+  price INT NOT NULL CHECK (price > 0),
   parent VARCHAR(256) REFERENCES categories(name) ON DELETE RESTRICT ON UPDATE CASCADE
 );
+-- should only be set and updated by admin.
 -- this should never be deleted. if it is deleted, there should be a 
 -- trigger that updates all pets belonging to the category to the 
 -- parent category. If there isn't a parent category, disallow the deletion
@@ -71,11 +73,6 @@ CREATE TABLE daily_prices (
   PRIMARY KEY (caretaker, category)
 );
 
-CREATE TABLE min_daily_prices (
-  category VARCHAR(256) REFERENCES categories(name) ON DELETE CASCADE ON UPDATE CASCADE PRIMARY KEY,
-  price INT NOT NULL CHECK (price > 0)
-);
--- should only be set and updated by admin.
 
 
 CREATE TABLE pets (

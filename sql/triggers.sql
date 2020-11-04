@@ -13,9 +13,8 @@ DROP TRIGGER IF EXISTS bid5_caretaker_not_full ON bids;
 DROP TRIGGER IF EXISTS bid6_validate_total_price ON bids;
 DROP TRIGGER IF EXISTS bid7_remove_others_if_selected ON bids;
 DROP TRIGGER IF EXISTS bid8_select_bid_if_full_timer ON bids;
-DROP TRIGGER IF EXISTS mdp1_update_daily_price ON min_daily_prices;
 DROP TRIGGER IF EXISTS dp1_check_more_than_global ON daily_prices;
-DROP TRIGGER IF EXISTS cat1_add_global_min_price ON categories;
+DROP TRIGGER IF EXISTS cat1_update_daily_price ON categories;
 
 -- 1. bid can only be created if start date is more than 2 days later
 -- can't be a check as it is only on insert
@@ -155,9 +154,9 @@ BEGIN
   FROM pets P
   WHERE P.owner = NEW.pet_owner AND P.name = NEW.pet;
   IF NEW.total_price < (
-      SELECT D.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
-      FROM min_daily_prices D
-      WHERE D.category = cat
+      SELECT C.price * (date(NEW.end_date) - date(NEW.start_date) + 1)
+      FROM categories C
+      WHERE C.name = cat
     ) * (SELECT CASE 
             WHEN get_average_rating(NEW.caretaker) > 4.5 THEN 1.15
             WHEN get_average_rating(NEW.caretaker) > 4 THEN 1.1
@@ -465,27 +464,12 @@ CREATE TRIGGER ft4_mark_active_bids_inactive
 AFTER INSERT OR UPDATE ON full_time_leaves
 FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
 
--- categories trigger
--- after creating a category, set a min price of 1, and have admin update it afterwards
-CREATE OR REPLACE FUNCTION add_global_min_price()
-RETURNS TRIGGER AS
-$$ BEGIN
-INSERT into min_daily_prices
-VALUES (NEW.name, 1);
-RETURN NEW;
-END; $$
-LANGUAGE plpgsql;
-
-CREATE TRIGGER cat1_add_global_min_price
-AFTER INSERT ON categories
-FOR EACH ROW EXECUTE PROCEDURE add_global_min_price();
-
 -- daily prices trigger
 -- before inserting or updating, ensure that it is greater than or equal to the global rpice
 CREATE OR REPLACE FUNCTION check_daily_price()
 RETURNS TRIGGER AS
 $$ BEGIN
-IF NEW.price < (SELECT price FROM min_daily_prices WHERE category = NEW.category)
+IF NEW.price < (SELECT price FROM categories WHERE name = NEW.category)
 THEN RAISE EXCEPTION 'Entered daily price is less than minimum set by PCS %', min_price;
 ELSE RETURN NEW;
 END IF;
@@ -496,7 +480,7 @@ CREATE TRIGGER dp1_check_more_than_global
 BEFORE INSERT OR UPDATE ON daily_prices
 FOR EACH ROW EXECUTE PROCEDURE check_daily_price();
 
--- min_daily_prices trigger
+-- categories trigger
 -- after inserting or updating, update all daily_prices for the same categories that is less than it to be equals to it
 CREATE OR REPLACE FUNCTION update_daily_price()
 RETURNS TRIGGER AS
@@ -504,12 +488,12 @@ $$
 BEGIN
 UPDATE daily_prices D
 SET price = NEW.price
-WHERE NEW.category = D.category AND D.price < NEW.price;
+WHERE NEW.name = D.category AND D.price < NEW.price;
 RETURN NEW;
 END; $$
 LANGUAGE plpgsql;
 
-CREATE TRIGGER mdp1_update_daily_price
-AFTER INSERT OR UPDATE ON min_daily_prices
+CREATE TRIGGER cat1_update_daily_price
+AFTER INSERT OR UPDATE ON categories
 FOR EACH ROW EXECUTE PROCEDURE check_daily_price();
 
