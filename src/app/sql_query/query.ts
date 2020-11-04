@@ -257,14 +257,22 @@ SET price=$2 \
 WHERE category=$1 \
 ";
 
-// ==================================
-export const getHighRatingCaretakerDetails = " \
-SELECT U.name, U.phone, C.pcs_user, C.is_part_time  \
-FROM (bids B INNER JOIN caretakers C ON B.caretaker = C.pcs_user) \
-    INNER JOIN users U ON C.pcs_user = U.email \
-WHERE (rating != NULL) AND ( \
-    SELECT COUNT(*) \
-    FROM caretakers C2 INNER JOIN bids B2 ON C2.caretaker = B2.caretaker \
-    WHERE rating = 1) = 0 \
-HAVING AVG(rating) >= 4 \
+
+
+/* Select the top 5 highest ranking caretakers with details
+   for the past one month sorted in the highest ranking first
+*/
+
+export const getHighRatingCaretakerDetailsWithin3months = " \
+SELECT DISTINCT U1.email, U1.name, U1.phone, C1.pcs_user, C1.is_part_time, B1.caretaker, AVG(B1.rating) AS avg_rating, COUNT(*) \
+FROM (caretakers AS C1 INNER JOIN users AS U1 ON C1.pcs_user = U1.email) \
+        INNER JOIN bids B1 ON B1.caretaker = C1.pcs_user \
+WHERE B1.rating is NOT NULL \
+    AND B1.is_selected = true \
+    AND B1.date_end > date_trunc('month', current_date - interval '3 month') \
+    AND B1.date_end <= date_trunc('month', current_date) \
+GROUP BY B1.caretaker, C1.pcs_user, U1.email \
+HAVING AVG(B1.rating) >= 4 \
+ORDER BY avg_rating DESC \
+LIMIT 5; \
 "
