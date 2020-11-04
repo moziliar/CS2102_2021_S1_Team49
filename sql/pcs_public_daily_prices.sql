@@ -939,3 +939,7 @@ INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('ayoudds@bl
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('iternottdt@dot.gov', 'Spectacled caiman', 5);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('smatuszinskidu@mozilla.org', 'Hyena, brown', 7);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('vaddeydv@wikispaces.com', 'Javan gold-spotted mongoose', 9);
+INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('cdenerley7e@cdc.gov', 'Javan gold-spotted mongoose', 8);
+INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('cdenerley7e@cdc.gov', 'Painted stork', 8);
+INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('cdenerley7e@cdc.gov', 'Superb starling', 8);
+INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('cdenerley7e@cdc.gov', 'Hyena, brown', 8);
