@@ -63,6 +63,7 @@ export const CreateTransactionInfo = async (req, res) => {
       res.json(user);
     }
   }).catch(err => {
+    console.log(err)
     res.status(404).json({ errMessage: 'Invalid transaction input provided' });
   })
 }

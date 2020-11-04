@@ -9,6 +9,7 @@ import _ from "lodash";
 
 import { CareTaker } from "../../../app/models/users";
 import { UserContext } from "../../contexts/UserContext";
+import API from "../../api";
 
 const PET_NAME = "pet";
 const PRICE = "price";
@@ -16,6 +17,7 @@ const CASH = "cash";
 const CREDIT_CARD = "cc";
 const PAYMENT_METHOD = "payment_method";
 const TRANSFER_METHOD = "transfer_method";
+const LOCATION = "location";
 const DELIVERY = "delivery";
 const PICKUP = "pickup";
 const PCS = "pcs";
@@ -29,6 +31,7 @@ interface BidForm {
   [PRICE]: number;
   [PAYMENT_METHOD]: string;
   [TRANSFER_METHOD]: string;
+  [LOCATION]: string;
   [CARD_NUMBER]: number;
   [START_DATE]: Date | null;
   [END_DATE]: Date | null;
@@ -38,12 +41,11 @@ interface BidForm {
 type IState = {
   formData: BidForm;
   modalShow: boolean;
-  careTaker: CareTaker | null;
 };
 
 type IProps = {
   modalShow: boolean;
-  careTaker: CareTaker | null;
+  careTaker: CareTaker;
   setBidModalShow: (setShow: boolean) => void;
 };
 
@@ -56,12 +58,12 @@ class BidModal extends Component<IProps, IState> {
 
   state: IState = {
     modalShow: this.props.modalShow,
-    careTaker: this.props.careTaker || null,
     formData: {
       [PET_NAME]: "",
       [PRICE]: 0,
       [PAYMENT_METHOD]: "",
       [TRANSFER_METHOD]: "",
+      [LOCATION]: "",
       [CARD_NUMBER]: 0,
       [START_DATE]: null,
       [END_DATE]: null,
@@ -103,11 +105,48 @@ class BidModal extends Component<IProps, IState> {
     this.props.setBidModalShow(setShow);
   };
 
+  _getNumberOfDays = (startDate: Date | null, endDate: Date | null) => {
+    if (startDate === null || endDate === null) {
+      alert('Date cant be null');
+      return 0;
+    } else {
+      return (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24) + 1;
+    }
+  }
+
   // Call API for bid.
-  _onPlaceBidButtonClicked = () => {};
+  _onPlaceBidButtonClicked = () => {
+    const { formData } = this.state;
+    const { careTaker } = this.props;
+
+    const req = {
+      pet_owner: this.context.currentUser.email,
+      pet_name: formData[PET_NAME],
+      care_taker: careTaker.email,
+      date_begin: formData[START_DATE],
+      date_end: formData[END_DATE],
+      transfer_method: formData[TRANSFER_METHOD],
+      location: formData[LOCATION],
+      total_price: this._getNumberOfDays(formData[START_DATE], formData[END_DATE]) * formData[PRICE],
+      is_active: true,
+      is_selected: false,
+      payment_method: formData[PAYMENT_METHOD],
+      cc_number: formData[CARD_NUMBER] || null,
+      rating: null,
+      review: null
+    }
+
+    API.post('/txn/create', req)
+      .then(res => {
+        alert('Bid has been placed');
+      })
+      .catch(err => {
+        alert(err.response.data.errMessage);
+      })
+  };
 
   render() {
-    const { careTaker, formData } = this.state;
+    const { formData } = this.state;
     const { credit_card, pets_owned } = this.context.currentUser;
 
     return (
@@ -144,6 +183,19 @@ class BidModal extends Component<IProps, IState> {
                   />
                 );
               })}
+            </Form.Group>
+            <Form.Group>
+              <Form.Label>
+                <strong>Location:</strong>
+              </Form.Label>
+              <br />
+              <Form.Control
+                type="text"
+                value={formData[LOCATION]}
+                onChange={(e) =>
+                  this._onHandleInputChange(LOCATION, e.target.value)
+                }
+              />
             </Form.Group>
             <Form.Group>
               <Form.Label>
@@ -272,6 +324,7 @@ class BidModal extends Component<IProps, IState> {
               !formData[START_DATE] ||
               !formData[END_DATE] ||
               formData[TRANSFER_METHOD] === "" ||
+              formData[LOCATION] === "" ||
               formData[PET_NAME] === "" ||
               formData[PAYMENT_METHOD] === ""
             }

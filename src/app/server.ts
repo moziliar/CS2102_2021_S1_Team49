@@ -1,6 +1,6 @@
 import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler } from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
-import { ListTxnByUserID } from './controllers/txn'
+import { CreateTransactionInfo, ListTxnByUserID } from './controllers/txn'
 import { ListAllBids, ListTnxByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
 
@@ -33,15 +33,15 @@ const initServer = (port: number) => {
   router.get('/categories/pricelist', GetAllCategoryPricesHandler);
   router.post('/category/create', CreateCategoryHandler);
   router.put('/category/update', UpdateCategoryHandler);
-  router.post('/pet/create', CreatePetHandler)
-  router.put('/pet/update', UpdatePetHandler)
-  router.delete('/pet/delete', DeletePetHandler)
+  router.post('/pet/create', CreatePetHandler);
+  router.put('/pet/update', UpdatePetHandler);
+  router.delete('/pet/delete', DeletePetHandler);
 
+  router.post('/txn/create', CreateTransactionInfo);
+  router.get('/txn/list', ListTxnByUserID);
 
-  router.get('/txn/list', ListTxnByUserID)
-
-  router.get('/bid/list', ListAllBids)
-  router.get('/bid/tnx', ListTnxByOwnerID)
+  router.get('/bid/list', ListAllBids);
+  router.get('/bid/tnx', ListTnxByOwnerID);
 
   return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }

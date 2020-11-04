@@ -8,6 +8,7 @@ import API from "../api";
 
 import "../styles/SearchPage.scss";
 import BidModal, { DateRangeAction } from "./subcomponents/BidModal";
+import { mockTakers } from "../../app/models/mockUsers";
 
 const CATEGORY = "category";
 const START_DATE = "startDate";
@@ -103,7 +104,8 @@ class SearchPage extends Component<{}, IState> {
         });
       })
       .catch((err) => {
-        alert(err.response.data.errMessage);
+        this.setState({ careTakers: mockTakers });
+        // alert(err.response.data.errMessage);
       });
   };
 
