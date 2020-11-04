@@ -30,16 +30,17 @@ class TransactionContextProvider extends Component<{}, contextState> {
         getOngoingBids: null
     }
 
-    getPastTransactions = () => {
-			API.get('/txn/list')
+    getPastTransactions = (email) => {
+			API.get(`/txn/list?email=${email}`)
 				.then(res => {
 					const pastTransactions = res.data.filter(t => t.is_selected &&  new Date(t.date_end).getTime() < new Date(Date.now()).getTime());
 					this.setState({ pastTransactions: pastTransactions });
 				});
     }
 
-    getOngoingTransactions = () => {
-			API.get('/txn/list')
+    getOngoingTransactions = (email) => {
+    	console.log(`/txn/list?email=${email}`);
+			API.get(`/txn/list?email=${email}`)
 				.then(res => {
 					const todayDate = new Date(Date.now()).getTime();
 					const ongoingTransactions = res.data.filter(t => {

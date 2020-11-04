@@ -9,6 +9,8 @@ const OngoingTransactionsSection = () => {
 	const transaction = useContext(TransactionContext);
 
 	useEffect(() => {
+		console.log(user.currentUser);
+		console.log(transaction.getOngoingTransactions);
 		if (user.currentUser && transaction.getOngoingTransactions) {
 			transaction.getOngoingTransactions(user.currentUser.email);
 		}

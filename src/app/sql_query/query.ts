@@ -38,6 +38,47 @@ WHERE email=$1 \
 ";
 
 
+export const searchUserQuery = " \
+SELECT * FROM users U \
+WHERE  get_average_rating(U.email) > $2 \
+    AND EXISTS ( \
+    SELECT * FROM daily_prices P \
+    WHERE U.email=P.caretaker \
+      AND P.category= $1 \
+      AND P.price<$3) \
+  AND \
+    CASE \
+      WHEN U.email IN (SELECT caretaker FROM full_time_leaves) \
+        THEN NOT EXISTS ( \
+          SELECT * FROM full_time_leaves L \
+          WHERE L.caretaker=U.email \
+            AND L.start_date>$4 AND L.start_date<$5 \
+             OR L.end_date>$4 AND L.end_date<$5) \
+      WHEN U.email IN (SELECT caretaker FROM part_time_availabilities) \
+        THEN EXISTS ( \
+          SELECT * FROM part_time_availabilities A \
+          WHERE A.caretaker=U.email \
+            AND A.start_date>$4 AND A.start_date<$5 \
+             OR A.end_date>$4 AND A.end_date<$5) \
+      ELSE FALSE\
+    END; \
+";
+
+
+export const getRatesByUserQuery = " \
+SELECT category, price \
+FROM daily_prices \
+WHERE caretaker=$1 \
+";
+
+
+export const getReviewsByUserQuery = " \
+SELECT category, price \
+FROM daily_prices \
+WHERE caretaker=$1 \
+";
+
+
 // INPUT:
 // pet -> {name, owner, description, special_requirements, gender, date_of_birth, category}
 export const createPetQuery = " \

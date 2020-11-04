@@ -1,7 +1,12 @@
 import { mockBids } from '../models/mockBids'
 import { mockTransactions } from '../models/mockTxns'
+import { db } from '../dbconfig/db'
 
 export const ListAllBids = (req, res) => {
+  db.query({
+    text: '',
+  })
+
   res.json(mockBids);
 }
 

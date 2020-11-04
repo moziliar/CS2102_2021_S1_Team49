@@ -20,9 +20,7 @@ const TransactionCard = (props: IProps) => {
 			<p>{ isCareTaker ? 'Owner' : 'Taker' } Email: { isCareTaker ? props.transaction.pet_owner : props.transaction.care_taker } </p>
 			<p>Period: { props.transaction.date_begin } - { props.transaction.date_end } ({ props.transaction.is_active ? !isCareTaker ? 'You bid for: ' : 'The owner bid for:' : '' }${props.transaction.total_price})</p>
 			<p>Pet Name: { props.transaction.pet_name }</p>
-			{ !props.transaction.is_active 
-					? props.transaction.review 
-						? <p>Review: { props.transaction.review } ({ props.transaction.rating }/5)</p>
+			{ props.transaction.review ? <p>Review: { props.transaction.review } ({ props.transaction.rating }/5)</p>
 						: !isCareTaker ? <Form style={{ 'marginTop': '10px' }}>
 											<small style={{ 'color': 'red' }}>You haven't review the care taker. Give your review now</small><br />
 											<Form.Control as="textarea" rows={ 2 } placeholder="Enter your review"/>
@@ -32,7 +30,6 @@ const TransactionCard = (props: IProps) => {
 											</div>
 										 </Form>
 										 : <small style={{ 'color': 'red' }}>*Owner has not give you any review</small>
-					: null // Review only for finished transactions
 			}
 		</div>
 	);

@@ -13,7 +13,7 @@ const CATEGORY_NAME = 'name';
 const PARENT_CATEGORY = 'parent_category';
 
 type IState = {
-    categoryList: Array<CategoryRate | object> | null,
+    categoryList: Array<CategoryRate> | null,
     formData: Category,
     modalShow: boolean
 }
@@ -44,6 +44,10 @@ class DashboardPage extends Component<{}, IState> {
     }
 
     _onHandleUpdatePrice = (index: number) => {
+        if (!this.state.categoryList) {
+            return
+        }
+
         const req = this.state.categoryList[index];
 
         API.put('/category/update', req)
@@ -69,7 +73,7 @@ class DashboardPage extends Component<{}, IState> {
     }
 
     _onHandleInputChange = (field: string, value: any) => {
-		const categoryListCopy:  Array<CategoryRate | object> | null = _.cloneDeep(this.state.categoryList);
+		const categoryListCopy:  Array<CategoryRate> | null = _.cloneDeep(this.state.categoryList);
 		_.set(categoryListCopy, field, value);
 		this.setState({ categoryList: categoryListCopy });
 	}

@@ -2,6 +2,7 @@ import { mockTakers, mockUsers } from '../models/mockUsers';
 import { db } from '../dbconfig/db';
 import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
+  searchUserQuery,
   queryPetQuery,
   queryCreditCard,
   queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery
@@ -125,7 +126,31 @@ export const DeleteCreditCardHandler = async (req, res) => {
 // ================================ SEARCH TAKER ========================================
 
 export const ListCareTakerHandler = async (req, res) => {
-  res.json(mockTakers);
+  /*
+    search requirements:
+    category
+    rating
+    price
+    date_begin
+    date_end
+   */
+  const users = await db.query({
+    text: searchUserQuery,
+    values: [
+      req.query.category,
+      req.query.rating,
+      req.query.price,
+      req.query.date_begin,
+      req.query.date_end,
+    ]
+  });
+
+  const rates = await db.query({
+    text:
+    value: [
+
+  ]
+  })
 }
 
 // ================================== HELPERS ===========================================
