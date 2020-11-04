@@ -263,16 +263,18 @@ WHERE category=$1 \
    for the past one month sorted in the highest ranking first
 */
 
-export const getHighRatingCaretakerDetailsWithin3months = " \
-SELECT DISTINCT U1.email, U1.name, U1.phone, C1.pcs_user, C1.is_part_time, B1.caretaker, AVG(B1.rating) AS avg_rating, COUNT(*) \
-FROM (caretakers AS C1 INNER JOIN users AS U1 ON C1.pcs_user = U1.email) \
-        INNER JOIN bids B1 ON B1.caretaker = C1.pcs_user \
-WHERE B1.rating is NOT NULL \
-    AND B1.is_selected = true \
-    AND B1.date_end > date_trunc('month', current_date - interval '3 month') \
-    AND B1.date_end <= date_trunc('month', current_date) \
-GROUP BY B1.caretaker, C1.pcs_user, U1.email \
-HAVING AVG(B1.rating) >= 4 \
-ORDER BY avg_rating DESC \
-LIMIT 5; \
-"
+export const getHighRatingCaretakerDetailsWithinNmonths = (N) => {
+    return " \
+        SELECT DISTINCT U1.email, U1.name, U1.phone, C1.pcs_user, C1.is_part_time, B1.caretaker, AVG(B1.rating) AS avg_rating, COUNT(*) \
+        FROM (caretakers AS C1 INNER JOIN users AS U1 ON C1.pcs_user = U1.email) \
+                INNER JOIN bids B1 ON B1.caretaker = C1.pcs_user \
+        WHERE B1.rating is NOT NULL \
+            AND B1.is_selected = true \
+            AND B1.date_end > date_trunc('month', current_date - interval '" + N + " month') \
+            AND B1.date_end <= date_trunc('month', current_date) \
+        GROUP BY B1.caretaker, C1.pcs_user, U1.email \
+        HAVING AVG(B1.rating) >= 4 \
+        ORDER BY avg_rating DESC \
+        LIMIT 5; \
+    "
+}
