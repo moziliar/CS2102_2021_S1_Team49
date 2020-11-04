@@ -469,7 +469,7 @@ FOR EACH ROW EXECUTE PROCEDURE ft_deactive_active_bids();
 CREATE OR REPLACE FUNCTION check_daily_price()
 RETURNS TRIGGER AS
 $$ BEGIN
-IF NEW.price < (SELECT price FROM categories WHERE name = NEW.category)
+IF NEW.price < (SELECT price FROM categories WHERE name = NEW.name)
 THEN RAISE EXCEPTION 'Entered daily price is less than minimum set by PCS %', min_price;
 ELSE RETURN NEW;
 END IF;
