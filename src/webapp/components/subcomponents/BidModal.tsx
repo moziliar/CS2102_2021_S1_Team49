@@ -45,7 +45,7 @@ type IState = {
 
 type IProps = {
   modalShow: boolean;
-  careTaker: CareTaker;
+  careTaker: CareTaker | null;
   setBidModalShow: (setShow: boolean) => void;
 };
 
@@ -122,7 +122,7 @@ class BidModal extends Component<IProps, IState> {
     const req = {
       pet_owner: this.context.currentUser.email,
       pet_name: formData[PET_NAME],
-      care_taker: careTaker.email,
+      care_taker: careTaker?.email,
       date_begin: formData[START_DATE],
       date_end: formData[END_DATE],
       transfer_method: formData[TRANSFER_METHOD],
