@@ -395,7 +395,7 @@ BEGIN
       prev_end := year_to_check - interval '1 day';
       first_iter := false;
     END IF;
-    IF temprow.start_date - prev_end - interval '1 day' >= interval '150 days'
+    IF temprow.start_date - prev_end - 1 >= 150
     THEN num_match := num_match + 1;
     END IF;
     prev_end := temprow.end_date;
