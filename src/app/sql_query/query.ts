@@ -127,6 +127,17 @@ WHERE pet_owner=$1 AND is_selected=true\
 ";
 
 // INPUT:
+// owner -> {email}
+export const listDoneTnxByOwnerId = " \
+SELECT * \
+FROM bids \
+WHERE pet_owner=$1 \
+  AND is_selected=true\
+  AND end_date <= CURRENT_DATE \
+";
+
+
+// INPUT:
 // bid -> {price, payment_method, transfer_method, cc_number}
 // owner -> {email}
 export const updateBid = " \

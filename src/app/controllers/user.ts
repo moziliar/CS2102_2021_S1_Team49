@@ -1,10 +1,13 @@
 import { mockTakers, mockUsers } from '../models/mockUsers';
+import { CareTaker } from '../models/users';
 import { db } from '../dbconfig/db';
 import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
   searchUserQuery,
   queryPetQuery,
   queryCreditCard,
+  getRatesByUserQuery,
+  listDoneTnxByOwnerId,
   queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery
 } from '../sql_query/query';
 
@@ -134,7 +137,7 @@ export const ListCareTakerHandler = async (req, res) => {
     date_begin
     date_end
    */
-  const users = await db.query({
+  const _users = await db.query({
     text: searchUserQuery,
     values: [
       req.query.category,
@@ -144,13 +147,40 @@ export const ListCareTakerHandler = async (req, res) => {
       req.query.date_end,
     ]
   });
+  console.log(_users.rows)
 
-  const rates = await db.query({
-    text:
-    value: [
+  let users: Array<CareTaker> = [];
 
-  ]
-  })
+  for await (const user of _users.rows) {
+    const rates = await db.query({
+      text: getRatesByUserQuery,
+      values: [user.email],
+    });
+
+    const bids = await db.query({
+      text: listDoneTnxByOwnerId,
+      values: [user.email],
+    })
+    users.push({
+      email: user.email,
+      name: user.name,
+      pic_url: user.pic_url,
+      phone: user.phone,
+      rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
+        .reduce((prev, curr) => prev + curr) / bids.rows.length),
+      rate: rates.rows,
+      reviews: bids.rows.map(bid => {
+        return {
+          owner_name: bid.pet_owner,
+          rating: bid.rating,
+          review: bid.review,
+        }
+      })
+    })
+  }
+
+  console.log(users);
+  res.json(users);
 }
 
 // ================================== HELPERS ===========================================
