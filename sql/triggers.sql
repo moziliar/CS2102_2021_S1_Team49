@@ -243,7 +243,7 @@ $$ BEGIN
   THEN 
     -- this should trigger the other triggers again
     UPDATE bids B
-    SET selected = true
+    SET is_selected = true
     WHERE B.pet_owner = NEW.pet_owner AND B.pet = NEW.pet 
     AND B.caretaker = NEW.caretaker AND B.start_date = NEW.start_date 
     AND B.end_date = NEW.end_date;
