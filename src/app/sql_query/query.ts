@@ -313,7 +313,8 @@ SELECT U.email AS email, U.name AS name, U.phone AS phone, U.pic_url AS pic_url
 FROM caretakers C INNER JOIN users U ON C.pcs_user = U.email
 WHERE NOT C.is_part_time AND (
   get_average_rating(C.pcs_user) >= 1 AND get_average_rating(C.pcs_user) <= 3
-  OR (SELECT COALESCE(SUM((SELECT
+  OR (
+  SELECT COALESCE(SUM((SELECT
     CASE 
       WHEN B.end_date > last_day_of_month(date(CURRENT_DATE - interval '1 month'))
       THEN last_day_of_month(date(CURRENT_DATE - interval '1 month'))
@@ -343,4 +344,52 @@ WHERE NOT C.is_part_time AND (
         OVERLAPS (F.start_date, F.end_date + 1)
       )))
 ORDER BY C.pcs_user ASC;
+`;
+
+// get summary information for past month
+// total number of pet taken care of
+// total pet-day
+// total revenue
+// highest revenue
+// average revenue
+// total salary given
+// average salary given
+// total full time salary
+// average full time salary
+// highest full time salary
+// best performing full timer
+// total part time salary
+// average part time salary
+// highest part time salary
+// best performing part timer
+// total bids made
+// percentage of successful bids
+export const getAdminPastMonthSummary = `
+`;
+
+// INPUT:
+// $1 - some date in month you're interested in as a SQL date
+// OUTPUT:
+// caretaker, is_part_time, pet_days, revenue, salary
+export const getSalariesForCaretakersInMonthQuery = ` 
+WITH pet_days(day, pet_owner, pet, caretaker, daily_price, transfer_method, location, payment_method, rating) AS (
+  SELECT D.day, B.pet_owner, B.pet, B.caretaker, B.total_price / (B.end_date + 1 - B.start_date) AS daily_price, B.transfer_method,
+    B.location, B.payment_method, B.rating
+  FROM (SELECT date(generate_series(first_day_of_month($1), last_day_of_month($1), interval '1 day')) 
+    AS day) D INNER JOIN bids B ON D.day BETWEEN B.start_date AND B.end_date
+  GROUP BY B.caretaker, B.pet, B.pet_owner, B.start_date, B.end_date, D.day
+  ORDER BY D.day
+)
+SELECT C.pcs_user AS caretaker, C.is_part_time AS is_part_time, COUNT(pet_days.day) AS pet_days, 
+  COALESCE(SUM(pet_days.daily_price), 0) AS revenue, 
+  CASE
+    WHEN C.is_part_time THEN COALESCE(SUM(pet_days.daily_price),0) * 0.75
+    ELSE 3000 + (SELECT COALESCE(SUM(PD.daily_price),0)
+                           FROM (SELECT * FROM pet_days 
+                            WHERE pet_days.caretaker = C.pcs_user 
+                            OFFSET 60) PD) * 0.8
+  END salary
+FROM caretakers C LEFT OUTER JOIN pet_days ON C.pcs_user = pet_days.caretaker
+GROUP BY C.pcs_user, C.is_part_time
+ORDER BY salary DESC;
 `;
