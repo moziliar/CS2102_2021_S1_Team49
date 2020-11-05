@@ -117,3 +117,13 @@ CREATE TABLE bids (
   PRIMARY KEY (pet_owner, pet, caretaker, start_date, end_date)
 );
 -- note that is_active also acts as a soft delete
+
+CREATE TYPE month ENUM ('1','2','3','4','5','6','7','8','9','10','11','12')
+
+CREATE TABLE salary (
+  caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON UPDATE CASCADE,
+  month month NOT NULL,
+  year CHAR(4) NOT NULL,
+  amount INT NOT NULL CHECK (amount >= 0),
+  PRIMARY KEY (caretaker, month, year)
+);
