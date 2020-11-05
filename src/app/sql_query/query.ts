@@ -41,31 +41,34 @@ WHERE email=$1 \
 ";
 
 export const searchUserQuery =
-  " \
-SELECT * FROM users U \
-WHERE  get_average_rating(U.email) > $2 \
-    AND EXISTS ( \
-    SELECT * FROM daily_prices P \
-    WHERE U.email=P.caretaker \
-      AND P.category= $1 \
-      AND P.price<$3) \
-  AND \
-    CASE \
-      WHEN U.email IN (SELECT caretaker FROM full_time_leaves) \
-        THEN NOT EXISTS ( \
-          SELECT * FROM full_time_leaves L \
-          WHERE L.caretaker=U.email \
-            AND L.start_date>$4 AND L.start_date<$5 \
-             OR L.end_date>$4 AND L.end_date<$5) \
+`
+SELECT * FROM users U 
+WHERE  get_average_rating(U.email) > $2 
+  AND EXISTS ( 
+    SELECT * FROM daily_prices P 
+    WHERE U.email=P.caretaker 
+      AND P.category=$1 
+      AND P.price<$3) 
+  AND 
+    CASE 
+      WHEN U.email IN (SELECT caretaker FROM full_time_leaves) 
+        THEN NOT EXISTS ( 
+          SELECT * FROM full_time_leaves L 
+          WHERE L.caretaker=U.email 
+            AND (date(L.start_date), date(L.end_date) + 1) OVERLAPS (date($4), date($5) + 1)) 
       WHEN U.email IN (SELECT caretaker FROM part_time_availabilities) \
-        THEN EXISTS ( \
-          SELECT * FROM part_time_availabilities A \
-          WHERE A.caretaker=U.email \
-            AND A.start_date>$4 AND A.start_date<$5 \
-             OR A.end_date>$4 AND A.end_date<$5) \
-      ELSE FALSE\
-    END; \
-";
+        THEN (
+          SELECT COUNT(*) 
+          FROM (SELECT generate_series(date($4), date($5), '1 day') AS day) D
+          WHERE EXISTS (
+            SELECT * FROM part_time_availabilities A
+            WHERE D.day BETWEEN A.start_date AND A.end_date
+          )
+        ) = (date($5) - date($4) + 1)
+      ELSE FALSE 
+    END; 
+`;
+
 
 export const getRatesByUserQuery =
   " \
