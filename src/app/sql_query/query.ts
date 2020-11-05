@@ -127,7 +127,15 @@ export const listTnxByOwnerId =
   " \
 SELECT * \
 FROM bids \
-WHERE pet_owner=$1 AND is_selected=true\
+WHERE pet_owner=$1 AND is_active=false AND is_selected=true\
+";
+
+// INPUT:
+// owner -> {email}
+export const listBidByOwnerId = " \
+SELECT * \
+FROM bids \
+WHERE pet_owner=$1 AND is_active=true AND is_selected=false\
 ";
 
 // INPUT:

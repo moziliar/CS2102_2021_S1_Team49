@@ -53,8 +53,8 @@ class TransactionContextProvider extends Component<{}, contextState> {
 				});
     }
 
-    getOngoingBids = () => {
-			API.get('/txn/list')
+    getOngoingBids = (email) => {
+			API.get('/bid/query', { params: {email: email }})
 				.then(res => {
 					const onGoingBids = res.data.filter(t => !t.is_selected);
 					this.setState({ ongoingBids: onGoingBids });
