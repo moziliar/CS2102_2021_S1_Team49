@@ -31,13 +31,13 @@ export const mockTakers: Array<CareTaker> = [
     rating: 3.9,
     rate: [
       {
-        name: 'Dog',
-        parent: 'Dog',
+        category: 'Dog',
+        caretaker:'example@google.com',
         price: 30
       },
       {
-        name: 'Cat',
-        parent: 'Dog',
+        category: 'Dog',
+        caretaker:'example@google.com',
         price: 70
       }
     ],
@@ -62,15 +62,13 @@ export const mockTakers: Array<CareTaker> = [
     rating: 3.9,
     rate: [
       {
-        name: 'Dog',
-        parent: 'Dog',
-
+        category: 'Dog',
+        caretaker:'example@google.com',
         price: 30
       },
       {
-        name: 'Cat',
-        parent: 'Dog',
-
+        category: 'Dog',
+        caretaker:'example@google.com',
         price: 70
       }
     ],

@@ -8,7 +8,7 @@ import {
   queryCreditCard,
   getRatesByUserQuery,
   listDoneTnxByOwnerId,
-  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths
+  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths, getAllCareTakerDailyPrice, deleteDailyPriceQuery, updateDailyPriceQuery, addDailyPrice
 } from '../sql_query/query';
 
 // ================================ USER =========================================
@@ -189,6 +189,50 @@ export const ListTopPerformingCareTaker = async (req, res) => {
     res.json(query.rows);
   }).catch(err => {
     console.log(err)
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
+}
+
+export const GetAllCareTakerDailyPriceHandler =  async (req, res) => {
+  await db.query({
+    text: getAllCareTakerDailyPrice,
+    values: [req.query.email]
+  }).then(query => {
+    res.json(query.rows);
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
+}
+
+export const CreateDailyPriceHandler = async (req, res) => {
+  await db.query({
+    text: addDailyPrice,
+    values: [req.body.email, req.body.category, req.body.price]
+  }).then(query => {
+    
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
+}
+
+export const UpdateDailyPriceHandler = async (req, res) => {
+  await db.query({
+    text: updateDailyPriceQuery,
+    values: [req.body.email, req.body.category, req.body.price]
+  }).then(query => {
+    
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
+}
+
+export const DeleteDailyPriceHandler = async (req, res) => {
+  await db.query({
+    text: deleteDailyPriceQuery,
+    values: [req.query.email, req.query.category]
+  }).then(query => {
+
+  }).catch(err => {
     res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
   })
 }

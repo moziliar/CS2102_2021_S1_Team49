@@ -72,7 +72,7 @@ WHERE  get_average_rating(U.email) > $2
 
 export const getRatesByUserQuery =
   " \
-SELECT category, price \
+SELECT * \
 FROM daily_prices \
 WHERE caretaker=$1 \
 ";
@@ -134,11 +134,11 @@ WHERE pet_owner=$1 AND is_active=false AND is_selected=true\
 ";
 
 // INPUT:
-// owner -> {email}
-export const listBidByOwnerId = " \
+// caretaker -> {email}
+export const listBidByTakerId = " \
 SELECT * \
 FROM bids \
-WHERE pet_owner=$1 AND is_active=true AND is_selected=false\
+WHERE caretaker=$1 AND is_active=true AND is_selected=false\
 ";
 
 // INPUT:
@@ -249,6 +249,21 @@ export const addDailyPrice =
 INSERT INTO daily_prices (caretaker, category, price) \
 VALUES ($1, $2, $3) \
 ";
+
+// INPUT:
+// caretaker -> {caretaker, category, price}
+export const updateDailyPriceQuery = " \
+UPDATE daily_prices \
+SET price=$3 \
+WHERE caretaker=$1 AND category=$2 \
+"
+
+// INPUT:
+// caretaker -> {caretaker, category}
+export const deleteDailyPriceQuery = " \
+DELETE FROM daily_prices \
+WHERE caretaker=$1 AND category=$2 \
+"
 
 // INPUT:
 // caretaker => {email}

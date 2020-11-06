@@ -6,7 +6,7 @@ export interface CareTaker {
   pic_url: string;
   phone: number;
   rating: number;
-  rate: Array<CategoryRate>;
+  rate: Array<DailyRate>;
   reviews?: Array<Review>;
 }
 
@@ -58,6 +58,12 @@ export interface Leave {
 export interface CategoryRate {
   name: string;
   parent: string;
+  price: number;
+}
+
+export interface DailyRate {
+  caretaker: string;
+  category: string;
   price: number;
 }
 

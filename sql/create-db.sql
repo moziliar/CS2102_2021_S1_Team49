@@ -1,5 +1,5 @@
 -- DROP VIEW IF EXISTS salary, rating;
-DROP TABLE IF EXISTS bids, pets, daily_prices, min_daily_prices, categories, credit_cards,
+DROP TABLE IF EXISTS bids, pets, daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
 DROP TYPE IF EXISTS payment_method, transfer_method;
 

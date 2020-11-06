@@ -9,6 +9,7 @@ import PastTransactionsSection from './subcomponents/PastTransactionsSection';
 import OngoingTransactionsSection from './subcomponents/OngoingTransactionsSection';
 import OngoingBidsSection from './subcomponents/OngoingBidsSection';
 import MyAvailabilitySection from './subcomponents/MyAvailabilitySection';
+import MyDailyRateSection from './subcomponents/MyDailyRateSection';
 import ProtectedRoute from './subcomponents/ProtectedRoute';
 
 import '../styles/ProfilePage.scss';
@@ -51,6 +52,7 @@ class ProfilePage extends Component {
 							<ProtectedRoute path="/profile/pending-bids" component={ OngoingBidsSection }/>
 							<ProtectedRoute path="/profile/my-availability" component={ MyAvailabilitySection }/>
 							<ProtectedRoute path="/profile/paycheck" component={ EditProfileSection }/>
+							<ProtectedRoute path="/profile/daily-rate" component={ MyDailyRateSection }/>
 						</Col>
 					</Row>
 				</Container>
@@ -73,7 +75,8 @@ class ProfilePage extends Component {
 			links.push(
 				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/my-availability" key="my-availability">My Availability</NavLink>,
-				// <NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>
+				// <NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>,
+				<NavLink activeClassName="is-active" to="/profile/daily-rate" key="daily-rate">My Daily Rates</NavLink>
 			);
 		}
 

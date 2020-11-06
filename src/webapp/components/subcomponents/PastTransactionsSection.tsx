@@ -29,7 +29,7 @@ const PastTransactionsSection = () => {
 			</ul>
 			{ transaction.pastTransactions.length !== 0
 					? transaction.pastTransactions.map((txn, index) => {
-							return <TransactionCard key={ index } transaction={ txn }/>
+							return <TransactionCard key={ index } transaction={ txn } isBid={ false }/>
 						})
 					: null
 			}
