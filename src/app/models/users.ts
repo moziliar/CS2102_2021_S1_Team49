@@ -10,6 +10,13 @@ export interface CareTaker {
   reviews?: Array<Review>;
 }
 
+export interface TopCareTaker {
+  email: string;
+  name: string;
+  is_part_time: boolean;
+  avg_rating: number;
+}
+
 export interface Review {
   owner_name: string;
   review: string;
@@ -49,7 +56,8 @@ export interface Leave {
 }
 
 export interface CategoryRate {
-  category: string;
+  name: string;
+  parent: string;
   price: number;
 }
 

@@ -1,4 +1,4 @@
-import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler } from './controllers/user'
+import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker } from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
 import { CreateTransactionInfo, ListTxnByUserID } from './controllers/txn'
 import { ListAllBids, ListBidByOwnerID } from './controllers/bid';
@@ -25,6 +25,7 @@ const initServer = (port: number) => {
   router.delete('/user/delete', DeleteUserHandler);
   router.post('/apply/caretaker', ApplyCareTakerHandler);
   router.get('/search/caretaker', ListCareTakerHandler);
+  router.get('/top/caretaker', ListTopPerformingCareTaker);
 
   router.post('/card/create', AddCreditCardHandler);
   router.delete('/card/delete', DeleteCreditCardHandler);

@@ -13,7 +13,7 @@ const MALE = "Male";
 
 type IState = {
   pets_owned: Array<Pet>;
-  categories: Array<Category> | null;
+  categories: Array<string> | null;
 };
 
 class MyPetsSection extends Component<{}, IState> {
@@ -111,13 +111,13 @@ class MyPetsSection extends Component<{}, IState> {
             {categories?.map((c) => {
               return (
                 <Form.Check
-                  key={c.name}
+                  key={c}
                   inline
                   type="radio"
-                  label={c.name}
-                  checked={"category" in pet ? pet.category === c.name : false}
+                  label={c}
+                  checked={"category" in pet ? pet.category === c : false}
                   onChange={(e) =>
-                    this._onHandleInputChange(`[${index}].category`, c.name)
+                    this._onHandleInputChange(`[${index}].category`, c)
                   }
                 />
               );

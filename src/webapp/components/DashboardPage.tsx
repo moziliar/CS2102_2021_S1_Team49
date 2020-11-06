@@ -1,21 +1,20 @@
 import React, { Component } from 'react';
-import { Container, Table, Button, Form, Modal } from 'react-bootstrap';
+import { Container, Table, Button, Form, Modal, Dropdown, Col } from 'react-bootstrap';
 import _ from 'lodash';
 
-import { CategoryRate } from '../../app/models/users';
-import { Category } from '../../app/models/pets';
+import { CategoryRate, TopCareTaker } from '../../app/models/users';
 import API from '../api';
 
 import '../styles/DashboardPage.scss';
 import { UserContext } from '../contexts/UserContext';
+import { mockTopCareTakers } from '../../app/models/mockUsers';
 
-const CATEGORY_NAME = 'name';
-const PARENT_CATEGORY = 'parent_category';
+
 
 type IState = {
     categoryList: Array<CategoryRate> | null,
-    formData: Category,
-    modalShow: boolean
+    topCareTaker: Array<TopCareTaker> | null,
+    months: number
 }
 
 class DashboardPage extends Component<{}, IState> {
@@ -23,24 +22,8 @@ class DashboardPage extends Component<{}, IState> {
 
     state: IState = {
         categoryList: null,
-        modalShow: false,
-        formData: {
-            [CATEGORY_NAME]: '',
-            [PARENT_CATEGORY]: ''
-        }
-    }
-
-    _setModalShow = (setShow: boolean) => {
-        this.setState({ modalShow: setShow });
-    }
-
-    _onHandleFormChange = (field: string, value: string) => {
-        this.setState({
-            formData: {
-                ...this.state.formData,
-                [field]: value
-            }
-        })
+        topCareTaker: null,
+        months: 1,
     }
 
     _onHandleUpdatePrice = (index: number) => {
@@ -60,12 +43,13 @@ class DashboardPage extends Component<{}, IState> {
     }
 
     // Need to check for trigger, create lead to insertion in min_daily_price
-    _onHandleAddPrice = () => {
-        const req = this.state.formData;
+    _onHandleAddPrice = (index: number) => {
+        const req = this.state.categoryList?.[index];
 
         API.post('/category/create', req)
             .then(res => {
-                this.setState({ categoryList: res.data, modalShow: false });
+                console.log(res.data)
+                this.setState({ categoryList: res.data });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -76,11 +60,26 @@ class DashboardPage extends Component<{}, IState> {
 		const categoryListCopy:  Array<CategoryRate> | null = _.cloneDeep(this.state.categoryList);
 		_.set(categoryListCopy, field, value);
 		this.setState({ categoryList: categoryListCopy });
-	}
+    }
+
+    _onHandleMonthChange = (value: number) => {
+        this.setState({ months: value });
+    }
+    
+    _getTopPerformingCareTaker = () => {
+        API.get('/top/caretaker', { params: {months: this.state.months }})
+            .then(res => {
+                this.setState({ topCareTaker: mockTopCareTakers })
+            })
+            .catch(err => {
+                alert(err.response.data.errMessage);
+            })
+    }
 
     componentDidMount = () => {
         API.get('/categories/pricelist')
             .then(res => {
+                console.log(res.data)
                 this.setState({ categoryList: res.data });
             })
             .catch(err => {
@@ -89,17 +88,53 @@ class DashboardPage extends Component<{}, IState> {
     }
 
     render() {
-        const { categoryList } = this.state;
+        const { categoryList, topCareTaker, months } = this.state;
+        const categoryListLength = categoryList?.length;
+        
         return (
             <div className="dashboard-page">
                 <Container>
-                    { this._renderAddCategoryModal() }
+                    <h2 style={{ 'marginBottom': '20px' }}>Top Performing CareTaker(based on rating) last N months</h2>
+                    <small>Input number of months of data to be calculated</small>
+                    <Form.Row style={{ 'marginBottom': '20px' }}>
+                        <Col>
+                            <Form.Control type="number" value={ months } onChange={ (e) => this._onHandleMonthChange(parseInt(e.target.value)) } />
+                        </Col>
+                        <Col>
+                            <Button onClick={ this._getTopPerformingCareTaker }>Get Data</Button>
+                        </Col>
+                    </Form.Row>
+                    { topCareTaker && topCareTaker.length > 0
+                        ?   <Table striped bordered hover size="sm">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Fulltime/Partime</th>
+                                        <th>Average Rating</th>
+                                    </tr>
+                                </thead>
+                                { topCareTaker.map((taker, index) => {
+                                    return (
+                                        <tr key={ index }>
+                                            <td>{ taker.name }</td>
+                                            <td>{ taker.email }</td>
+                                            <td>{ taker.is_part_time ? "Parttime" : "Fulltime" }</td>
+                                            <td>{ taker.avg_rating }</td>
+                                        </tr>
+                                    )
+                                  })
+                                }
+                            </Table>
+                        : null
+                    }
+                    <hr />
                     <h2 style={{ 'marginBottom': '20px' }}>Set Base Rate</h2>
-                    <Button style={{ 'marginBottom': '15px', 'marginRight': '15px' }} variant="success" onClick={ () => this._setModalShow(true) }>Add New Category</Button>
                     <Table striped bordered hover size="sm">
                         <thead>
                             <tr>
                                 <th>Category Name</th>
+                                <th>Parent Category</th>
                                 <th>Base Rate(/night)</th>
                                 <th>Action</th>
                             </tr>
@@ -109,9 +144,10 @@ class DashboardPage extends Component<{}, IState> {
                                 ? categoryList.map((category, index) => {
                                     return (
                                         <tr key={ index }>
-                                            <td><Form.Control type="text" disabled={ true } value={ category.category } onChange={ (e) => this._onHandleInputChange(`[${index}].category`, e.target.value) } /></td>
-                                            <td><Form.Control type="number" value={ category.price } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) }/></td>
-                                            <td><Button variant="primary" onClick={ () => this._onHandleUpdatePrice(index) }>Update</Button></td>
+                                            { categoryListLength && index !== categoryListLength - 1 
+                                                ? this._renderExistingCategoryRow(category, index)
+                                                : this._renderNewCategoryRow(category, index)
+                                            }
                                         </tr>
                                     );
                                   })
@@ -124,46 +160,26 @@ class DashboardPage extends Component<{}, IState> {
         );
     }
 
-    _renderAddCategoryModal = () => {
-        const { formData, modalShow } = this.state;
-
+    _renderExistingCategoryRow = (category: CategoryRate, index: number) => {
         return (
-            <Modal
-                show={ modalShow }
-                onHide={ () => this._setModalShow(false) }
-                size="lg"
-                aria-labelledby="contained-modal-title-vcenter"
-                centered>
-                <Modal.Header closeButton>
-                    <Modal.Title id="contained-modal-title-vcenter">
-                        <h3>Add new category</h3>
-                    </Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <small><i>*Category name must be unique and parent category must exist in the list</i></small>
-                    <Form.Group>
-                        <Form.Label><strong>Category name:</strong></Form.Label><br />
-                        <Form.Control 
-                            type="text"
-                            value={ formData[CATEGORY_NAME] }
-                            onChange={ (e) => this._onHandleFormChange(CATEGORY_NAME, e.target.value) } />
-                    </Form.Group>
-                    <Form.Group>
-                        <Form.Label><strong>Parent Category's name:</strong></Form.Label><br />
-                        <Form.Control 
-                            type="text"
-                            value={ formData[PARENT_CATEGORY] }
-                            onChange={ (e) => this._onHandleFormChange(PARENT_CATEGORY, e.target.value) } />
-                    </Form.Group>
-                    <Button 
-                        variant="success" 
-                        onClick={ this._onHandleAddPrice }
-                        disabled={ formData[CATEGORY_NAME] === "" }>
-                            Add Category
-                    </Button>
-                </Modal.Body>
-            </Modal>
-        )
+            <>
+                <td>{ category.name }</td>
+                <td>{ category.parent || "N.A"}</td>
+                <td><Form.Control type="number" value={ category.price } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) } /></td>
+                <td><Button variant="primary" onClick={ () => this._onHandleUpdatePrice(index) }>Update</Button></td>
+            </>
+        );
+    }
+
+    _renderNewCategoryRow = (category: CategoryRate, index: number) => {
+        return (
+            <>
+                <td><Form.Control type="text" value={ category.name } onChange={ (e) => this._onHandleInputChange(`[${index}].name`, e.target.value) } /></td>
+                <td><Form.Control type="text" value={ category.parent || "" } onChange={ (e) => this._onHandleInputChange(`[${index}].parent`, e.target.value) } /></td>
+                <td><Form.Control type="number" value={ category.price } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) } /></td>
+                <td><Button variant="success" onClick={ () => this._onHandleAddPrice(index) }>Add New</Button></td>
+            </>
+        );
     }
 }
 

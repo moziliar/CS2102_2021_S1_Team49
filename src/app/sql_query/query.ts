@@ -243,37 +243,39 @@ WHERE caretaker=$1 \
 ";
 
 // INPUT:
-// price -> {pcs_user, category, price}
+// price -> {caretaker, category, price}
 export const addDailyPrice =
   " \
 INSERT INTO daily_prices (caretaker, category, price) \
 VALUES ($1, $2, $3) \
 ";
 
-export const getAllAvailCategories = " \
-SELECT name FROM categories \
+// INPUT:
+// caretaker => {email}
+export const getAllCareTakerDailyPrice = " \
+SELECT * from daily_prices \
+WHERE caretaker=$1 \
 ";
 
-export const getAllCategoryPrices =
-  " \
-SELECT * FROM min_daily_prices \
-ORDER BY category \
+export const getAllCategoriesQuery = " \
+SELECT * FROM categories \
+ORDER BY name \
 ";
 
 // INPUT:
-// category -> {name, parent_category}
+// category -> {name, price, parent}
 export const addCategoryQuery = " \
 INSERT INTO categories \
-VALUES ($1, $2) \
+VALUES ($1, $2, $3) \
 ";
 
 // INPUT:
-// category -> {category, price}
+// category -> {name, price}
 export const updateCategoryQuery =
   " \
-UPDATE min_daily_prices \
+UPDATE categories \
 SET price=$2 \
-WHERE category=$1 \
+WHERE name=$1 \
 ";
 
 /* Select the top 5 highest ranking caretakers with details
@@ -283,7 +285,7 @@ WHERE category=$1 \
 export const getHighRatingCaretakerDetailsWithinNmonths = (N) => {
   return (
     " \
-        SELECT DISTINCT U1.email, U1.name, U1.phone, C1.pcs_user, C1.is_part_time, B1.caretaker, AVG(B1.rating) AS avg_rating, COUNT(*) \
+        SELECT DISTINCT U1.email, U1.name, C1.is_part_time, AVG(B1.rating) AS avg_rating, COUNT(*) \
         FROM (caretakers AS C1 INNER JOIN users AS U1 ON C1.pcs_user = U1.email) \
                 INNER JOIN bids B1 ON B1.caretaker = C1.pcs_user \
         WHERE B1.rating is NOT NULL \

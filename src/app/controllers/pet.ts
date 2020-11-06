@@ -1,7 +1,7 @@
 import { mockPets } from '../models/mockPets'
 import { GetUserByEmail } from './user';
 import { db } from '../dbconfig/db';
-import { addCategoryQuery, createPetQuery, deletePetQuery, getAllAvailCategories, getAllCategoryPrices, updateCategoryQuery, updatePetQuery } from '../sql_query/query';
+import { addCategoryQuery, createPetQuery, deletePetQuery, getAllCategoriesQuery, updateCategoryQuery, updatePetQuery } from '../sql_query/query';
 
 // pet -> {name, owner, description, special_requirements, gender, date_of_birth, category}
 export const CreatePetHandler = async (req, res) => {
@@ -64,39 +64,41 @@ export const DeletePetHandler = async (req, res) => {
 }
 
 export const GetAllPetCategoriesHandler = async (req, res) => {
-  await db.query({
-    text: getAllAvailCategories
-  }).then(async query => {
-    res.json(query.rows);
-  }).catch(err => {
-    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
-  })
+  await GetAllCategoryHelper()
+    .then(async query => {
+      const categoryList = query.categoryList.map(q => q.name);
+      res.json(categoryList);
+    }).catch(err => {
+      res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+    })
 }
 
 export const CreateCategoryHandler = async (req, res) => {
   await db.query({
     text: addCategoryQuery,
-    values: [req.body.name, req.body.parent_category ? req.body.parent_category : null]
+    values: [req.body.name, req.body.price, req.body.parent ? req.body.parent : null]
   }).then(async query => {
     if (query.rowCount > 0) {
       await GetAllCategoryHelper()
         .then(query => {
+          query.categoryList.push({});
           res.json(query.categoryList);
         })
     }
   }).catch(err => {
     console.log(err)
-    res.status(404).json({ errMessage: 'Duplicate category detected. Change the category name.' })
+    res.status(404).json({ errMessage: 'Duplicate category detected/parent category does not exist. Change the category name.' })
   })
 }
 
 export const UpdateCategoryHandler = async (req, res) => {
   await db.query({
     text: updateCategoryQuery,
-    values: [req.body.category, req.body.price]
+    values: [req.body.name, req.body.price]
   }).then(async q => {
       await GetAllCategoryHelper()
         .then(query => {
+          query.categoryList.push({});
           res.json(query.categoryList);
         })
   }).catch(err => {
@@ -107,6 +109,7 @@ export const UpdateCategoryHandler = async (req, res) => {
 export const GetAllCategoryPricesHandler = async (req, res) => {
   await GetAllCategoryHelper()
     .then(query => {
+      query.categoryList.push({});
       res.json(query.categoryList);
     }).catch(err => {
       res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
@@ -115,7 +118,7 @@ export const GetAllCategoryPricesHandler = async (req, res) => {
 
 export const GetAllCategoryHelper = async () => {
   const categoriesRet = await db.query({
-    text: getAllCategoryPrices
+    text: getAllCategoriesQuery
   });
   return { categoryList: categoriesRet.rows }
 }

@@ -8,7 +8,7 @@ import {
   queryCreditCard,
   getRatesByUserQuery,
   listDoneTnxByOwnerId,
-  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery
+  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths
 } from '../sql_query/query';
 
 // ================================ USER =========================================
@@ -126,7 +126,7 @@ export const DeleteCreditCardHandler = async (req, res) => {
   })
 }
 
-// ================================ SEARCH TAKER ========================================
+// ================================ CARE TAKER ========================================
 
 export const ListCareTakerHandler = async (req, res) => {
   /*
@@ -179,8 +179,18 @@ export const ListCareTakerHandler = async (req, res) => {
     })
   }
 
-  console.log(users);
   res.json(users);
+}
+
+export const ListTopPerformingCareTaker = async (req, res) => {
+  await db.query({
+    text: getHighRatingCaretakerDetailsWithinNmonths(req.query.months)
+  }).then(query => {
+    res.json(query.rows);
+  }).catch(err => {
+    console.log(err)
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
 }
 
 // ================================== HELPERS ===========================================

@@ -1,5 +1,26 @@
-import { User, Status, CreditCard, CareTaker } from './users';
+import { User, Status, CreditCard, CareTaker, TopCareTaker } from './users';
 import { mockPets } from './mockPets';
+
+export const mockTopCareTakers: Array<TopCareTaker> = [
+  {
+    email: 'example@facebook.com',
+    name: 'Paul Peterson',
+    is_part_time: false,
+    avg_rating: 4.5
+  },
+  {
+    email: 'example@google.com',
+    name: 'Amy Peterson',
+    is_part_time: true,
+    avg_rating: 4.2
+  },
+  {
+    email: 'example@yahoo.com',
+    name: 'Jack Han',
+    is_part_time: false,
+    avg_rating: 4.1
+  }
+]
 
 export const mockTakers: Array<CareTaker> = [
   {
@@ -10,11 +31,13 @@ export const mockTakers: Array<CareTaker> = [
     rating: 3.9,
     rate: [
       {
-        category: 'Dog',
+        name: 'Dog',
+        parent: 'Dog',
         price: 30
       },
       {
-        category: 'Cat',
+        name: 'Cat',
+        parent: 'Dog',
         price: 70
       }
     ],
@@ -39,11 +62,15 @@ export const mockTakers: Array<CareTaker> = [
     rating: 3.9,
     rate: [
       {
-        category: 'Dog',
+        name: 'Dog',
+        parent: 'Dog',
+
         price: 30
       },
       {
-        category: 'Cat',
+        name: 'Cat',
+        parent: 'Dog',
+
         price: 70
       }
     ],
@@ -82,7 +109,8 @@ export const mockUsers: Array<User> = [
     ],
     categories: [
       {
-        category: mockPets[0].category,
+        name: mockPets[0].category,
+        parent: 'Dog',
         price: 5000
       }
     ]

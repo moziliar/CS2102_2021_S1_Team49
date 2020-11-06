@@ -331,8 +331,8 @@ class SearchPage extends Component<{}, IState> {
           <h6>Rates:</h6>
           {rates.map((rate, index) => {
             return (
-              <p key={rate.category}>
-                {rate.category} - ${rate.price}/night
+              <p key={rate.name}>
+                {rate.name} - ${rate.price}/night
               </p>
             );
           })}
