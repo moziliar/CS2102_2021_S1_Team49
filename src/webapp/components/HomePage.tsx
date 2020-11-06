@@ -9,8 +9,8 @@ class HomePage extends Component {
 		return (
 			<div className="homepage">
 				<div className="center-text">
-					<h1>Sed ut perspiciatis unde omnis</h1>
-					<p>Duis aute irure dolor in in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+					<h1>Join Us Now</h1>
+					<p>The best matching website for your pet and care taker</p>
 					<Link to="/signup"><Button variant="info">Register now</Button></Link>
 				</div>
 			</div>

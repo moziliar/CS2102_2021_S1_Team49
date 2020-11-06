@@ -170,18 +170,18 @@ class BidModal extends Component<IProps, IState> {
               </Form.Label>
               <br />
               {pets_owned?.map((pet, index) => {
-                return (
-                  <Form.Check
-                    key={index}
-                    inline
-                    type="radio"
-                    label={pet.name + "(" + pet.category + ")"}
-                    checked={formData[PET_NAME] === pet.name}
-                    onChange={(e) =>
-                      this._onHandleInputChange(PET_NAME, pet.name)
-                    }
-                  />
-                );
+                return !_.isEmpty(pet) 
+                  ? <Form.Check
+                      key={index}
+                      inline
+                      type="radio"
+                      label={pet.name + "(" + pet.category + ")"}
+                      checked={formData[PET_NAME] === pet.name}
+                      onChange={(e) =>
+                        this._onHandleInputChange(PET_NAME, pet.name)
+                      }
+                   />
+                  : null
               })}
             </Form.Group>
             <Form.Group>

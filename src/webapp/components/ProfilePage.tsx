@@ -73,7 +73,7 @@ class ProfilePage extends Component {
 			links.push(
 				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/my-availability" key="my-availability">My Availability</NavLink>,
-				<NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>
+				// <NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>
 			);
 		}
 

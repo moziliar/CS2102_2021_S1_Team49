@@ -29,7 +29,7 @@ type SearchForm = {
 type IState = {
   modalShow: boolean;
   bidModalShow: boolean;
-  categories: Array<Category> | null;
+  categories: Array<string> | null;
   careTakers: Array<CareTaker> | null;
   selectedCareTaker: number | null;
   formData: SearchForm;
@@ -104,8 +104,7 @@ class SearchPage extends Component<{}, IState> {
         });
       })
       .catch((err) => {
-        this.setState({ careTakers: mockTakers });
-        // alert(err.response.data.errMessage);
+        alert('Something is wrong. Please try again later!');
       });
   };
 
@@ -120,6 +119,7 @@ class SearchPage extends Component<{}, IState> {
   componentDidMount = () => {
     API.get("/categories/list")
       .then((res) => {
+        console.log(res.data)
         this.setState({ categories: res.data });
       })
       .catch((err) => {
@@ -205,16 +205,16 @@ class SearchPage extends Component<{}, IState> {
                 <strong>Choose your pet category:</strong>
               </Form.Label>
               <br />
-              {categories?.map((c) => {
+              {categories?.map((c, index) => {
                 return (
                   <Form.Check
-                    key={c.name}
+                    key={index}
                     inline
                     type="radio"
-                    label={c.name}
-                    checked={formData[CATEGORY] === c.name}
+                    label={c}
+                    checked={formData[CATEGORY] === c}
                     onChange={(e) =>
-                      this._onHandleInputChange(CATEGORY, c.name)
+                      this._onHandleInputChange(CATEGORY, c)
                     }
                   />
                 );
