@@ -8,84 +8,84 @@ Non-db constraints
 List of constraints grouped by the main entities
 
 Users
-1.Users are identified by a uid, and their email and hashed password must be recorded.
-2.Every User has a User Profile.
-3.A User can be either a PetOwner and/or Care taker (is-a, can overlap), or a PCS Administrator.
-4.A User can have many Credit Cards.
+1. Users are identified by an email.
+2. A User must have a password and name. (Non-null)
+3. A User can be either a Pet owner and/or Care taker (is-a, can overlap), or a PCS Administrator.
+4. A User can have a phone number and picture.
 
-User Profiles
-1.Every User Profile has a name and phone number.
-
-PetOwners
-1.PetOwners can have many Pets.
+PetOwner
+1. Pet Owners can have many pets.
+2. Pet Owners can have many credit cards.
 
 Pets
-1.Pets are identified by a pid. 
-2.Every Pet has its own Pet Profile.
+1. Pets are identified by a name and their owner.
+2. Every Pet can have a description, special requirements (daily walk, types of food, etc), gender, date of birth
+3. Every Pet has a Category. (cats, dogs, big dogs, lizards, etc) (Non-null)
+(Dependent on PetOwner)
 
-Pet Profiles
-1.Every Pet Profile has a name, description, special requirements (daily walk, types of food, etc), gender, date of birth
-2.Every Pet Profile has a Category. (cats, dogs, big dogs, lizards, etc)
-
-(Pet) Categories
-1.Categories are identified by name.
-2.A Category that has Subcategories is called a parent Category.
-3.A Category can have multiple Subcategories (e.g. big dogs within dogs)
-4.A Subcategory only has 1 parent Category.
-5.A Subcategory can also be a parent Category for other Subcategories.
+Categories
+1. Categories are identified by name.
+2. A category that has subcategories is called a parent category.
+3. A category can have multiple subcategories (e.g. big dogs within dogs)
+4. A subcategory only has 1 parent category.
+5. A subcategory can also be a parent category for other subcategories
+(Subcategories dependent on categories)
 
 CareTaker
-1.Every CareTaker can only take care of certain Categories of Pets.
-2.Every CareTaker has a daily price for each Category of Pets they can take care of.
-3.Every CareTaker can take care of more than one Pet at any time.
-4.Every CareTaker has a Salary.
-5.Every CareTaker is either a Full-time (2x150 consecutive days/year) or Part-time employee.
-6.A Full-time CareTaker can take Leave. This marks them as unavailable, otherwise, they would be available.
-7.A Full-time CareTaker cannot apply for leave on a date where they are caring for a Pet.
-8.A Full-time CareTaker can take care of up to 5 Pets once.
-9.A Full-time CareTaker will always accept any job if they have not applied for leave, they are not taking care of 5 Pets at the same time yet, and they can take care of the Pet in the job.
-10.Every Part-time CareTaker can have multiple Availabilities.
-11.A Part-time CareTaker cannot take care of more than 2 Pets unless they have a good rating (e.g., 4 out of 5) and they cannot take care of more than 5 Pet regardless of rating. 
-DailyPrice
-1.Daily Prices are identified by the CareTaker and PetCategory, and must have a price.
+1. Every CareTaker has a daily price for every category of pets they can take care of.
+2. The daily price indicated by the CareTaker must be positive and greater than the min daily price for the category set by the admin.
+3. Every CareTaker can take care of more than one pet at any time.
+4. Every CareTaker can have a salary.
+5. Every CareTaker is either a Full-time (2x150 consecutive days/year) or part-time employee.
+=================================================================
+6. A Full-time CareTaker can take leave. This marks them as unavailable, otherwise, they would be available.
+7. A Full-time CareTaker can only care for a pet if they are not on leave.
+8. A Full-time CareTaker can take care of up to 5 pets once.
+9. A full-time CareTaker will always accept any job if they have not applied for leave, they are not taking care of 5 pets at the same time yet, and they can take care of the pet in the job.
+=================================================================
+10. Every Part-Time CareTaker can have multiple availabilities.
+11. A Part-Time CareTaker can only take care of a pet if they are available on all days.
+12. A Part-time CareTaker cannot take care of more than 2 Pets unless they have a good rating (e.g., 4 out of 5) and they cannot take care of more than 5 Pet regardless of rating.
 
-(Part-time) Availabilities
-1.Availabilities are identified by the CareTaker, start date, and end date.
-2.Availabilities for the same CareTaker cannot overlap (start date between another Availabilities’ start and end date. 
 
-(Full-time) Leaves
-1.Leaves are identified by the CareTaker, start date, and end date.
-2.Leaves for the same CareTaker cannot overlap (start date between another leaves’ start and end date) 
+PartTimeAvailabilities
+1. Availabilities are identified by the CareTaker, start date, and end date.
+2. Availabilities for the same CareTaker cannot overlap (start date between another availabilities’ start and end date.
+3. Start date should be before the end date.
+4. Availabilities cannot be deleted for a CareTaker on a date where they are caring for a pet.
+(Dependent on CareTaker)
+
+FullTimeLeaves
+1. Leaves are identified by the CareTaker, start date, and end date.
+2. Leaves for the same CareTaker cannot overlap (start date between another leaves’ start and end date)
+3. Leaves cannot be created for a CareTaker on a date where they are caring for a pet.
+4. Start date should be before the end date.
+(Dependent on CareTaker)
 
 Salary
-1.Salary is identified by caretaker and month year, and has an amount.
-2.After the end of the month, the Salary will not change.
-3.For a Full-timer’s latest month, Salary is calculated based on rating and the number of Pets taken care of in a given month for how many days. This is called Pet-day. The Care Taker will receive $3000 per month up to 60 Pet-day, following which they receive 80% of the transaction price as a bonus.
-4.For a Part-timer’s latest month, the amount is 75% of their total transaction prices for the month. 
-
-Transaction
-1.Transactions are identified by tid, and must have a transfer method (delivery, pickup, physical), location, total price, payment method, start date, end date
-2.Every transaction can have a review, given by the PetOwner to the CareTaker, after the transaction is over.
-3.Every transaction is about one Pet.
-4.Every transaction might have a credit card number.
+1. Salary is identified by caretaker and month year, and must have an amount.
+2. For a full-timer’s latest month, salary is calculated based on rating and the number of pets taken care of in a given month for how many days. This is called pet-day. The CareTaker will receive $3000 per month up to 60 pet-day, following which they receive 80% of the transaction price as a bonus.
+3. For a part-timer’s latest month, the amount is 75% of their total transaction prices for the month.
+(Dependent on CareTaker)
 
 Credit Card
-1.Pre-registered credit card info of a user.ts; holds credit card number, holder name, expiry date.
-
-Review
-1.Reviews are identified by tid, and must have a description and rating 
+1. Credit card is identified by PetOwner and credit card number. It must have a holder name, expiry date.
+2. Expiry date must be in the future.
+(Dependent on PetOwner)
 
 Bid
-1.Bids are identified by Bid, and must have a transfer method (delivery, pickup, physical), location, total price, start date, end date, Bid end date, isActive, isSelected
-2.Bids are made by PetOwners.
-3.Bids cannot be created if the CareTaker is already taking care of the maximum number of Pets they can care for.
-4.Bids can be selected by the CareTakers.
-5.Every Bid is about a Pet.
-6.If the Bids were not selected two days before the start date, the Bid with the highest daily rate is automatically selected by the system two days before the start date of the transaction.
-7.Bids can only be for transactions at least one day in advance.
-8.Selected Bids are converted into Transactions.
-9.When a Bid is accepted, all overlapping Bids for the same dates for the same Pet will be invalidated, and if this Bid causes the CareTaker to take care of the maximum number of Pets they can take care of for some dates, all Bids for those dates for this CareTaker will be invalidated.
+1. Bids are identified by pet, caretaker, start date and end date, and must have a transfer method (delivery, pickup, physical), location, total price, isActive, isSelected, payment method
+2. Bids are made by PetOwners.
+3. Bids cannot be created if the CareTaker is already taking care of the maximum number of pets they can care for.
+4. Bids can be selected by the CareTakers.
+5. If the bids were not selected two days before the start date, the bid with the highest daily rate is automatically selected by the system two days before the start date of the transaction.
+6. New bids can only be for start dates more than two days in advance.
+7. When a bid is accepted, all overlapping bids for the same dates for the same pet will be marked inactive, and if this bid causes the CareTaker to take care of the maximum number of pets they can take care of for some dates, all bids for those dates for this CareTaker will be invalidated.
+8. Only selected bids can have a rating and a review (nullable).
+9. If the payment method is by card, the bid should have a credit card number.
+10. Start date should be before the end date.
+11. Total price for the bid should be greater than both the admin set minimum daily price after accounting for the caretaker’s rating, and the caretaker’s own daily price for the category.
+(Dependent on pet and caretaker)
 
-PCS Administrator
-1.PCS Administrator can help transfer a Pet from the PetOwner to the CareTaker
-2.PCS Administrator can specify the minimum daily price for a Full-time CareTaker for a particular Pet Category and the price increases with the overall rating of the CareTaker but will never be below the base price
+PCS Admin
+1. PCS Admin can specify the minimum positive daily price for a CareTaker for a particular pet type and the price increases with the rating of the CareTaker but will never be below the base price
