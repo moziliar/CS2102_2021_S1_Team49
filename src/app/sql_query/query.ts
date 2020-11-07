@@ -59,10 +59,9 @@ WHERE owner=$1 \
 // user- > {email}
 export const updatePetQuery = " \
 UPDATE pets \
-SET name=$1, owner=$2, description=$3, \
-       special_requirements=$4, gender=$5, \
-       date_of_birth=$6, category=$7 \
-WHERE name=$1 AND owner=$8 \
+SET description=$3, special_requirements=$4, gender=$5, \
+    date_of_birth=$6, category=$7 \
+WHERE name=$1 AND owner=$2 \
 ";
 
 // INPUT:
@@ -83,7 +82,7 @@ FROM bids \
 export const listTnxByOwnerId = " \
 SELECT * \
 FROM bids \
-WHERE pet_owner=$1 \
+WHERE pet_owner=$1 AND is_selected=true\
 ";
 
 // INPUT:
@@ -96,6 +95,23 @@ SET total_price=$1, payment_method=$2 \
 WHERE pet_owner=$5 \
 ";
 
+
+export const createTransactionInfo = " \
+INSERT INTO bids \
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) \
+";
+
+
+export const updateTransactionInfo = " \
+UPDATE bids \
+SET pet_owner=$1, pet=$2, caretaker=$3, date_begin=$4, \
+    date_end=$5, transfer_method=$6, location=$7, total_price=$8, \
+    is_active=$9, is_selected=$10, payment_method=$11, cc_number=$12, \
+    rating=$13, review=$14 \
+WHERE pet_owner=$1 AND caretaker=$3 AND date_begin=$4 AND date_end=$5 AND is_selected=true AND $10=true \
+";
+
+
 // INPUT:
 // owner -> {email}
 export const deleteBid = " \
@@ -107,9 +123,16 @@ WHERE pet_owner=$1 \
 
 // INPUT:
 // owner -> {email, cc_number, holder_name, expiry_date}
-export const addCreditCard = " \
-INSERT INTO credit_cards (email, cc_number, holder_name, expiry_date) \
+export const addCreditCardQuery = " \
+INSERT INTO credit_cards (owner, cc_number, holder_name, expiry_date) \
 VALUES ($1, $2, $3, $4) \
+";
+
+// INPUT:
+// owner -> {email, cc_number}
+export const deleteCreditCardQuery = " \
+DELETE FROM credit_cards \
+WHERE owner=$1 AND cc_number=$2 \
 ";
 
 
@@ -120,6 +143,12 @@ SELECT * FROM credit_cards \
 WHERE owner=$1 \
 ";
 
+// INPUT:
+// owner -> {email, is_part_time}
+export const applyCareTakerQuery = " \
+INSERT INTO caretakers \
+VALUES ($1, $2) \
+";
 
 // INPUT:
 // owner -> {email, cc_number, holder_name, expiry_date}
@@ -151,3 +180,21 @@ export const addDailyPrice = " \
 INSERT INTO daily_prices (caretaker, category, price) \
 VALUES ($1, $2, $3) \
 ";
+
+export const getAllAvailCategories = " \
+SELECT name FROM categories \
+";
+
+
+
+// ==================================
+export const getHighRatingCaretakerDetails = " \
+SELECT U.name, U.phone, C.pcs_user, C.is_part_time  \
+FROM (bids B INNER JOIN caretakers C ON B.caretaker = C.pcs_user) \
+    INNER JOIN users U ON C.pcs_user = U.email \
+WHERE (rating != NULL) AND ( \
+    SELECT COUNT(*) \
+    FROM caretakers C2 INNER JOIN bids B2 ON C2.caretaker = B2.caretaker \
+    WHERE rating = 1) = 0 \
+HAVING AVG(rating) >= 4 \
+"

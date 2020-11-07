@@ -23,7 +23,7 @@ exports.mockPets = [
             special_reqs: [
                 'must walk'
             ],
-            gender: pet_pb_1.PetProfile.Gender.FEMALE,
+            gender: "Female",
             description: 'likes to play a lot',
             date_of_birth: '02.07.2018'
         },

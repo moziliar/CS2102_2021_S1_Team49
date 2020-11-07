@@ -1,11 +1,13 @@
-import { mockUsers } from '../models/mockUsers';
+import { mockTakers, mockUsers } from '../models/mockUsers';
 import { db } from '../dbconfig/db';
 import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
   queryPetQuery,
   queryCreditCard,
-  queryCaretaker, queryAvailabiliies
+  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery
 } from '../sql_query/query';
+
+// ================================ USER =========================================
 
 export const LoginHandler = async (req, res) => {
   const usersRet = await db.query({
@@ -19,77 +21,12 @@ export const LoginHandler = async (req, res) => {
     res.status(502).json({ errMessage: 'More than one user found'});
   }
 
-  const user = usersRet.rows[0];
-
-  const petsRet = await db.query({
-    text: queryPetQuery,
-    values: [user.email],
-  })
-
-  const creditCardRet = await db.query({
-    text: queryCreditCard,
-    values: [user.email],
-  })
-
-  const isCaretakerRet = await db.query({
-    text: queryCaretaker,
-    values: [user.email],
-  })
-
-  const isCaretaker = isCaretakerRet.rows.length > 0;
-
-  if (!isCaretaker) {
-    res.json({
-      ...user,
-      pets_owned: petsRet.rows,
-      credit_card: creditCardRet.rows[0],
-    });
-
-    return;
-  }
-
-  if (isCaretakerRet.rows[0].is_part_time) {
-    const availabilitiesRet = await db.query({
-      text: queryAvailabiliies,
-      values: [user.email],
-    })
-
-    res.json({
-      ...user,
-      pets_owned: petsRet.rows,
-      credit_card: creditCardRet.rows[0],
-      is_part_time: isCaretakerRet.rows[0],
-      leave_or_avail: availabilitiesRet.rows.map(ret => {
-        return {
-          start_date: ret.start_date,
-          end_date: ret.end_date,
-        }
-      })
-    });
-  } else {
-    const leavesRet = await db.query({
-      text: queryAvailabiliies,
-      values: [user.email],
-    })
-
-    res.json({
-      ...user,
-      pets_owned: petsRet.rows,
-      credit_card: creditCardRet.rows[0],
-      is_part_time: isCaretakerRet.rows[0].is_part_time,
-      leave_or_avail: leavesRet.rows.map(ret => {
-        return {
-          start_date: ret.start_date,
-          end_date: ret.end_date,
-        }
-      })
-    });
-  }
+  const user = await GetUserByEmail(usersRet.rows[0].email);
+  res.json(user);
 };
-// user -> {email, password, name, phone, pic_url, is_admin}
 
 export const CreateUserHandler = async (req, res) => {
-  const newUser = await db.query({
+  await db.query({
     text: createUserQuery,
     values: [req.body.email, 
              req.body.password, 
@@ -98,16 +35,16 @@ export const CreateUserHandler = async (req, res) => {
              req.body.pic_url, 
              req.body.is_admin
             ]
-  }).then(query => {
+  }).then(async query => {
     // Success creating user
     if (query.rowCount > 0) {
-      res.json(mockUsers[0]);
+      const user = await GetUserByEmail(req.body.email);
+      res.json(user);
     }
   }).catch(err => {
-    res.status(401).json({ errMessage: 'Email has been taken. User other email' });
+    res.status(404).json({ errMessage: 'Email has been taken. User other email' });
   })
 }
-// user -> {email, name, phone, pic_url}
 
 export const UpdateUserHandler = async (req, res) => {
   await db.query({
@@ -115,25 +52,152 @@ export const UpdateUserHandler = async (req, res) => {
     values: [req.body.email,
              req.body.name,
              req.body.phone,
-             req.body.pic_url],
+             req.body.pic_url], 
   }).then(async r => { 
-    await GetUserByEmail(req, res)
+    await GetUserByEmail(req.body.email)
       .then(user => {
         res.json(user);
       })
     })
     .catch(err => {
-      res.status(401).json({ errMessage: 'Fail updating basic information' });
+      res.status(404).json({ errMessage: 'Fail updating basic information' });
     })
 }
 
-export const GetUserByEmail = async (req, res) => {
-  return await db.query({
-    text: searchUserByEmailQuery,
-    values: [req.body.email],
-  }).then(query => mockUsers[0]);
+export const ApplyCareTakerHandler = async (req, res) => {
+  await db.query({
+    text: applyCareTakerQuery,
+    values: [req.body.email,
+             req.body.is_part_time
+            ]
+  }).then(async r => {
+    await GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
+      })
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Error applying to be Care Taker. Please try again later!' });
+  })
 }
 
 export const DeleteUserHandler = (req, res) => {
   res.json(mockUsers[0]);
+}
+
+// ================================ CREDIT CARD =========================================
+
+export const AddCreditCardHandler = async (req, res) => {
+  await db.query({
+    text: addCreditCardQuery,
+    values: [req.body.email,
+             req.body.cc_number,
+             req.body.holder_name,
+             req.body.expiry_date
+            ]
+  }).then(async r => {
+    await GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
+      })
+  })
+  .catch(err => {
+    res.status(404).json({ errMessage: 'Please ensure all fields are not empty, card number is unique, and expiry date is after today\' date' });
+  })
+
+}
+
+export const DeleteCreditCardHandler = async (req, res) => {
+  await db.query({
+    text: deleteCreditCardQuery,
+    values: [req.query.email, req.query.cc_number]
+  }).then(async r => {
+    await GetUserByEmail(req.query.email)
+      .then(user => {
+        res.json(user);
+      })
+  })
+  .catch(err => {
+    console.log(err)
+    res.status(404).json({ errMessage: 'Fail removing card. Please try again later.' });
+  })
+}
+
+// ================================ SEARCH TAKER ========================================
+
+export const ListCareTakerHandler = async (req, res) => {
+  res.json(mockTakers);
+}
+
+// ================================== HELPERS ===========================================
+
+export const GetUserByEmail = async (email: string) => {
+  const userRet =  await db.query({
+    text: searchUserByEmailQuery,
+    values: [email],
+  });
+
+  const user = userRet.rows[0];
+
+  const petsRet = await db.query({
+    text: queryPetQuery,
+    values: [email],
+  })
+
+  const creditCardRet = await db.query({
+    text: queryCreditCard,
+    values: [email],
+  })
+
+  const isCaretakerRet = await db.query({
+    text: queryCaretaker,
+    values: [email],
+  })
+
+  const isCaretaker = isCaretakerRet.rows.length > 0;
+
+  if (!isCaretaker) {
+    return {
+      ...user,
+      pets_owned: petsRet.rows.concat({}) || [{}],
+      credit_card: creditCardRet.rows.concat({}) || [{}],
+    };
+  }
+
+  if (isCaretakerRet.rows[0].is_part_time) {
+    const availabilitiesRet = await db.query({
+      text: queryAvailabiliies,
+      values: [email],
+    })
+
+    return {
+      ...user,
+      pets_owned: petsRet.rows.concat({}) || [{}],
+      credit_card: creditCardRet.rows.concat({}) || [{}],
+      is_part_time: isCaretakerRet.rows[0],
+      leave_or_avail: availabilitiesRet.rows.map(ret => {
+        return {
+          start_date: ret.start_date,
+          end_date: ret.end_date,
+        }
+      })
+    }
+  } else {
+    const leavesRet = await db.query({
+      text: queryAvailabiliies,
+      values: [email],
+    });
+
+    return {
+      ...user,
+      pets_owned: petsRet.rows.concat({}) || [{}],
+      credit_card: creditCardRet.rows.concat({}) || [{}],
+      is_part_time: isCaretakerRet.rows[0].is_part_time,
+      leave_or_avail: leavesRet.rows.map(ret => {
+        return {
+          start_date: ret.start_date,
+          end_date: ret.end_date,
+        }
+      })
+    }
+  }
 }
