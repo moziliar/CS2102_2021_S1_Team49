@@ -1,7 +1,7 @@
 -- DROP VIEW IF EXISTS salary, rating;
 DROP TABLE IF EXISTS bids, pets, daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
-DROP TYPE IF EXISTS payment_method, transfer_method;
+DROP TYPE IF EXISTS transfer_method;
 
 -- note that for triggers that execute at the same stage, they execute
 -- in alphabetical order. Hence, validation triggers are implemented
@@ -87,7 +87,6 @@ CREATE TABLE pets (
 );
 
 CREATE TYPE transfer_method AS ENUM ('deliver', 'pickup', 'pcs');
-CREATE TYPE payment_method AS ENUM ('cash', 'cc');
 
 CREATE TABLE bids (
   pet_owner VARCHAR(256),
