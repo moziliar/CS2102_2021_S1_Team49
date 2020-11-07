@@ -56,7 +56,7 @@ WHERE  get_average_rating(U.email) > $2
           SELECT * FROM full_time_leaves L 
           WHERE L.caretaker=U.email 
             AND (date(L.start_date), date(L.end_date) + 1) OVERLAPS (date($4), date($5) + 1)) 
-      WHEN U.email IN (SELECT caretaker FROM part_time_availabilities) \
+      WHEN U.email IN (SELECT caretaker FROM part_time_availabilities)
         THEN (
           SELECT COUNT(*) 
           FROM (SELECT generate_series(date($4), date($5), '1 day') AS day) D
@@ -66,7 +66,34 @@ WHERE  get_average_rating(U.email) > $2
           )
         ) = (date($5) - date($4) + 1)
       ELSE FALSE 
-    END; 
+    END
+  AND NOT EXISTS (
+    SELECT * FROM (SELECT generate_series(date($4), date($5), '1 day') AS day) D
+    WHERE (SELECT COUNT(*) 
+      FROM bids
+      WHERE is_selected=TRUE
+      AND D.day BETWEEN start_date AND end_date
+    ) >= (
+      CASE
+        WHEN EXISTS (
+          SELECT pcs_user FROM caretakers 
+          WHERE pcs_user=U.email
+            AND is_part_time=FALSE) 
+          THEN 5
+        WHEN EXISTS (
+          SELECT pcs_user FROM caretakers 
+          WHERE pcs_user=U.email
+            AND is_part_time=TRUE)
+          THEN 
+            CASE
+              WHEN get_average_rating(U.email) < 4
+                THEN 2
+              ELSE 5
+            END
+        ELSE -1
+      END
+    )
+  ); 
 `;
 
 
