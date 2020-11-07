@@ -73,8 +73,6 @@ CREATE TABLE daily_prices (
   PRIMARY KEY (caretaker, category)
 );
 
-
-
 CREATE TABLE pets (
   name VARCHAR(256),
   owner VARCHAR(256) REFERENCES users(email) ON DELETE CASCADE ON UPDATE CASCADE,

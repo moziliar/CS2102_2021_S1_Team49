@@ -1,4 +1,5 @@
 import React, { createContext, Component } from 'react';
+import { mockTransactions } from '../../app/models/mockTxns';
 import { Transaction } from '../../app/models/txns';
 import API from '../api';
 
@@ -30,32 +31,33 @@ class TransactionContextProvider extends Component<{}, contextState> {
         getOngoingBids: null
     }
 
-    getPastTransactions = () => {
-			API.get('/txn/list')
+    getPastTransactions = (email) => {
+			API.get(`/txn/list?email=${email}`)
 				.then(res => {
-					const pastTransactions = res.data.filter(t => t.info.is_selected &&  new Date(t.info.end_date).getTime() < new Date(Date.now()).getTime());
+					const pastTransactions = mockTransactions.filter(t => t.is_selected &&  new Date(t.date_end).getTime() < new Date(Date.now()).getTime());
 					this.setState({ pastTransactions: pastTransactions });
 				});
     }
 
-    getOngoingTransactions = () => {
-			API.get('/txn/list')
+    getOngoingTransactions = (email) => {
+    	console.log(`/txn/list?email=${email}`);
+			API.get(`/txn/list?email=${email}`)
 				.then(res => {
 					const todayDate = new Date(Date.now()).getTime();
-					const ongoingTransactions = res.data.filter(t => {
-						const startDate = new Date(t.info.start_date).getTime();
-						const endDate = new Date(t.info.end_date).getTime();
+					const ongoingTransactions = mockTransactions.filter(t => {
+						const startDate = new Date(t.date_begin).getTime();
+						const endDate = new Date(t.date_end).getTime();
 
-						return t.info.is_selected && startDate <= todayDate && endDate >= todayDate;
+						return t.is_selected && startDate <= todayDate && endDate >= todayDate;
 					});
 					this.setState({ ongoingTransactions: ongoingTransactions });
 				});
     }
 
-    getOngoingBids = () => {
-			API.get('/txn/list')
+    getOngoingBids = (email) => {
+			API.get('/bid/query', { params: {email: email }})
 				.then(res => {
-					const onGoingBids = res.data.filter(t => !t.info.is_selected);
+					const onGoingBids = mockTransactions.filter(t => !t.is_selected);
 					this.setState({ ongoingBids: onGoingBids });
 				});
     }
