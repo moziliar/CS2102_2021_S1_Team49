@@ -37,12 +37,10 @@ CareTaker
 3. Every CareTaker can take care of more than one pet at any time.
 4. Every CareTaker can have a salary.
 5. Every CareTaker is either a Full-time (2x150 consecutive days/year) or part-time employee.
-=================================================================
 6. A Full-time CareTaker can take leave. This marks them as unavailable, otherwise, they would be available.
 7. A Full-time CareTaker can only care for a pet if they are not on leave.
 8. A Full-time CareTaker can take care of up to 5 pets once.
 9. A full-time CareTaker will always accept any job if they have not applied for leave, they are not taking care of 5 pets at the same time yet, and they can take care of the pet in the job.
-=================================================================
 10. Every Part-Time CareTaker can have multiple availabilities.
 11. A Part-Time CareTaker can only take care of a pet if they are available on all days.
 12. A Part-time CareTaker cannot take care of more than 2 Pets unless they have a good rating (e.g., 4 out of 5) and they cannot take care of more than 5 Pet regardless of rating.
@@ -74,7 +72,7 @@ Credit Card
 (Dependent on PetOwner)
 
 Bid
-1. Bids are identified by pet, caretaker, start date and end date, and must have a transfer method (delivery, pickup, physical), location, total price, isActive, isSelected, payment method
+1. Bids are identified by pet, caretaker, start date and end date, and must have a transfer method (delivery, pickup, physical), location, total price, isActive, isSelected
 2. Bids are made by PetOwners.
 3. Bids cannot be created if the CareTaker is already taking care of the maximum number of pets they can care for.
 4. Bids can be selected by the CareTakers.
@@ -82,7 +80,7 @@ Bid
 6. New bids can only be for start dates more than two days in advance.
 7. When a bid is accepted, all overlapping bids for the same dates for the same pet will be marked inactive, and if this bid causes the CareTaker to take care of the maximum number of pets they can take care of for some dates, all bids for those dates for this CareTaker will be invalidated.
 8. Only selected bids can have a rating and a review (nullable).
-9. If the payment method is by card, the bid should have a credit card number.
+9. A bid paid by cash will have no cc_number. A bid paid by credit card will have a cc_number.
 10. Start date should be before the end date.
 11. Total price for the bid should be greater than both the admin set minimum daily price after accounting for the caretaker’s rating, and the caretaker’s own daily price for the category.
 (Dependent on pet and caretaker)
