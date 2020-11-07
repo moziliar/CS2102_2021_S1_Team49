@@ -1,6 +1,8 @@
 version: '3'
 services:
   pcs-backend:
+    depends_on:
+      - psql
     build:
       context: .
       dockerfile: src/app/Dockerfile
@@ -25,6 +27,9 @@ services:
     container_name: psql
     image: postgres
     restart: always
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d/
     environment:
       POSTGRES_DB: "${DB_NAME}"
       POSTGRES_USER: "${DB_USER}"
