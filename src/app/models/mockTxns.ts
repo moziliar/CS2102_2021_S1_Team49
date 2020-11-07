@@ -1,70 +1,82 @@
-import { Transaction, TransferMethod } from './txns';
+import { Transaction, TransactionInfo, TransferMethod, Review } from './txns';
 import { mockUsers } from './mockUsers';
 import { mockPets } from './mockPets';
 
 export const mockTransactions: Array<Transaction> = [
   {
-    pet_owner: 'test',
-    pet_name: 'Doggy',
-    care_taker: 'Peter',
-    location: 'Singapore',
-    date_begin: '2020-06-06',
-    date_end: '2020-07-06',
-    total_price: 7000,
-    transfer_method: 'delivery',
-    is_selected: true,
-    is_active: false,
-    payment_method: 'cash',
-    cc_number: null,
-    rating: 3,
-    review: 'Good'
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2020',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+      is_selected: true
+    },
+    review: {
+      description: 'good care taker!',
+      rating: 5
+    }
   },
   {
-    pet_owner: 'Peter',
-    pet_name: 'Doggy',
-    care_taker: 'test',
-    location: 'Singapore',
-    date_begin: '2020-06-06',
-    date_end: '2020-07-06',
-    total_price: 7000,
-    transfer_method: 'delivery',
-    is_selected: true,
-    is_active: false,
-    payment_method: 'cash',
-    cc_number: null,
-    rating: null,
-    review: ''
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2020',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+      is_selected: true
+    },
+    review: {
+      description: '',
+      rating: 0
+    }
   },
   {
-    pet_owner: 'Peter',
-    pet_name: 'Doggy',
-    care_taker: 'test',
-    location: 'Singapore',
-    date_begin: '2020-06-06',
-    date_end: '2020-07-06',
-    total_price: 7000,
-    transfer_method: 'delivery',
-    is_selected: true,
-    is_active: true,
-    payment_method: 'cash',
-    cc_number: null,
-    rating: 3,
-    review: 'Good'
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2021',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+      is_selected: true
+    },
+    review: {
+      description: '',
+      rating: 0
+    }
   },
   {
-    pet_owner: 'test',
-    pet_name: 'Doggy',
-    care_taker: 'dd',
-    location: 'Singapore',
-    date_begin: '2020-06-06',
-    date_end: '2020-07-06',
-    total_price: 7000,
-    transfer_method: 'delivery',
-    is_selected: true,
-    is_active: false,
-    payment_method: 'cash',
-    cc_number: null,
-    rating: 0,
-    review: ''
-  },
+    info: {
+      owner: mockUsers[0],
+      care_taker: mockUsers[0],
+      pet: mockPets[0],
+      location: 'central',
+      start_date: '05/12/2020',
+      end_date: '07/12/2021',
+      total_price: 7000,
+      transfer_method: TransferMethod.OWNER_DELIVER,
+      use_card: true,
+      credit_card: mockUsers[0].credit_card,
+      is_selected: false
+    },
+    review: {
+      description: '',
+      rating: 0
+    }
+  }
 ]

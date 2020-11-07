@@ -737,6 +737,7 @@ INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('sklug79@bl
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('sraine7a@nifty.com', 'Painted stork', 7);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('ede7b@arizona.edu', 'Fox, crab-eating', 9);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('bfrill7c@newyorker.com', 'Fox, crab-eating', 8);
+INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('cdenerley7e@cdc.gov', 'Superb starling', 7);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('lwadforth7g@istockphoto.com', 'Vine snake (unidentified)', 7);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('lscully7h@slideshare.net', 'Spectacled caiman', 5);
 INSERT INTO public.daily_prices (caretaker, category, price) VALUES ('mclapison7i@google.cn', 'Painted stork', 6);

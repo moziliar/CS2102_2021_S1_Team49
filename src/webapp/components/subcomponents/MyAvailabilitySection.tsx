@@ -13,7 +13,6 @@ const initialState = {
 }
 
 function reducer(state, action) {
-	console.log(action)
   switch (action.type) {
     case 'focusChange':
       return {...state, focusedInput: action.payload}
@@ -38,7 +37,6 @@ const MyAvailabilitySection = () => {
 				onFocusChange={ focusedInput => dispatch({type: 'focusChange', payload: focusedInput})}
 				startDate={ state.startDate } // Date or null
 				endDate={ state.endDate } // Date or null
-				displayFormat="yyyy-MM-dd"
 				focusedInput={ state.focusedInput } // START_DATE, END_DATE or null
 			/>
 			<Button

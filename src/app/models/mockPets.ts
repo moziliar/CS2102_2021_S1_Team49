@@ -1,4 +1,4 @@
-import { Pet, Category } from './pets';
+import { Pet, Gender, Category } from './pets';
 
 export const mockCategories: Array<Category> = [
   {
@@ -13,10 +13,12 @@ export const mockPets: Array<Pet> = [
     owner_id: 1,
     picture_url: '',
     name: 'kitty',
-    special_requirements: 'must_walk',
-    gender: "Female",
+    special_reqs: [
+      'must walk'
+    ],
+    gender: Gender.FEMALE,
     description: 'likes to play a lot',
     date_of_birth: '02/07/2018',
-    category: 'dog',
+    category: mockCategories[0],
   }
 ]

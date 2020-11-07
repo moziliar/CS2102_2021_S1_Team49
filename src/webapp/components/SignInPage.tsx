@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Button, Container, Modal } from 'react-bootstrap';
+import { Form, Button, Container } from 'react-bootstrap';
 import { Link, Redirect } from 'react-router-dom';
 
 import { UserContext } from '../contexts/UserContext';
@@ -93,9 +93,6 @@ class SignInPage extends Component<{}, IState> {
 										<Form.Label>Picture URL</Form.Label>
 										<Form.Control type="pic_url" value={ pic_url } onChange={ e => this.onHandleInputChange(PIC_URL, e.target.value) }/>
 									</Form.Group>
-									<Modal>
-
-									</Modal>
 									{ name === '' || password === '' || email === '' 
 										? <small style={{ 'color': 'red' }}>Name, Email, and Password can't be empty</small>
 										: null

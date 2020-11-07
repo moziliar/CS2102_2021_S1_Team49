@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { Navbar, Nav } from 'react-bootstrap';
-import { NavLink, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 
 import '../../styles/NavigationBar.scss';
@@ -15,12 +15,12 @@ const NavigationBar = () => {
 				<Nav className="links">
 					{ userContext.isLoggedIn
 						? <div>
-								<NavLink activeClassName="is-active" to="/profile">My Profile</NavLink>
-								<NavLink activeClassName="is-active" to="/search">Find Care Taker</NavLink>
+								<Link to="/profile">My Profile</Link>
+								<Link to="/profile">Find Care Takers</Link>
 							</div>
 						: <div>
-								<NavLink activeClassName="is-active" to="/signin">Sign In</NavLink>
-								<NavLink activeClassName="is-active" to="/signup">Sign Up</NavLink>
+								<Link to="/signin">Sign In</Link>
+								<Link to="/signup">Sign Up</Link>
 							</div>
 					}
 				</Nav>

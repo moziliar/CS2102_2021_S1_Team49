@@ -1,8 +1,6 @@
 version: '3'
 services:
   pcs-backend:
-    depends_on:
-      - psql
     build:
       context: .
       dockerfile: src/app/Dockerfile
@@ -33,6 +31,3 @@ services:
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
     ports:
       - 54321:5432
-    volumes:
-      - ./data:/var/lib/postgresql/data
-      - ./sql:/docker-entrypoint-initdb.d/
