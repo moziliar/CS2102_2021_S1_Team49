@@ -117,7 +117,7 @@ CREATE TABLE bids (
 );
 -- note that is_active also acts as a soft delete
 
-CREATE TYPE month ENUM ('1','2','3','4','5','6','7','8','9','10','11','12')
+CREATE TYPE month AS ENUM ('1','2','3','4','5','6','7','8','9','10','11','12');
 
 CREATE TABLE salary (
   caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON UPDATE CASCADE,
