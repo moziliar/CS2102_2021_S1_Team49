@@ -3,16 +3,11 @@ export interface Pet {
   owner_id: number;
   picture_url: string;
   name: string;
-  special_reqs: Array<string>;
-  gender: number;
+  special_requirements: string;
+  gender: string;
   description: string;
   date_of_birth: string;
-  category: Category;
-}
-
-export enum Gender {
-  MALE,
-  FEMALE,
+  category: string;
 }
 
 export interface Category {
