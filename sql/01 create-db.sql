@@ -1,7 +1,7 @@
 -- DROP VIEW IF EXISTS salary, rating;
 DROP TABLE IF EXISTS bids, pets, daily_prices, categories, credit_cards,
 full_time_leaves, part_time_availabilities, caretakers, users;
-DROP TYPE IF EXISTS payment_method, transfer_method;
+DROP TYPE IF EXISTS transfer_method;
 
 -- note that for triggers that execute at the same stage, they execute
 -- in alphabetical order. Hence, validation triggers are implemented
@@ -85,7 +85,6 @@ CREATE TABLE pets (
 );
 
 CREATE TYPE transfer_method AS ENUM ('deliver', 'pickup', 'pcs');
-CREATE TYPE payment_method AS ENUM ('cash', 'cc');
 
 CREATE TABLE bids (
   pet_owner VARCHAR(256),
@@ -101,10 +100,9 @@ CREATE TABLE bids (
   is_active BOOLEAN NOT NULL,
   is_selected BOOLEAN NOT NULL,
 
-  payment_method payment_method NOT NULL,
-  cc_number VARCHAR(50) 
-  CHECK ((payment_method = 'cash' AND cc_number IS NULL)
-    OR (payment_method = 'cc' AND cc_number IS NOT NULL)),
+  -- NULL implies cash
+  -- NOT NULL implies credit card
+  cc_number VARCHAR(50),
 
   rating SMALLINT
   CHECK (rating IS NULL OR (rating IS NOT NULL AND date(end_date) <= CURRENT_DATE AND is_selected)),
@@ -116,7 +114,7 @@ CREATE TABLE bids (
 );
 -- note that is_active also acts as a soft delete
 
-CREATE TYPE month ENUM ('1','2','3','4','5','6','7','8','9','10','11','12')
+CREATE TYPE month AS ENUM ('1','2','3','4','5','6','7','8','9','10','11','12');
 
 CREATE TABLE salary (
   caretaker VARCHAR(256) REFERENCES caretakers(pcs_user) ON UPDATE CASCADE,
