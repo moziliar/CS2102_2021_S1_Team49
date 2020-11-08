@@ -13,13 +13,13 @@ services:
     environment:
       ENV: "dev"
       NODE_ENV: "production"
-      PORT: 8080
+      PORT: "${PORT}"
       DB_HOST: psql
-      DB_PORT: 5432
-      DB_USER: user
-      DB_PASSWORD: password
+      DB_PORT: "${DB_PORT}"
+      DB_USER: "${DB_USER}"
+      DB_PASSWORD: "${DB_PASSWORD}"
     ports:
-      - 8080:8080
+      - "8080:${PORT}"
 
   psql:
     env_file:
@@ -35,4 +35,9 @@ services:
       POSTGRES_USER: "${DB_USER}"
       POSTGRES_PASSWORD: "${DB_PASSWORD}"
     ports:
-      - 54321:5432
+      - "54321:${DB_PORT}"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://${DB_HOST}:${DB_PORT}"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
