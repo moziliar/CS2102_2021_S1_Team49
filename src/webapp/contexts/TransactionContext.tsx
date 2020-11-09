@@ -43,8 +43,9 @@ class TransactionContextProvider extends Component<{}, contextState> {
     	console.log(`/txn/list?email=${email}`);
 			API.get(`/txn/list?email=${email}`)
 				.then(res => {
+					console.log(res.data);
 					const todayDate = new Date(Date.now()).getTime();
-					const ongoingTransactions = mockTransactions.filter(t => {
+					const ongoingTransactions = res.data.filter(t => {
 						const startDate = new Date(t.date_begin).getTime();
 						const endDate = new Date(t.date_end).getTime();
 
@@ -57,7 +58,7 @@ class TransactionContextProvider extends Component<{}, contextState> {
     getOngoingBids = (email) => {
 			API.get('/bid/query', { params: {email: email }})
 				.then(res => {
-					const onGoingBids = mockTransactions.filter(t => !t.is_selected);
+					const onGoingBids = res.data.filter(t => !t.is_selected);
 					this.setState({ ongoingBids: onGoingBids });
 				});
     }

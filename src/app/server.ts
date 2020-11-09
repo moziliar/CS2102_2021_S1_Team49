@@ -1,6 +1,6 @@
 import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker, GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler } from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
-import { CreateTransactionInfo, ListTxnByUserID } from './controllers/txn'
+import { CreateTransactionInfo, ListTxnByUserID, AcceptBidByParams } from './controllers/txn'
 import { ListAllBids, ListBidByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
 
@@ -47,6 +47,7 @@ const initServer = (port: number) => {
 
   router.get('/bid/list', ListAllBids);
   router.get('/bid/query', ListBidByOwnerID);
+  router.put('/bid/accept', AcceptBidByParams);
 
   return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }

@@ -4,7 +4,9 @@ import { db } from '../dbconfig/db';
 import {
   listTnxByOwnerId,
   createTransactionInfo,
-  updateTransactionInfo
+  updateTransactionInfo,
+  acceptBidByParams,
+  getTxnByTxnInfo
 } from '../sql_query/query';
 
 
@@ -20,7 +22,7 @@ export const ListTxnByUserID = async (req, res) => {
   const txn: Array<Transaction> = userTnx.rows.map(_txn => {
     return {
       pet_owner: _txn.pet_owner,
-      pet_name: _txn.pet_name,
+      pet: _txn.pet,
       care_taker: _txn.caretaker,
       location: _txn.location,
       date_begin: _txn.start_date,
@@ -42,7 +44,7 @@ export const CreateTransactionInfo = async (req, res) => {
   await db.query({
     text: createTransactionInfo,
     values: [req.body.pet_owner,
-             req.body.pet_name,
+             req.body.pet,
              req.body.care_taker,
              req.body.date_begin,
              req.body.date_end,
@@ -51,16 +53,14 @@ export const CreateTransactionInfo = async (req, res) => {
              req.body.total_price,
              req.body.is_active,
              req.body.is_selected,
-             req.body.payment_method,
              req.body.cc_number,
              req.body.rating,
              req.body.review
             ],
   }).then(async query => {
-    // Success creating user
     if (query.rowCount > 0) {
-      const user = await GetTransactionByTransactionInfo(req.body.pet_owner, req.body.care_taker, req.body.date_begin, req.body.date_end, req.body.is_selected);
-      res.json(user);
+      const txns = await GetTransactionByTransactionInfo(req.body.pet_owner, req.body.pet_name, req.body.care_taker, req.body.date_begin, req.body.date_end, req.body.is_selected);
+      res.json(txns);
     }
   }).catch(err => {
     console.log(err)
@@ -72,7 +72,7 @@ export const UpdateTransactionInfo = async (req, res) => {
   await db.query({
     text: updateTransactionInfo,
     values: [req.body.pet_owner,
-             req.body.pet_name,
+             req.body.pet,
              req.body.care_taker,
              req.body.date_begin,
              req.body.date_end,
@@ -87,9 +87,9 @@ export const UpdateTransactionInfo = async (req, res) => {
              req.body.review
             ],
   }).then(async r => { 
-    GetTransactionByTransactionInfo(req.body.pet_owner, req.body.care_taker, req.body.date_begin, req.body.date_end, req.body.is_selected)
-      .then(user => {
-        res.json(user);
+    await GetTransactionByTransactionInfo(req.body.pet_owner, req.body.pet, req.body.care_taker, req.body.date_begin, req.body.date_end, req.body.is_selected)
+      .then(txns => {
+        res.json(txns);
       })
     })
     .catch(err => {
@@ -97,11 +97,49 @@ export const UpdateTransactionInfo = async (req, res) => {
     })
 }
 
-export const GetTransactionByTransactionInfo = async (pet_owner: string, care_taker: string, date_begin: string, date_end: string, is_selected: boolean) => {
+export const AcceptBidByParams = async (req, res) => {
+  console.log(
+    req.body.owner,
+    req.body.pet_name,
+    req.body.care_taker,
+    req.body.date_begin,
+    req.body.date_end,
+  );
+  db.query({
+    text: acceptBidByParams,
+    values: [
+      req.body.owner,
+      req.body.pet_name,
+      req.body.care_taker,
+      req.body.date_begin,
+      req.body.date_end,
+    ],
+  }).then(r => {
+    console.log(r);
+    GetTransactionByTransactionInfo(req.body.owner, req.body.pet_name, req.body.care_taker, req.body.date_begin, req.body.date_end, true)
+      .then(txn => {
+        res.json(txn);
+      })
+  }).catch(err => {
+      res.status(404).json({ errMessage: 'Fail updating transaction basic information' });
+    })
+}
+
+export const GetTransactionByTransactionInfo = async (
+  pet_owner: string, pet: string, care_taker: string, date_begin: string, date_end: string, is_selected: boolean) => {
   // if is_selected == false return error
   // if pet_owner, caretaker, date_begin and date_end are empty, return error
-  
-  return {
+  const txns = await db.query({
+    text: getTxnByTxnInfo,
+    values: [
+      pet_owner,
+      pet,
+      care_taker,
+      new Date(date_begin),
+      new Date(date_end),
+      is_selected
+    ],
+  });
 
-  }
+  return txns.rows;
 }

@@ -20,7 +20,7 @@ export const ListBidByOwnerID = async (req, res) => {
   const txn: Array<Transaction> = userTnx.rows.map(_txn => {
     return {
       pet_owner: _txn.pet_owner,
-      pet_name: _txn.pet_name,
+      pet: _txn.pet,
       care_taker: _txn.caretaker,
       location: _txn.location,
       date_begin: _txn.start_date,
@@ -35,6 +35,7 @@ export const ListBidByOwnerID = async (req, res) => {
       review: _txn.review};
   })
 
+  console.log(txn);
   res.json(txn);
 }
 
