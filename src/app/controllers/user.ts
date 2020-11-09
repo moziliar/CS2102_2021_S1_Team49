@@ -2,8 +2,8 @@ import { mockTakers, mockUsers } from '../models/mockUsers';
 import { CareTaker } from '../models/users';
 import { db } from '../dbconfig/db';
 import {
-  loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery,
-  searchUserQuery,
+  loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery, searchUserQuery,
+  applyLeaveQuery, applyAvailabilityQuery,
   queryPetQuery,
   queryCreditCard,
   getRatesByUserQuery,
@@ -182,8 +182,46 @@ export const ListCareTakerHandler = async (req, res) => {
   res.json(users);
 }
 
+export const ApplyLeaveHanlder = async (req, res) => {
+  db.query({
+    text: applyLeaveQuery,
+    values: [
+      req.body.email,
+      req.body.start_date,
+      req.body.end_date,
+    ],
+  }).then(out => {
+      console.log(out.rows);
+      res.json({
+        success: true,
+        message: 'applied leave successfully',
+      })
+  }).catch(err => {
+    console.log(err);
+  })
+}
+
+export const ApplyAvailabilityHanlder = async (req, res) => {
+  db.query({
+    text: applyAvailabilityQuery,
+    values: [
+      req.body.email,
+      req.body.start_date,
+      req.body.end_date,
+    ],
+  }).then(out => {
+    console.log(out.rows);
+    res.json({
+      success: true,
+      message: 'applied leave successfully',
+    })
+  }).catch(err => {
+    console.log(err);
+  })
+}
+
 export const ListTopPerformingCareTaker = async (req, res) => {
-  await db.query({
+  db.query({
     text: getHighRatingCaretakerDetailsWithinNmonths(req.query.months)
   }).then(query => {
     res.json(query.rows);

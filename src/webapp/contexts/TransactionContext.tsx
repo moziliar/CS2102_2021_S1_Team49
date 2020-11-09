@@ -32,16 +32,15 @@ class TransactionContextProvider extends Component<{}, contextState> {
     }
 
     getPastTransactions = (email) => {
-			API.get(`/txn/list?email=${email}`)
+			API.get(`/txn/list`, { params: { email: email} })
 				.then(res => {
-					const pastTransactions = mockTransactions.filter(t => t.is_selected &&  new Date(t.date_end).getTime() < new Date(Date.now()).getTime());
+					const pastTransactions = res.data.filter(t => t.is_selected &&  new Date(t.date_end).getTime() < new Date(Date.now()).getTime());
 					this.setState({ pastTransactions: pastTransactions });
 				});
     }
 
     getOngoingTransactions = (email) => {
-    	console.log(`/txn/list?email=${email}`);
-			API.get(`/txn/list?email=${email}`)
+			API.get(`/txn/list`, { params: { email: email} })
 				.then(res => {
 					console.log(res.data);
 					const todayDate = new Date(Date.now()).getTime();
@@ -49,7 +48,7 @@ class TransactionContextProvider extends Component<{}, contextState> {
 						const startDate = new Date(t.date_begin).getTime();
 						const endDate = new Date(t.date_end).getTime();
 
-						return t.is_selected && startDate <= todayDate && endDate >= todayDate;
+						return t.is_selected && endDate >= todayDate;
 					});
 					this.setState({ ongoingTransactions: ongoingTransactions });
 				});

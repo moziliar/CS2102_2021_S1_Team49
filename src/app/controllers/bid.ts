@@ -1,6 +1,6 @@
 import { mockBids } from '../models/mockBids'
 import { mockTransactions } from '../models/mockTxns'
-import { listBidByTakerId } from '../sql_query/query'
+import { listTnxByUserId } from '../sql_query/query'
 import { Transaction } from '../models/txns'
 import { db } from '../dbconfig/db'
 
@@ -14,7 +14,7 @@ export const ListAllBids = (req, res) => {
 
 export const ListBidByOwnerID = async (req, res) => {
   const userTnx =  await db.query({
-    text: listBidByTakerId,
+    text: listTnxByUserId,
     values: [req.query.email],
   });
   const txn: Array<Transaction> = userTnx.rows.map(_txn => {

@@ -44,7 +44,10 @@ const MyAvailabilitySection = () => {
 			<Button
 				style={{ 'marginTop': '15px' }}
 				disabled={ state.startDate === null || state.endDate === null }
-				onClick={ () => user.applyLeave(state.startDate, state.endDate) }>
+				onClick={ user.currentUser?.is_part_time
+					? () => user.applyAvailability(user.currentUser.email, state.startDate, state.endDate)
+					: () => user.applyLeave(user.currentUser.email, state.startDate, state.endDate)
+				}>
 					Apply!
 			</Button>
 		</div>

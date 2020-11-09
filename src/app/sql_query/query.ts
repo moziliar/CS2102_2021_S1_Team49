@@ -96,6 +96,15 @@ WHERE  get_average_rating(U.email) > $2
   ); 
 `;
 
+export const applyLeaveQuery = `
+INSERT INTO full_time_leaves
+VALUES ($1, $2, $3)
+`;
+
+export const applyAvailabilityQuery = `
+INSERT INTO part_time_availabilities
+VALUES ($1, $2, $3)
+`;
 
 export const getRatesByUserQuery =
   " \
@@ -153,19 +162,10 @@ FROM bids \
 
 // INPUT:
 // owner -> {email}
-export const listTnxByOwnerId =
-  " \
-SELECT * \
-FROM bids \
-WHERE pet_owner=$1 AND is_active=false AND is_selected=true\
-";
-
-// INPUT:
-// caretaker -> {email}
-export const listBidByTakerId = `
-SELECT * 
-FROM bids 
-WHERE caretaker=$1 AND is_active=true AND is_selected=false
+export const listTnxByUserId = `
+SELECT *
+FROM bids
+WHERE pet_owner=$1 OR caretaker=$1 AND is_active=false AND is_selected=true
 `;
 
 // INPUT:

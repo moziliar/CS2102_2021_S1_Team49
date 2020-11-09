@@ -1,4 +1,10 @@
-import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker, GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler } from './controllers/user'
+import {
+  LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler,
+  AddCreditCardHandler, DeleteCreditCardHandler,
+  ApplyLeaveHanlder, ApplyAvailabilityHanlder,
+  ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker,
+  GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler
+} from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
 import { CreateTransactionInfo, ListTxnByUserID, AcceptBidByParams } from './controllers/txn'
 import { ListAllBids, ListBidByOwnerID } from './controllers/bid';
@@ -23,6 +29,8 @@ const initServer = (port: number) => {
   router.post('/user/create', CreateUserHandler);
   router.put('/user/update', UpdateUserHandler);
   router.delete('/user/delete', DeleteUserHandler);
+  router.post('/user/apply_leave', ApplyLeaveHanlder);
+  router.post('/user/apply_availability', ApplyAvailabilityHanlder);
   router.post('/apply/caretaker', ApplyCareTakerHandler);
   router.get('/search/caretaker', ListCareTakerHandler);
   router.get('/top/caretaker', ListTopPerformingCareTaker);
