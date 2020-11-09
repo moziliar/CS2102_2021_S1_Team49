@@ -3,10 +3,10 @@ import {
   AddCreditCardHandler, DeleteCreditCardHandler,
   ApplyLeaveHanlder, ApplyAvailabilityHanlder,
   ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker,
-  GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler
+  GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler, GetSalaryHandler
 } from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
-import { CreateTransactionInfo, ListTxnByUserID, AcceptBidByParams } from './controllers/txn'
+import { CreateTransactionInfo, ListTxnByUserID, AcceptBidByParams, ReviewTransactionHandler } from './controllers/txn'
 import { ListAllBids, ListBidByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
 
@@ -38,6 +38,7 @@ const initServer = (port: number) => {
   router.post('/dailyrate/create', CreateDailyPriceHandler);
   router.put('/dailyrate/update', UpdateDailyPriceHandler);
   router.delete('/dailyrate/delete', DeleteDailyPriceHandler);
+  router.put('/caretaker/salary', GetSalaryHandler);
 
   router.post('/card/create', AddCreditCardHandler);
   router.delete('/card/delete', DeleteCreditCardHandler);
@@ -52,6 +53,7 @@ const initServer = (port: number) => {
 
   router.post('/txn/create', CreateTransactionInfo);
   router.get('/txn/list', ListTxnByUserID);
+  router.put('/txn/addreview', ReviewTransactionHandler)
 
   router.get('/bid/list', ListAllBids);
   router.get('/bid/query', ListBidByOwnerID);

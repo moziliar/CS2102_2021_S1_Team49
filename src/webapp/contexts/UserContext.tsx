@@ -231,6 +231,7 @@ class UserContextProvider extends Component<{}, userContextState> {
 
 		API.delete('/pet/delete', { params: data })
 			.then(res => {
+				console.log(res.data);
 				this.setState({
 					currentUser: res.data,
 					errMessage: '',

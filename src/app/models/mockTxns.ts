@@ -36,9 +36,9 @@ export const mockTransactions: Array<Transaction> = [
     review: ''
   },
   {
-    pet_owner: 'Peter',
+    pet_owner: 'test',
     pet: 'Doggy',
-    care_taker: 'test',
+    care_taker: 'Peter',
     location: 'Singapore',
     date_begin: '2020-06-06',
     date_end: '2020-07-06',
@@ -48,8 +48,8 @@ export const mockTransactions: Array<Transaction> = [
     is_active: true,
     payment_method: 'cash',
     cc_number: null,
-    rating: 3,
-    review: 'Good'
+    rating: null,
+    review: ''
   },
   {
     pet_owner: 'test',

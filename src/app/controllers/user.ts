@@ -5,6 +5,7 @@ import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery, searchUserQuery,
   applyLeaveQuery, applyAvailabilityQuery,
   queryPetQuery,
+  getSalaryQuery,
   queryCreditCard,
   getRatesByUserQuery,
   listDoneTnxByOwnerId,
@@ -270,6 +271,17 @@ export const DeleteDailyPriceHandler = async (req, res) => {
     values: [req.query.email, req.query.category]
   }).then(query => {
 
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
+}
+
+export const GetSalaryHandler = async (req, res) => {
+  db.query({
+    text: getSalaryQuery,
+    values: [req.query.caretaker, req.query.month, req.query.year]
+  }).then(query => {
+    res.json(query.rows[0]);
   }).catch(err => {
     res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
   })

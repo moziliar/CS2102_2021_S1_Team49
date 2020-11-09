@@ -50,9 +50,11 @@ export const DeletePetHandler = async (req, res) => {
   await db.query({
     text: deletePetQuery,
     values: [req.query.name, req.query.owner]
-  }).then(async r => {
-    const user = await GetUserByEmail(req.body.owner);
-    res.json(user);
+  }).then(r => {
+    GetUserByEmail(req.query.owner)
+      .then(user => {
+        res.json(user);
+      })
   })
   .catch(err => {
     console.log(err)
@@ -91,7 +93,7 @@ export const CreateCategoryHandler = async (req, res) => {
 export const UpdateCategoryHandler = async (req, res) => {
   await db.query({
     text: updateCategoryQuery,
-    values: [req.body.name, req.body.price]
+    values: [req.body.name, req.body.price * 100]
   }).then(async q => {
       GetAllCategoryHelper()
         .then(query => {

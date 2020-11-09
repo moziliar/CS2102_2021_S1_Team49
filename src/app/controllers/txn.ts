@@ -6,7 +6,8 @@ import {
   createTransactionInfo,
   updateTransactionInfo,
   acceptBidByParams,
-  getTxnByTxnInfo
+  getTxnByTxnInfo,
+  reviewTransactionQuery
 } from '../sql_query/query';
 
 
@@ -122,6 +123,29 @@ export const UpdateTransactionInfo = async (req, res) => {
     })
     .catch(err => {
       res.status(404).json({ errMessage: 'Fail updating transaction basic information' });
+    })
+}
+
+export const ReviewTransactionHandler = async (req, res) => {
+  console.log(req.body)
+  db.query({
+    text: reviewTransactionQuery,
+    values: [
+      req.body.owner,
+      req.body.pet_name,
+      req.body.care_taker,
+      req.body.date_begin,
+      req.body.date_end,
+      req.body.rating,
+      req.body.review
+    ],
+  }).then(r => {
+    GetTransactionByTransactionInfo(req.body.owner, req.body.pet_name, req.body.care_taker, req.body.date_begin, req.body.date_end, true)
+      .then(txn => {
+        res.json(txn);
+      })
+  }).catch(err => {
+      res.status(404).json({ errMessage: 'Fail adding review to past transaction' });
     })
 }
 

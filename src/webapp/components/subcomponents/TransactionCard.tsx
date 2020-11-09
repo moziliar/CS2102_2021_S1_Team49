@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { Form } from 'react-bootstrap';
+import React, { useContext, useState } from 'react';
+import { Form, Button } from 'react-bootstrap';
 
 import { Transaction } from '../../../app/models/txns';
 import { User } from '../../../app/models/users';
@@ -12,6 +12,8 @@ type IProps = {
 }
 
 const TransactionCard = (props: IProps) => {
+	const [review, setReview] = useState('');
+	const [rating, setRating] = useState(0);
 	const userContext = useContext(UserContext);
 	const currentUser: User | null = userContext.currentUser;
 	const { transaction, isBid } = props;
@@ -35,8 +37,25 @@ const TransactionCard = (props: IProps) => {
 			})
 	};
 
+	const _onHandleAddReview = () => {
+		const request = {
+			...req,
+			review: review,
+			rating: rating
+		}
+
+		API.put('/txn/addreview', request)
+			.then(res => {
+				console.log(res)
+			})
+			.catch(err => {
+				alert(err.response.data.errMessage)
+			})
+	}
+
 	const isCareTaker = currentUser?.email === transaction.care_taker;
 	const backgroundColor: string = isCareTaker ? '#ccffe5' : '#ccedff'
+	console.log(props.transaction)
 	
 	return (
 		<div style={{ 'backgroundColor': backgroundColor, 'padding': '20px', 'borderRadius': '5px', 'margin': '15px' }}>
@@ -50,10 +69,22 @@ const TransactionCard = (props: IProps) => {
 					: !isCareTaker 
 						? <Form style={{ 'marginTop': '10px' }}>
 							<small style={{ 'color': 'red' }}>You haven't review the care taker. Give your review now</small><br />
-							<Form.Control as="textarea" rows={ 2 } placeholder="Enter your review"/>
+							<Form.Control 
+								as="textarea" 
+								rows={ 2 } 
+								placeholder="Enter your review" 
+								value={ review }
+								onChange={ (e) => setReview(e.target.value) }/>
 							<div style={{ 'marginTop': '10px' }}>
-								<Form.Control type="number" placeholder="Give your rating(1-5)" max={ 5 } min={ 1 } style={{ 'width': '40%', 'display': 'inline', 'marginRight': '20px' }}/>
-								<input type="submit" />
+								<Form.Control 
+									value={ rating } 
+									type="number" 
+									placeholder="Give your rating(1-5)" 
+									max={ 5 } 
+									min={ 1 } 
+									style={{ 'width': '40%', 'display': 'inline', 'marginRight': '20px' }}
+									onChange={ (e) => setRating(parseInt(e.target.value)) }/>
+								<Button onClick={ _onHandleAddReview }>Submit Review</Button>
 							</div>
 						</Form>
 						: <small style={{ 'color': 'red' }}>*Owner has not give you any review</small>

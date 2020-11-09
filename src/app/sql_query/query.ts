@@ -208,6 +208,13 @@ SET pet_owner=$1, pet=$2, caretaker=$3, date_begin=$4,
 WHERE pet_owner=$1 AND caretaker=$3 AND start_date=$4 AND end_date=$5 AND is_selected=true AND $10=true
 `;
 
+export const reviewTransactionQuery = 
+" \
+UPDATE bids \
+SET rating=$6, review=$7 \
+WHERE pet_owner=$1 AND pet=$2 AND caretaker=$3 AND start_date=$4 AND end_date=$5 \
+";
+
 export const acceptBidByParams = `
 UPDATE bids
 SET is_selected=true, is_active=false
@@ -292,6 +299,13 @@ UPDATE daily_prices \
 SET price=$3 \
 WHERE caretaker=$1 AND category=$2 \
 "
+
+export const getSalaryQuery = 
+" \
+SELECT year, month, amount \
+FROM salary \
+WHERE caretaker=$1 AND month=$2 AND year=$3 \
+";
 
 // INPUT:
 // caretaker -> {caretaker, category}

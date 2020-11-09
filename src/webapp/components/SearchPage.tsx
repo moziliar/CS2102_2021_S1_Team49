@@ -91,7 +91,7 @@ class SearchPage extends Component<{}, IState> {
     const req = {
       category: formData[CATEGORY],
       rating: formData[RATING],
-      price: formData[PRICE],
+      price: formData[PRICE] * 100,
       date_begin: formData[START_DATE],
       date_end: formData[END_DATE],
     };
@@ -332,7 +332,7 @@ class SearchPage extends Component<{}, IState> {
           {rates.map((rate, index) => {
             return (
               <p key={rate.category}>
-                {rate.category} - ${rate.price}/night
+                {rate.category} - ${rate.price / 100}/night
               </p>
             );
           })}
