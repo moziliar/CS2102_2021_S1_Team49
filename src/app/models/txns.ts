@@ -1,6 +1,6 @@
 export interface Transaction {
   pet_owner: string;
-  pet_name: string;
+  pet: string;
   care_taker: string;
   location: string;
   date_begin: string;

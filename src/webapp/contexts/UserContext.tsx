@@ -21,6 +21,7 @@ export type userContextState = {
 	deletePet: any,
 	updatePet: any,
 	applyLeave: any,
+	applyAvailability: any,
 	currentUser: User | null
 };
 
@@ -39,6 +40,7 @@ export const UserContext = createContext<userContextState>({
 	deletePet: null,
 	updatePet: null,
 	applyLeave: null,
+	applyAvailability: null,
 	currentUser: null
 });
 
@@ -58,6 +60,7 @@ class UserContextProvider extends Component<{}, userContextState> {
 		deletePet: null,
 		updatePet: null,
 		applyLeave: null,
+		applyAvailability: null,
 		currentUser: null
 	};
 
@@ -240,8 +243,20 @@ class UserContextProvider extends Component<{}, userContextState> {
 			})
 	}
 
-	applyLeave = (startDate: Date, endDate: Date) => {
-		console.log("Leave Applied");
+	applyLeave = (email: string, startDate: Date, endDate: Date) => {
+		API.post('/user/apply_leave', { email: email, start_date: startDate, end_date: endDate })
+			.then(res => {
+				console.log(res.data.message);
+			})
+			.catch(err => console.log(err));
+	}
+
+	applyAvailability = (email: string, startDate: Date, endDate: Date) => {
+		API.post('/user/apply_availability', { email: email, start_date: startDate, end_date: endDate })
+			.then(res => {
+				console.log(res.data.message);
+			})
+			.catch(err => console.log(err));
 	}
 
 	render() {
@@ -251,6 +266,7 @@ class UserContextProvider extends Component<{}, userContextState> {
 				signUpFunc: this.signUpFunc, 
 				signOutFunc: this.signOutFunc,
 				applyLeave: this.applyLeave,
+				applyAvailability: this.applyAvailability,
 				updateUserFunc: this.updateUserFunc,
 				applyCareTaker: this.applyCareTaker,
 				addCreditCard: this.addCreditCard,

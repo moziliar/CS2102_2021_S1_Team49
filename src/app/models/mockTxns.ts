@@ -5,7 +5,7 @@ import { mockPets } from './mockPets';
 export const mockTransactions: Array<Transaction> = [
   {
     pet_owner: 'test',
-    pet_name: 'Doggy',
+    pet: 'Doggy',
     care_taker: 'Peter',
     location: 'Singapore',
     date_begin: '2020-06-06',
@@ -21,7 +21,7 @@ export const mockTransactions: Array<Transaction> = [
   },
   {
     pet_owner: 'Peter',
-    pet_name: 'Doggy',
+    pet: 'Doggy',
     care_taker: 'test',
     location: 'Singapore',
     date_begin: '2020-06-06',
@@ -37,7 +37,7 @@ export const mockTransactions: Array<Transaction> = [
   },
   {
     pet_owner: 'Peter',
-    pet_name: 'Doggy',
+    pet: 'Doggy',
     care_taker: 'test',
     location: 'Singapore',
     date_begin: '2020-06-06',
@@ -53,7 +53,7 @@ export const mockTransactions: Array<Transaction> = [
   },
   {
     pet_owner: 'test',
-    pet_name: 'Doggy',
+    pet: 'Doggy',
     care_taker: 'dd',
     location: 'Singapore',
     date_begin: '2020-06-06',

@@ -19,20 +19,20 @@ const TransactionCard = (props: IProps) => {
 	const req = {
 		care_taker: transaction.care_taker,
 		owner: transaction.pet_owner,
-		pet_name: transaction.pet_name,
+		pet_name: transaction.pet,
 		date_begin: transaction.date_begin,
 		date_end: transaction.date_end
 	}
 	
 	// Link to API
 	const _onHandleAcceptBid = () => {
-		// API.put('/bid/accept', req)
-		// 	.then(res => {
-				
-		// 	})
-		// 	.catch(err => {
-		// 		alert(err.response.data.errMessage)
-		// 	})
+		API.put('/bid/accept', req)
+			.then(res => {
+				console.log(res)
+			})
+			.catch(err => {
+				alert(err.response.data.errMessage)
+			})
 	};
 
 	const isCareTaker = currentUser?.email === transaction.care_taker;
@@ -42,7 +42,7 @@ const TransactionCard = (props: IProps) => {
 		<div style={{ 'backgroundColor': backgroundColor, 'padding': '20px', 'borderRadius': '5px', 'margin': '15px' }}>
 			<p>{ isCareTaker ? 'Owner' : 'Taker' } Email: { isCareTaker ? props.transaction.pet_owner : props.transaction.care_taker } </p>
 			<p>Period: { transaction.date_begin } - { transaction.date_end } ({ transaction.is_active ? !isCareTaker ? 'You bid for: ' : 'The owner bid for:' : '' }${props.transaction.total_price})</p>
-			<p>Pet Name: { transaction.pet_name }</p>
+			<p>Pet Name: { transaction.pet }</p>
 			{ isBid
 				? <button onClick={ _onHandleAcceptBid }>Accept Bid</button>
 				: transaction.review

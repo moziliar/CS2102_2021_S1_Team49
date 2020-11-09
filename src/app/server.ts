@@ -1,6 +1,12 @@
-import { LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler, AddCreditCardHandler, DeleteCreditCardHandler, ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker, GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler } from './controllers/user'
+import {
+  LoginHandler, CreateUserHandler, UpdateUserHandler, DeleteUserHandler,
+  AddCreditCardHandler, DeleteCreditCardHandler,
+  ApplyLeaveHanlder, ApplyAvailabilityHanlder,
+  ApplyCareTakerHandler, ListCareTakerHandler, ListTopPerformingCareTaker,
+  GetAllCareTakerDailyPriceHandler, DeleteDailyPriceHandler, UpdateDailyPriceHandler, CreateDailyPriceHandler
+} from './controllers/user'
 import { CreatePetHandler, UpdatePetHandler, DeletePetHandler, GetAllCategoryPricesHandler, GetAllPetCategoriesHandler, CreateCategoryHandler, UpdateCategoryHandler } from './controllers/pet'
-import { CreateTransactionInfo, ListTxnByUserID } from './controllers/txn'
+import { CreateTransactionInfo, ListTxnByUserID, AcceptBidByParams } from './controllers/txn'
 import { ListAllBids, ListBidByOwnerID } from './controllers/bid';
 import initDB from './dbconfig/db'
 
@@ -23,6 +29,8 @@ const initServer = (port: number) => {
   router.post('/user/create', CreateUserHandler);
   router.put('/user/update', UpdateUserHandler);
   router.delete('/user/delete', DeleteUserHandler);
+  router.post('/user/apply_leave', ApplyLeaveHanlder);
+  router.post('/user/apply_availability', ApplyAvailabilityHanlder);
   router.post('/apply/caretaker', ApplyCareTakerHandler);
   router.get('/search/caretaker', ListCareTakerHandler);
   router.get('/top/caretaker', ListTopPerformingCareTaker);
@@ -47,6 +55,7 @@ const initServer = (port: number) => {
 
   router.get('/bid/list', ListAllBids);
   router.get('/bid/query', ListBidByOwnerID);
+  router.put('/bid/accept', AcceptBidByParams);
 
   return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }
