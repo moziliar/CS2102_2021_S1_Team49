@@ -51,11 +51,8 @@ export const DeletePetHandler = async (req, res) => {
     text: deletePetQuery,
     values: [req.query.name, req.query.owner]
   }).then(async r => {
-    console.log(req.query.owner);
-    await GetUserByEmail(req.query.owner)
-      .then(user => {
-        res.json(user);
-      })
+    const user = await GetUserByEmail(req.body.owner);
+    res.json(user);
   })
   .catch(err => {
     console.log(err)
@@ -79,7 +76,7 @@ export const CreateCategoryHandler = async (req, res) => {
     values: [req.body.name, req.body.price, req.body.parent ? req.body.parent : null]
   }).then(async query => {
     if (query.rowCount > 0) {
-      await GetAllCategoryHelper()
+      GetAllCategoryHelper()
         .then(query => {
           query.categoryList.push({});
           res.json(query.categoryList);
@@ -96,7 +93,7 @@ export const UpdateCategoryHandler = async (req, res) => {
     text: updateCategoryQuery,
     values: [req.body.name, req.body.price]
   }).then(async q => {
-      await GetAllCategoryHelper()
+      GetAllCategoryHelper()
         .then(query => {
           query.categoryList.push({});
           res.json(query.categoryList);

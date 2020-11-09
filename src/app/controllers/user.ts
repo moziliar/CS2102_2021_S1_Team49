@@ -58,7 +58,7 @@ export const UpdateUserHandler = async (req, res) => {
              req.body.phone,
              req.body.pic_url], 
   }).then(async r => { 
-    await GetUserByEmail(req.body.email)
+    GetUserByEmail(req.body.email)
       .then(user => {
         res.json(user);
       })
@@ -99,7 +99,7 @@ export const AddCreditCardHandler = async (req, res) => {
              req.body.expiry_date
             ]
   }).then(async r => {
-    await GetUserByEmail(req.body.email)
+    GetUserByEmail(req.body.email)
       .then(user => {
         res.json(user);
       })
@@ -115,7 +115,7 @@ export const DeleteCreditCardHandler = async (req, res) => {
     text: deleteCreditCardQuery,
     values: [req.query.email, req.query.cc_number]
   }).then(async r => {
-    await GetUserByEmail(req.query.email)
+    GetUserByEmail(req.query.email)
       .then(user => {
         res.json(user);
       })

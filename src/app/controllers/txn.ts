@@ -87,7 +87,7 @@ export const UpdateTransactionInfo = async (req, res) => {
              req.body.review
             ],
   }).then(async r => { 
-    await GetTransactionByTransactionInfo(req.body.pet_owner, req.body.care_taker, req.body.date_begin, req.body.date_end, req.body.is_selected)
+    GetTransactionByTransactionInfo(req.body.pet_owner, req.body.care_taker, req.body.date_begin, req.body.date_end, req.body.is_selected)
       .then(user => {
         res.json(user);
       })
