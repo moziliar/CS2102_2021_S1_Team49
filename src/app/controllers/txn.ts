@@ -29,7 +29,6 @@ export const ListTxnByUserID = async (req, res) => {
       transfer_method: _txn.transfer_method,
       is_selected: _txn.is_selected,
       is_active: _txn.is_active,
-      payment_method: _txn.payment_method,
       cc_number: _txn.cc_number,
       rating: _txn.rating,
       review: _txn.review};
@@ -51,7 +50,6 @@ export const CreateTransactionInfo = async (req, res) => {
              req.body.total_price,
              req.body.is_active,
              req.body.is_selected,
-             req.body.payment_method,
              req.body.cc_number,
              req.body.rating,
              req.body.review
@@ -81,7 +79,6 @@ export const UpdateTransactionInfo = async (req, res) => {
              req.body.total_price,
              req.body.is_active,
              req.body.is_selected,
-             req.body.payment_method,
              req.body.cc_number,
              req.body.rating,
              req.body.review

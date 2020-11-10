@@ -14,7 +14,6 @@ export const mockTransactions: Array<Transaction> = [
     transfer_method: 'delivery',
     is_selected: true,
     is_active: false,
-    payment_method: 'cash',
     cc_number: null,
     rating: 3,
     review: 'Good'
@@ -30,7 +29,6 @@ export const mockTransactions: Array<Transaction> = [
     transfer_method: 'delivery',
     is_selected: true,
     is_active: false,
-    payment_method: 'cash',
     cc_number: null,
     rating: null,
     review: ''
@@ -46,7 +44,6 @@ export const mockTransactions: Array<Transaction> = [
     transfer_method: 'delivery',
     is_selected: true,
     is_active: true,
-    payment_method: 'cash',
     cc_number: null,
     rating: 3,
     review: 'Good'
@@ -62,7 +59,6 @@ export const mockTransactions: Array<Transaction> = [
     transfer_method: 'delivery',
     is_selected: false,
     is_active: true,
-    payment_method: 'cash',
     cc_number: null,
     rating: 0,
     review: ''

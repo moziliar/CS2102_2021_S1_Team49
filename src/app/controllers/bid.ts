@@ -29,7 +29,6 @@ export const ListBidByOwnerID = async (req, res) => {
       transfer_method: _txn.transfer_method,
       is_selected: _txn.is_selected,
       is_active: _txn.is_active,
-      payment_method: _txn.payment_method,
       cc_number: _txn.cc_number,
       rating: _txn.rating,
       review: _txn.review};

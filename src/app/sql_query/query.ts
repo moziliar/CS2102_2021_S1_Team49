@@ -180,31 +180,31 @@ WHERE pet_owner=$1 \
 ";
 
 // INPUT:
-// bid -> {price, payment_method, transfer_method, cc_number}
+// bid -> {price, transfer_method, cc_number}
 // owner -> {email}
 export const updateBid =
-  " \
-UPDATE bids \
-SET total_price=$1, payment_method=$2 \
-    transfer_method=$3, cc_number=$4 \
-WHERE pet_owner=$5 \
-";
+    " \
+  UPDATE bids \
+  SET total_price=$1, \
+      transfer_method=$2, cc_number=$3 \
+  WHERE pet_owner=$4 \
+  ";
 
 export const createTransactionInfo =
-  " \
-INSERT INTO bids \
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) \
-";
+    " \
+  INSERT INTO bids \
+  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) \
+  ";
 
 export const updateTransactionInfo =
-  " \
-UPDATE bids \
-SET pet_owner=$1, pet=$2, caretaker=$3, date_begin=$4, \
-    date_end=$5, transfer_method=$6, location=$7, total_price=$8, \
-    is_active=$9, is_selected=$10, payment_method=$11, cc_number=$12, \
-    rating=$13, review=$14 \
-WHERE pet_owner=$1 AND caretaker=$3 AND date_begin=$4 AND date_end=$5 AND is_selected=true AND $10=true \
-";
+    " \
+  UPDATE bids \
+  SET pet_owner=$1, pet=$2, caretaker=$3, date_begin=$4, \
+      date_end=$5, transfer_method=$6, location=$7, total_price=$8, \
+      is_active=$9, is_selected=$10, cc_number=$11, \
+      rating=$12, review=$13 \
+  WHERE pet_owner=$1 AND caretaker=$3 AND date_begin=$4 AND date_end=$5 AND is_selected=true AND $10=true \
+  ";
 
 // INPUT:
 // owner -> {email}
@@ -427,9 +427,9 @@ export const getAdminPastMonthSummary = `
 // OUTPUT:
 // caretaker, is_part_time, pet_days, revenue, salary
 export const getSalariesForCaretakersInMonthQuery = ` 
-WITH pet_days(day, pet_owner, pet, caretaker, daily_price, transfer_method, location, payment_method, rating) AS (
+WITH pet_days(day, pet_owner, pet, caretaker, daily_price, transfer_method, location, rating) AS (
   SELECT D.day, B.pet_owner, B.pet, B.caretaker, B.total_price / (B.end_date + 1 - B.start_date) AS daily_price, B.transfer_method,
-    B.location, B.payment_method, B.rating
+    B.location, B.rating
   FROM (SELECT date(generate_series(first_day_of_month($1), last_day_of_month($1), interval '1 day')) 
     AS day) D INNER JOIN bids B ON D.day BETWEEN B.start_date AND B.end_date
   GROUP BY B.caretaker, B.pet, B.pet_owner, B.start_date, B.end_date, D.day
