@@ -59,6 +59,8 @@ const initServer = (port: number) => {
   router.get('/bid/query', ListBidByOwnerID);
   router.put('/bid/accept', AcceptBidByParams);
 
+  router.all('*', (req, res) => res.redirect('/'));
+
   return () => server.listen(port, () => { console.log(`server listening at port ${port}`); });
 }
 
