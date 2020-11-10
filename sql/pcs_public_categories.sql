@@ -1,0 +1,10 @@
+INSERT INTO public.categories (name, price, parent) VALUES ('Vulture, griffon', 5561, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Savannah deer (unidentified)', 7065, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Gull, lava', 7088, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Asiatic jackal', 6763, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Bohor reedbuck', 8604, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Whale, killer', 5835, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Red-winged blackbird', 7525, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Monkey, red howler', 5153, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Galapagos penguin', 8278, null);
+INSERT INTO public.categories (name, price, parent) VALUES ('Cobra, egyptian', 7607, null);

@@ -54,10 +54,10 @@ export const DeletePetHandler = async (req, res) => {
     const user = await GetUserByEmail(req.body.owner);
     res.json(user);
   })
-  .catch(err => {
-    console.log(err)
-    res.status(404).json({ errMessage: 'Fail removing pet. Please try again later.' });
-  })
+    .catch(err => {
+      console.log(err)
+      res.status(404).json({ errMessage: 'Fail removing pet. Please try again later.' });
+    })
 }
 
 export const GetAllPetCategoriesHandler = async (req, res) => {

@@ -137,6 +137,7 @@ export const ListCareTakerHandler = async (req, res) => {
     date_begin
     date_end
    */
+  console.log(req.body);
   const _users = await db.query({
     text: searchUserQuery,
     values: [
