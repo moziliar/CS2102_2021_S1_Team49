@@ -9,7 +9,7 @@ import {
   queryCreditCard,
   getRatesByUserQuery,
   listDoneTnxByOwnerId,
-  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths, getAllCareTakerDailyPrice, deleteDailyPriceQuery, updateDailyPriceQuery, addDailyPrice
+  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths, getAllCareTakerDailyPrice, deleteDailyPriceQuery, updateDailyPriceQuery, addDailyPrice, queryLeaves
 } from '../sql_query/query';
 
 // ================================ USER =========================================
@@ -185,7 +185,7 @@ export const ListCareTakerHandler = async (req, res) => {
       })
     } else {
       const leavesRet = await db.query({
-        text: queryAvailabiliies,
+        text: queryLeaves,
         values: [user.email],
       });
 
@@ -378,7 +378,7 @@ export const GetUserByEmail = async (email: string) => {
     }
   } else {
     const leavesRet = await db.query({
-      text: queryAvailabiliies,
+      text: queryLeaves,
       values: [email],
     });
 
