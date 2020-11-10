@@ -69,10 +69,11 @@ export const ListTxnByCaretaker = async (req, res) => {
 }
 
 export const CreateTransactionInfo = async (req, res) => {
+  console.log(req.body);
   await db.query({
     text: createTransactionInfo,
     values: [req.body.pet_owner,
-             req.body.pet,
+             req.body.pet_name,
              req.body.care_taker,
              req.body.date_begin,
              req.body.date_end,
