@@ -100,7 +100,7 @@ class SearchPage extends Component<{}, IState> {
     API.get("/search/caretaker", { params: req })
       .then((res) => {
         this.setState({
-          careTakers: mockTakers,
+          careTakers: res.data,
           modalShow: false,
           selectedCareTaker: null,
         });
