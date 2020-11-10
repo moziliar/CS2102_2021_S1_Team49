@@ -45,3 +45,11 @@
         text-decoration: underline;
     }
 }
+
+div.rounded-circle {
+    pointer-events: none;
+}
+
+div.rounded-circle.not-available {
+    border: 1px solid white !important;
+}

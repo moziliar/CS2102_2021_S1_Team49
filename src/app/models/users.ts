@@ -8,6 +8,8 @@ export interface CareTaker {
   rating: number;
   rate: Array<DailyRate>;
   reviews?: Array<Review>;
+  leave_or_avail?: Array<Leave>;
+  is_part_time?: boolean;
 }
 
 export interface TopCareTaker {

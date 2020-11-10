@@ -165,7 +165,7 @@ class DashboardPage extends Component<{}, IState> {
             <>
                 <td>{ category.name }</td>
                 <td>{ category.parent || "N.A"}</td>
-                <td><Form.Control type="number" value={ category.price } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) } /></td>
+                <td><Form.Control type="number" value={ category.price / 100 } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) } /></td>
                 <td><Button variant="primary" onClick={ () => this._onHandleUpdatePrice(index) }>Update</Button></td>
             </>
         );
