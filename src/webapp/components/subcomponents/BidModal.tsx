@@ -130,7 +130,7 @@ class BidModal extends Component<IProps, IState> {
       total_price: this._getNumberOfDays(formData[START_DATE], formData[END_DATE]) * formData[PRICE],
       is_active: true,
       is_selected: false,
-      payment_method: formData[PAYMENT_METHOD],
+      payment_method: formData[CARD_NUMBER] === null ? CASH : CREDIT_CARD,
       cc_number: formData[CARD_NUMBER] || null,
       rating: null,
       review: null
