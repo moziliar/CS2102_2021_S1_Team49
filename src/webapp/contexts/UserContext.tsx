@@ -245,6 +245,8 @@ class UserContextProvider extends Component<{}, userContextState> {
 	}
 
 	applyLeave = (email: string, startDate: Date, endDate: Date) => {
+		startDate.setDate(startDate.getDate() + 1);
+		endDate.setDate(endDate.getDate() + 1);
 		API.post('/user/apply_leave', { email: email, start_date: startDate, end_date: endDate })
 			.then(res => {
 				this.setState({ currentUser: res.data })
@@ -254,6 +256,8 @@ class UserContextProvider extends Component<{}, userContextState> {
 	}
 
 	applyAvailability = (email: string, startDate: Date, endDate: Date) => {
+		startDate.setDate(startDate.getDate() + 1);
+		endDate.setDate(endDate.getDate() + 1);
 		API.post('/user/apply_availability', { email: email, start_date: startDate, end_date: endDate })
 			.then(res => {
 				this.setState({ currentUser: res.data })
