@@ -51,12 +51,12 @@ WHERE  get_average_rating(U.email) > $2
       AND P.price<$3) 
   AND 
     CASE 
-      WHEN U.email IN (SELECT caretaker FROM full_time_leaves) 
+      WHEN U.email IN (SELECT pcs_user FROM caretakers WHERE pcs_user=U.email AND is_part_time=false) 
         THEN NOT EXISTS ( 
           SELECT * FROM full_time_leaves L 
           WHERE L.caretaker=U.email 
             AND (date(L.start_date), date(L.end_date) + 1) OVERLAPS (date($4), date($5) + 1)) 
-      WHEN U.email IN (SELECT caretaker FROM part_time_availabilities)
+      WHEN U.email IN (SELECT pcs_user FROM caretakers WHERE pcs_user=U.email AND is_part_time=true) 
         THEN (
           SELECT COUNT(*) 
           FROM (SELECT generate_series(date($4), date($5), '1 day') AS day) D
@@ -73,6 +73,7 @@ WHERE  get_average_rating(U.email) > $2
       FROM bids
       WHERE is_selected=TRUE
       AND D.day BETWEEN start_date AND end_date
+      AND bids.caretaker=U.email
     ) >= (
       CASE
         WHEN EXISTS (
@@ -90,7 +91,7 @@ WHERE  get_average_rating(U.email) > $2
                 THEN 2
               ELSE 5
             END
-        ELSE -1
+        ELSE 5
       END
     )
   ); 
