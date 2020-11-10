@@ -217,7 +217,6 @@ class UserContextProvider extends Component<{}, userContextState> {
 				});
 			})
 			.catch(err => {
-				console.log(err)
 				alert(err.reponse.message.errMessage);
 			})
 	}
@@ -252,7 +251,7 @@ class UserContextProvider extends Component<{}, userContextState> {
 				this.setState({ currentUser: res.data })
 				alert('Leave applied successfully')
 			})
-			.catch(err => console.log(err));
+			.catch(err => console.log('Apply leave fail, check the leave is duplicate or does not meet requirement'));
 	}
 
 	applyAvailability = (email: string, startDate: Date, endDate: Date) => {
@@ -263,7 +262,7 @@ class UserContextProvider extends Component<{}, userContextState> {
 				this.setState({ currentUser: res.data })
 				alert('Availability updated')
 			})
-			.catch(err => console.log(err));
+			.catch(err => console.log('Apply availibility fail, check if it is duplicate and retry.'));
 	}
 
 	render() {

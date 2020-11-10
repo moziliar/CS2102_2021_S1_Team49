@@ -39,7 +39,7 @@ class MyDailyRate extends Component<{}, IState> {
             const req = {
                 email: email,
                 category: category,
-                price: categoryList[index]["minPrice"]
+                price: categoryList[index]["minPrice"] * 100
             };
             if (myRateList.map(rate => rate.category).includes(category)) {
                 API.put('/dailyrate/update', req)
@@ -98,7 +98,7 @@ class MyDailyRate extends Component<{}, IState> {
                                                     onChange={ () => this._onHandleInputChange(`[${index}].isSelected`, !category["isSelected"]) }/>
                                             </td>
                                             <td>{ category.name }</td>
-                                            <td>{ category.price }</td>
+                                            <td>{ category.price / 100 }</td>
                                             <td>
                                                 <Form.Control 
                                                     type="number" 

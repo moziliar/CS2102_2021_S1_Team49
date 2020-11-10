@@ -73,8 +73,10 @@ class ProfilePage extends Component {
 		);
 
 		if (isCareTaker) {
+			if (this.context.currentUser.is_part_time) {
+				links.push(<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>);
+			}
 			links.push(
-				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/my-availability" key="my-availability">My Availability</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/daily-rate" key="daily-rate">My Daily Rates</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>

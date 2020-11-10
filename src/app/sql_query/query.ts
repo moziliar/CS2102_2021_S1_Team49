@@ -161,6 +161,12 @@ SELECT * \
 FROM bids \
 ";
 
+export const listBidsByUserId = `
+SELECT *
+FROM bids
+WHERE caretaker=$1 AND is_active=true AND is_selected=false
+`;
+
 // INPUT:
 // owner -> {email}
 export const listTnxByUserId = `
