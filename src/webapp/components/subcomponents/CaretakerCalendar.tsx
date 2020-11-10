@@ -14,13 +14,14 @@ const CaretakerCalendar = (props) => {
 			start_date += 86400000 // equivalent of 1 day(in ms)
 		}
     }
+    console.log(set);
 
 	const overrides = useMemo<Overrides>(
 		() => ({
 		  ...defaultComponents,
 		  DayCell: {
 			className: (p) => {
-              console.log(p.date.getTime())
+              console.log(Math.floor(p.date.getTime() / 86400000))
 			  const wasSelected = set.has(Math.floor(p.date.getTime() / 86400000));
 			  return (
 				(props.is_part_time 
