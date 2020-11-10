@@ -228,10 +228,9 @@ export const ApplyLeaveHanlder = async (req, res) => {
       req.body.end_date,
     ],
   }).then(out => {
-      console.log(out.rows);
-      res.json({
-        success: true,
-        message: 'applied leave successfully',
+    GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
       })
   }).catch(err => {
     console.log(err);
@@ -247,11 +246,10 @@ export const ApplyAvailabilityHanlder = async (req, res) => {
       req.body.end_date,
     ],
   }).then(out => {
-    console.log(out.rows);
-    res.json({
-      success: true,
-      message: 'applied leave successfully',
-    })
+    GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
+      })
   }).catch(err => {
     console.log(err);
   })
