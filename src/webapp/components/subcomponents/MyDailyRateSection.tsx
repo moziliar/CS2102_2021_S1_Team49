@@ -35,6 +35,13 @@ class MyDailyRate extends Component<{}, IState> {
 
         if (!categoryList[index]["isSelected"]) {
             API.delete('/dailyrate/delete', { params: {email: email, category: category} })
+                .then(res => {
+                    console.log(res.data);
+                    alert('Deleted daily rates successfully');
+                })
+                .catch(err => {
+                    alert('Error deleting daily rates. Please try again');
+                })
         } else {
             const req = {
                 email: email,
@@ -43,8 +50,22 @@ class MyDailyRate extends Component<{}, IState> {
             };
             if (myRateList.map(rate => rate.category).includes(category)) {
                 API.put('/dailyrate/update', req)
+                    .then(res => {
+                        console.log(res.data);
+                        alert('Updated daily rates successfully');
+                    })
+                    .catch(err => {
+                        alert('Error updating daily rates. Ensure daily rates is not negative. Please try again');
+                    })
             } else {
                 API.post('/dailyrate/create', req)
+                    .then(res => {
+                        console.log(res.data);
+                        alert('Created daily rates successfully');
+                    })
+                    .catch(err => {
+                        alert('Error creating daily rates. Ensure daily rates is not negative. Please try again');
+                    })
             }
         }
     }

@@ -247,7 +247,10 @@ export const CreateDailyPriceHandler = async (req, res) => {
     text: addDailyPrice,
     values: [req.body.email, req.body.category, req.body.price]
   }).then(query => {
-    
+    GetUserByEmail(req.query.email)
+      .then(user => {
+        res.json(user);
+      })
   }).catch(err => {
     res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
   })
@@ -258,7 +261,10 @@ export const UpdateDailyPriceHandler = async (req, res) => {
     text: updateDailyPriceQuery,
     values: [req.body.email, req.body.category, req.body.price]
   }).then(query => {
-    
+    GetUserByEmail(req.query.email)
+      .then(user => {
+        res.json(user);
+      })
   }).catch(err => {
     res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
   })
@@ -269,7 +275,10 @@ export const DeleteDailyPriceHandler = async (req, res) => {
     text: deleteDailyPriceQuery,
     values: [req.query.email, req.query.category]
   }).then(query => {
-
+    GetUserByEmail(req.query.email)
+    .then(user => {
+      res.json(user);
+    })
   }).catch(err => {
     res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
   })
