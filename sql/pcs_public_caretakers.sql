@@ -10,7 +10,6 @@ INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('vbeech8@addthis.
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('ezannetti9@webs.com', true);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('ebeehoa@msn.com', false);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('ncarenb@prnewswire.com', true);
-INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('gmcmahonc@usnews.com', false);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('ggreenoughd@free.fr', false);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('ereallye@nasa.gov', false);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('emcgivenf@bloglovin.com', true);
@@ -498,3 +497,4 @@ INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('ayoudds@bloomber
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('iternottdt@dot.gov', true);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('smatuszinskidu@mozilla.org', true);
 INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('vaddeydv@wikispaces.com', true);
+INSERT INTO public.caretakers (pcs_user, is_part_time) VALUES ('gmcmahonc@usnews.com', false);
