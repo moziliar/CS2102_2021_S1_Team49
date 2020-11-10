@@ -10,7 +10,7 @@ const CaretakerCalendar = (props) => {
 		let start_date = (new Date(leave_or_availability[i].start_date)).getTime();
         const end_date = (new Date(leave_or_availability[i].end_date)).getTime();
 		while (start_date <= end_date) {
-			set.add(start_date);
+			set.add(Math.floor(start_date / 86400000));
 			start_date += 86400000 // equivalent of 1 day(in ms)
 		}
     }
@@ -21,7 +21,7 @@ const CaretakerCalendar = (props) => {
 		  DayCell: {
 			className: (p) => {
               console.log(p.date.getTime())
-			  const wasSelected = set.has(p.date.getTime());
+			  const wasSelected = set.has(Math.floor(p.date.getTime() / 86400000));
 			  return (
 				(props.is_part_time 
 				  ? wasSelected
