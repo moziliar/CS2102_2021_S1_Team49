@@ -43,7 +43,7 @@ WHERE email=$1 \
 export const searchUserQuery =
 `
 SELECT * FROM users U 
-WHERE  get_average_rating(U.email) > $2 
+WHERE  get_average_rating(U.email) >= $2 
   AND EXISTS ( 
     SELECT * FROM daily_prices P 
     WHERE U.email=P.caretaker 
@@ -87,7 +87,7 @@ WHERE  get_average_rating(U.email) > $2
             AND is_part_time=TRUE)
           THEN 
             CASE
-              WHEN get_average_rating(U.email) < 4
+              WHEN get_average_rating(U.email) <= 4
                 THEN 2
               ELSE 5
             END
@@ -361,10 +361,10 @@ export const getHighRatingCaretakerDetailsWithinNmonths = (N) => {
                 INNER JOIN bids B1 ON B1.caretaker = C1.pcs_user \
         WHERE B1.rating is NOT NULL \
             AND B1.is_selected = true \
-            AND B1.date_end > date_trunc('month', current_date - interval '" +
+            AND B1.end_date > date_trunc('month', current_date - interval '" +
     N +
     " month') \
-            AND B1.date_end <= date_trunc('month', current_date) \
+            AND B1.end_date <= date_trunc('month', current_date) \
         GROUP BY B1.caretaker, C1.pcs_user, U1.email \
         HAVING AVG(B1.rating) >= 4 \
         ORDER BY avg_rating DESC \

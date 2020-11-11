@@ -75,7 +75,7 @@ export const GetAllPetCategoriesHandler = async (req, res) => {
 export const CreateCategoryHandler = async (req, res) => {
   await db.query({
     text: addCategoryQuery,
-    values: [req.body.name, req.body.price, req.body.parent ? req.body.parent : null]
+    values: [req.body.name, req.body.price * 100, req.body.parent ? req.body.parent : null]
   }).then(async query => {
     if (query.rowCount > 0) {
       GetAllCategoryHelper()

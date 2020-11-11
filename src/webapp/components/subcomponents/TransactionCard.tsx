@@ -43,6 +43,11 @@ const TransactionCard = (props: IProps) => {
 			})
 	};
 
+	const _formatDate = (date: string) => {
+		const d = new Date(date);
+		return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' +  d.getDate();
+	}
+
 	const _onHandleAddReview = () => {
 		const request = {
 			...req,
@@ -62,12 +67,11 @@ const TransactionCard = (props: IProps) => {
 
 	const isCareTaker = currentUser?.email === transaction.care_taker;
 	const backgroundColor: string = isCareTaker ? '#ccffe5' : '#ccedff'
-	console.log(props.transaction)
 	
 	return (
 		<div style={{ 'backgroundColor': backgroundColor, 'padding': '20px', 'borderRadius': '5px', 'margin': '15px' }}>
 			<p>{ isCareTaker ? 'Owner' : 'Taker' } Email: { isCareTaker ? props.transaction.pet_owner : props.transaction.care_taker } </p>
-			<p>Period: { transaction.date_begin } - { transaction.date_end } ({ transaction.is_active ? !isCareTaker ? 'You bid for: ' : 'The owner bid for:' : '' }${props.transaction.total_price / 100})</p>
+			<p>Period: { _formatDate(transaction.date_begin) } - { _formatDate(transaction.date_end) } ({ transaction.is_active ? !isCareTaker ? 'You bid for: ' : 'The owner bid for:' : '' }${props.transaction.total_price / 100})</p>
 			<p>Pet Name: { transaction.pet }</p>
 			{ isBid
 				? <button onClick={ _onHandleAcceptBid }>Accept Bid</button>

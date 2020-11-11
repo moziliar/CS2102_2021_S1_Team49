@@ -307,7 +307,7 @@ class SearchPage extends Component<{}, IState> {
           </Col>
           <Col xs={9} className="detail">
             <h5>
-              {index + 1}. {careTaker.name} ({careTaker.rating} / 5.0)
+              {index + 1}. {careTaker.name} ({careTaker.rating.toFixed(2)} / 5.0)
             </h5>
             <p>Email: {careTaker.email}</p>
             <p>Contact: {careTaker.phone}</p>
@@ -352,7 +352,7 @@ class SearchPage extends Component<{}, IState> {
                   <div key={index}>
                     <p>
                       {index + 1}. {review.owner_name} - {review.review} (
-                      {review.rating}/5.0)
+                      {review.rating.toFixed(2)}/5.0)
                     </p>
                   </div>
                 );

@@ -102,7 +102,7 @@ class MyDailyRate extends Component<{}, IState> {
                                             <td>
                                                 <Form.Control 
                                                     type="number" 
-                                                    value={ category["minPrice"] || ''}
+                                                    value={ category["minPrice"] / 100 || ''}
                                                     onChange={ (e) => this._onHandleInputChange(`[${index}].minPrice`, parseInt(e.target.value)) }/>
                                             </td>
                                             <td>
