@@ -59,7 +59,7 @@ class MyDailyRate extends Component<{}, IState> {
         const categoryList = firstRes.data?.map(category => {
             const isChosenCategory = secondRes.data?.map(rate => rate.category).includes(category.name);
             category["isSelected"] = isChosenCategory;
-            category["minPrice"] = isChosenCategory ? secondRes.data?.filter(rate => rate.category === category.name)[0].price : '';
+            category["minPrice"] = isChosenCategory ? secondRes.data?.filter(rate => rate.category === category.name)[0].price / 100: '';
             return category;
         });
 
@@ -102,7 +102,7 @@ class MyDailyRate extends Component<{}, IState> {
                                             <td>
                                                 <Form.Control 
                                                     type="number" 
-                                                    value={ category["minPrice"] / 100 || ''}
+                                                    value={ category["minPrice"] || ''}
                                                     onChange={ (e) => this._onHandleInputChange(`[${index}].minPrice`, parseInt(e.target.value)) }/>
                                             </td>
                                             <td>

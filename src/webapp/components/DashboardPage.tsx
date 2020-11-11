@@ -32,6 +32,7 @@ class DashboardPage extends Component<{}, IState> {
         }
 
         const req = this.state.categoryList[index];
+        req.price *= 100;
 
         API.put('/category/update', req)
             .then(res => {
@@ -45,10 +46,10 @@ class DashboardPage extends Component<{}, IState> {
     // Need to check for trigger, create lead to insertion in min_daily_price
     _onHandleAddPrice = (index: number) => {
         const req = this.state.categoryList?.[index];
+        req.price *= 100;
 
         API.post('/category/create', req)
             .then(res => {
-                console.log(res.data)
                 this.setState({ categoryList: res.data });
             })
             .catch(err => {
@@ -69,7 +70,7 @@ class DashboardPage extends Component<{}, IState> {
     _getTopPerformingCareTaker = () => {
         API.get('/top/caretaker', { params: {months: this.state.months }})
             .then(res => {
-                this.setState({ topCareTaker: mockTopCareTakers })
+                this.setState({ topCareTaker: res.data })
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -79,8 +80,11 @@ class DashboardPage extends Component<{}, IState> {
     componentDidMount = () => {
         API.get('/categories/pricelist')
             .then(res => {
-                console.log(res.data)
-                this.setState({ categoryList: res.data });
+                const categoryList = res.data.map(category => {
+                    category["price"] = category.price / 100;
+                    return category;
+                });
+                this.setState({ categoryList: categoryList });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -165,7 +169,7 @@ class DashboardPage extends Component<{}, IState> {
             <>
                 <td>{ category.name }</td>
                 <td>{ category.parent || "N.A"}</td>
-                <td><Form.Control type="number" value={ category.price / 100 } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) } /></td>
+                <td><Form.Control type="number" value={ category.price } onChange={ (e) => this._onHandleInputChange(`[${index}].price`, e.target.value) } /></td>
                 <td><Button variant="primary" onClick={ () => this._onHandleUpdatePrice(index) }>Update</Button></td>
             </>
         );

@@ -169,20 +169,35 @@ export const ListCareTakerHandler = async (req, res) => {
       text: queryCaretaker,
       values: [user.email],
     })
-
-    let leave_or_avail = [];
-
+    
     if (isCaretakerRet.rows[0].is_part_time) {
       const availabilitiesRet = await db.query({
         text: queryAvailabiliies,
         values: [user.email],
       })
 
-      leave_or_avail = availabilitiesRet.rows.map(ret => {
-        return {
-          start_date: ret.start_date,
-          end_date: ret.end_date,
-        }
+      users.push({
+        email: user.email,
+        name: user.name,
+        pic_url: user.pic_url,
+        phone: user.phone,
+        is_part_time: isCaretakerRet.rows[0].is_part_time,
+        leave_or_avail: availabilitiesRet.rows.map(ret => {
+          return {
+            start_date: ret.start_date,
+            end_date: ret.end_date,
+          }
+        }),
+        rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
+          .reduce((prev, curr) => prev + curr) / bids.rows.length),
+        rate: rates.rows,
+        reviews: bids.rows.map(bid => {
+          return {
+            owner_name: bid.pet_owner,
+            rating: bid.rating,
+            review: bid.review,
+          }
+        })
       })
     } else {
       const leavesRet = await db.query({
@@ -190,31 +205,30 @@ export const ListCareTakerHandler = async (req, res) => {
         values: [user.email],
       });
 
-      leave_or_avail = leavesRet.rows.map(ret => {
-        return {
-          start_date: ret.start_date,
-          end_date: ret.end_date,
-        }
-      });
-    }
-    users.push({
-      email: user.email,
-      name: user.name,
-      pic_url: user.pic_url,
-      phone: user.phone,
-      is_part_time: isCaretakerRet.rows[0].is_part_time,
-      leave_or_avail: leave_or_avail,
-      rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
-        .reduce((prev, curr) => prev + curr) / bids.rows.length),
-      rate: rates.rows,
-      reviews: bids.rows.map(bid => {
-        return {
-          owner_name: bid.pet_owner,
-          rating: bid.rating,
-          review: bid.review,
-        }
+      users.push({
+        email: user.email,
+        name: user.name,
+        pic_url: user.pic_url,
+        phone: user.phone,
+        is_part_time: isCaretakerRet.rows[0].is_part_time,
+        leave_or_avail: leavesRet.rows.map(ret => {
+          return {
+            start_date: ret.start_date,
+            end_date: ret.end_date,
+          }
+        }),
+        rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
+          .reduce((prev, curr) => prev + curr) / bids.rows.length),
+        rate: rates.rows,
+        reviews: bids.rows.map(bid => {
+          return {
+            owner_name: bid.pet_owner,
+            rating: bid.rating,
+            review: bid.review,
+          }
+        })
       })
-    })
+    }
   }
 
   res.json(users);

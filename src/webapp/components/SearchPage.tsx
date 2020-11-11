@@ -331,7 +331,7 @@ class SearchPage extends Component<{}, IState> {
           >
             Place Bid
           </Button>
-          <h4>{careTaker.name}({careTaker.is_part_time ? 'Part Time' : 'Full Time'}</h4>
+          <h4>{careTaker.name}({careTaker.is_part_time ? 'Part Time' : 'Full Time'})</h4>
           <div style={{ 'width': '350px' }}>
             <CaretakerCalendar 
               leave_or_avail={ careTaker.leave_or_avail } 
