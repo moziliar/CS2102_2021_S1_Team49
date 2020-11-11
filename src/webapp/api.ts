@@ -6,7 +6,7 @@ const backend_url = () => {
   // }
 
   // local testing
-  console.log("hello");
+  // console.log("hello");
   return "http://127.0.0.1:8080";
 };
 
