@@ -177,10 +177,10 @@ WHERE pet_owner=$1 OR caretaker=$1 AND is_active=false AND is_selected=true
 
 // INPUT:
 // owner -> {email}
-export const listDoneTnxByOwnerId = `
+export const listDoneTnxByTakerId = `
 SELECT * 
 FROM bids 
-WHERE pet_owner=$1 
+WHERE caretaker=$1 
   AND is_selected=true
   AND end_date <= CURRENT_DATE 
 `;

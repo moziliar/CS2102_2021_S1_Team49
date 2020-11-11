@@ -123,3 +123,18 @@ CREATE TABLE salary (
   amount INT NOT NULL CHECK (amount >= 0),
   PRIMARY KEY (caretaker, month, year)
 );
+
+-- helper functions
+CREATE OR REPLACE FUNCTION first_day_of_month(some_date date)
+    RETURNS DATE AS
+$$ BEGIN
+    RETURN date(date_trunc('month', some_date));
+END; $$
+    LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION last_day_of_month(some_date date)
+    RETURNS DATE AS
+$$ BEGIN
+    RETURN date(date_trunc('month', some_date) + interval '1 month - 1 day');
+END; $$
+    LANGUAGE plpgsql;

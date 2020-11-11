@@ -8,7 +8,7 @@ import {
   getSalaryQuery,
   queryCreditCard,
   getRatesByUserQuery,
-  listDoneTnxByOwnerId,
+  listDoneTnxByTakerId,
   queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths, getAllCareTakerDailyPrice, deleteDailyPriceQuery, updateDailyPriceQuery, addDailyPrice, queryLeaves
 } from '../sql_query/query';
 
@@ -160,9 +160,10 @@ export const ListCareTakerHandler = async (req, res) => {
     });
 
     const bids = await db.query({
-      text: listDoneTnxByOwnerId,
+      text: listDoneTnxByTakerId,
       values: [user.email],
     })
+    console.log(bids.rows);
 
     const isCaretakerRet = await db.query({
       text: queryCaretaker,
