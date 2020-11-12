@@ -38,7 +38,7 @@ const initServer = (port: number) => {
   router.post('/dailyrate/create', CreateDailyPriceHandler);
   router.put('/dailyrate/update', UpdateDailyPriceHandler);
   router.delete('/dailyrate/delete', DeleteDailyPriceHandler);
-  router.put('/caretaker/salary', GetSalaryHandler);
+  router.get('/caretaker/salary', GetSalaryHandler);
 
   router.post('/card/create', AddCreditCardHandler);
   router.delete('/card/delete', DeleteCreditCardHandler);
