@@ -62,7 +62,8 @@ WHERE  get_average_rating(U.email) >= $2
           FROM (SELECT generate_series(date($4), date($5), '1 day') AS day) D
           WHERE EXISTS (
             SELECT * FROM part_time_availabilities A
-            WHERE D.day BETWEEN A.start_date AND A.end_date
+            WHERE caretaker=U.email 
+              AND D.day BETWEEN A.start_date AND A.end_date
           )
         ) = (date($5) - date($4) + 1)
       ELSE FALSE 
