@@ -134,7 +134,7 @@ class DashboardPage extends Component<{}, IState> {
                                             <td>{ taker.name }</td>
                                             <td>{ taker.email }</td>
                                             <td>{ taker.is_part_time ? "Parttime" : "Fulltime" }</td>
-                                            <td>{ parseInt(taker.avg_rating).toFixed(2) }</td>
+                                            <td>{ parseInt(taker.avg_rating + '').toFixed(2) }</td>
                                         </tr>
                                     )
                                   })
