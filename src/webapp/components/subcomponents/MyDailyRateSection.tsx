@@ -43,8 +43,18 @@ class MyDailyRate extends Component<{}, IState> {
             };
             if (myRateList.map(rate => rate.category).includes(category)) {
                 API.put('/dailyrate/update', req)
+                    .then(res => {
+                        alert('Update successful!')
+                    }).catch(err => {
+                        alert('Ensure minimum price meet the requirement and try again');
+                    })
             } else {
                 API.post('/dailyrate/create', req)
+                    .then(res => {
+                        alert('New category added!')
+                    }).catch(err => {
+                        alert('Ensure minimum price meet the requirement and try again');
+                    })
             }
         }
     }

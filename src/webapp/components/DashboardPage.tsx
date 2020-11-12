@@ -36,7 +36,11 @@ class DashboardPage extends Component<{}, IState> {
 
         API.put('/category/update', req)
             .then(res => {
-                this.setState({ categoryList: res.data });
+                const categoryList = res.data.map(category => {
+                    category.price = category.price / 100;
+                    return category;
+                });
+                this.setState({ categoryList: categoryList });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -50,7 +54,13 @@ class DashboardPage extends Component<{}, IState> {
 
         API.post('/category/create', req)
             .then(res => {
-                this.setState({ categoryList: res.data });
+                const categoryList = res.data.map(category => {
+                    console.log(category);
+                    category.price = category.price / 100;
+                    console.log(category)
+                    return category;
+                });
+                this.setState({ categoryList: categoryList });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -81,7 +91,7 @@ class DashboardPage extends Component<{}, IState> {
         API.get('/categories/pricelist')
             .then(res => {
                 const categoryList = res.data.map(category => {
-                    category["price"] = category.price / 100;
+                    category.price = category.price / 100;
                     return category;
                 });
                 this.setState({ categoryList: categoryList });
@@ -124,7 +134,7 @@ class DashboardPage extends Component<{}, IState> {
                                             <td>{ taker.name }</td>
                                             <td>{ taker.email }</td>
                                             <td>{ taker.is_part_time ? "Parttime" : "Fulltime" }</td>
-                                            <td>{ taker.avg_rating }</td>
+                                            <td>{ taker.avg_rating.toFixed(2) }</td>
                                         </tr>
                                     )
                                   })
