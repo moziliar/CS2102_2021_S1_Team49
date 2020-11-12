@@ -80,7 +80,7 @@ class PaycheckSection extends Component<{}, IState> {
                         ? <tbody>
                             <tr>
                                 <th>{ salary.year }</th>
-                                <th>{ salary.month }</th>
+                                <th>{ monthList[parseInt(salary.month) - 1] }</th>
                                 <th>{ salary.amount / 100 }</th>
                             </tr>
                          </tbody>
