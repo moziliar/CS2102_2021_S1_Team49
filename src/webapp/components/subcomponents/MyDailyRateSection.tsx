@@ -35,6 +35,13 @@ class MyDailyRate extends Component<{}, IState> {
 
         if (!categoryList[index]["isSelected"]) {
             API.delete('/dailyrate/delete', { params: {email: email, category: category} })
+                .then(res => {
+                    console.log(res.data);
+                    alert('Deleted daily rates successfully');
+                })
+                .catch(err => {
+                    alert('Error deleting daily rates. Please try again');
+                })
         } else {
             const req = {
                 email: email,

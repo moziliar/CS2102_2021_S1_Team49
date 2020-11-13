@@ -49,10 +49,16 @@ If you choose to install DB server locally, feel free to do so.
 background.
 3. Refer to the output log (`docker-compose logs -f`) for DB password if unsure.
 4. Use `docker ps` to get the container ID
-5. Use `docker exec -ti [postgres container id] psql -U [username] -p` to enter the PostgreSQL server in the container.
+5. Use `docker exec -ti [postgres container id] psql -U [username] -d [db_name]` to enter the PostgreSQL server in the container.
 
 ### Step 3: ENV setup
 
-Run `cp .env.example .env` and configure the environment variables inside to your local environment.
-
+Execute `cp .env.example .env` and configure the environment variables inside to your local environment.
+Then run `source .env`
 We shall use the Heroku config for production/staging variable injection.
+
+## Developer option
+1. Run `npm run server` to startup the server
+2. Run `npm run webapp-dev` to run the frontend at localhost
+
+Note if you have problem at #1 you might need to modify your environment variable of `DB_PORT` to `54321`

@@ -75,18 +75,18 @@ class SignInPage extends Component<{}, IState> {
 						<h1>{ isSignIn ? 'Sign In' : 'Sign Up' } to Care Taker</h1>
 						<Form>
 							<Form.Group>
-								<Form.Label>Email<small style={{ 'color': 'red' }}>{ isSignIn ? '' : '(Required)' }</small></Form.Label>
+								<Form.Label>Email <small style={{ 'color': 'red' }}>{ isSignIn ? '' : '(Required)' }</small></Form.Label>
 								<Form.Control type="email" value={ email } onChange={ e => this.onHandleInputChange(EMAIL, e.target.value) }/>
 							</Form.Group>
 							<Form.Group>
-								<Form.Label>Password<small style={{ 'color': 'red' }}>{ isSignIn ? '' : '(Required)' }</small></Form.Label>
+								<Form.Label>Password <small style={{ 'color': 'red' }}>{ isSignIn ? '' : '(Required)' }</small></Form.Label>
 								<Form.Control type="password" value={ password } onChange={ e => this.onHandleInputChange(PASSWORD, e.target.value) }/>
 							</Form.Group>
 							{ isSignIn 
 								? null
 								: <>
 									<Form.Group>
-										<Form.Label>Name<small style={{ 'color': 'red' }}>{ isSignIn ? '' : '(Required)' }</small></Form.Label>
+										<Form.Label>Name <small style={{ 'color': 'red' }}>{ isSignIn ? '' : '(Required)' }</small></Form.Label>
 										<Form.Control type="name" value={ name } onChange={ e => this.onHandleInputChange(NAME, e.target.value) }/>
 									</Form.Group>
 									<Form.Group>
