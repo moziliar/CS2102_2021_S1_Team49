@@ -29,6 +29,7 @@ export const mockTakers: Array<CareTaker> = [
     pic_url: 'https://media.macphun.com/img/uploads/customer/how-to/579/15531840725c93b5489d84e9.43781620.jpg?q=85&w=1340',
     phone: 12345678,
     rating: 3.9,
+    is_part_time: true,
     rate: [
       {
         category: 'Dog',
@@ -39,6 +40,12 @@ export const mockTakers: Array<CareTaker> = [
         category: 'Dog',
         caretaker:'example@google.com',
         price: 70
+      }
+    ],
+    leave_or_avail: [
+      {
+        start_date: '2020-11-13',
+        end_date: '2020-11-25'
       }
     ],
     reviews: [
@@ -60,6 +67,7 @@ export const mockTakers: Array<CareTaker> = [
     pic_url: 'https://media.macphun.com/img/uploads/customer/how-to/579/15531840725c93b5489d84e9.43781620.jpg?q=85&w=1340',
     phone: 12345678,
     rating: 3.9,
+    is_part_time: false,
     rate: [
       {
         category: 'Dog',
@@ -70,6 +78,12 @@ export const mockTakers: Array<CareTaker> = [
         category: 'Dog',
         caretaker:'example@google.com',
         price: 70
+      }
+    ],
+    leave_or_avail: [
+      {
+        start_date: '2020-11-13',
+        end_date: '2020-11-25'
       }
     ],
     reviews: [

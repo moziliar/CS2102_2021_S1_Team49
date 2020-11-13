@@ -1,10 +1,10 @@
-import React, { useReducer, useContext } from 'react'
+import React, { useReducer, useContext, useMemo } from 'react'
 import { DateRangeInput } from '@datepicker-react/styled';
-// import DateBooking from 'react-booking-calendar';
 
 import { UserContext } from '../../contexts/UserContext';
 import '../../styles/Calendar.scss';
 import { Button } from 'react-bootstrap';
+import CaretakerCalendar from './CaretakerCalendar';
 
 const initialState = {
   startDate: null,
@@ -25,13 +25,17 @@ function reducer(state, action) {
 }
 
 const MyAvailabilitySection = () => {
-	const [state, dispatch] = useReducer(reducer, initialState)
+	const [state, dispatch] = useReducer(reducer, initialState);
 	const user = useContext(UserContext);
 
-  return (
+    return (
 		<div style={{ 'padding': '15px' }}>
-			{/* <h4 style={{ 'marginBottom': '15px' }}>My Current Availability</h4>
-			<DateBooking style={{ 'height': '200px' }} bookings={[]} /> */}
+			<h4 style={{ 'marginBottom': '15px' }}>My Current Availability</h4>
+			<div style={{ 'width': '350px' }}>
+				<CaretakerCalendar 
+					leave_or_avail={ user.currentUser?.leave_or_avail } 
+					is_part_time={ user.currentUser?.is_part_time } />
+			</div>
 			<h5 style={{ 'margin': '15px 0' }}>Set { user.currentUser?.is_part_time ? 'Availability' : 'Leave'}</h5>
 			<DateRangeInput
 				onDatesChange={ data => dispatch({type: 'dateChange', payload: data })}
@@ -51,7 +55,7 @@ const MyAvailabilitySection = () => {
 					Apply!
 			</Button>
 		</div>
-  )
+    )
 }
 
 export default MyAvailabilitySection;

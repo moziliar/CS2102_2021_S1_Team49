@@ -43,7 +43,7 @@ WHERE email=$1 \
 export const searchUserQuery =
 `
 SELECT * FROM users U 
-WHERE  get_average_rating(U.email) > $2 
+WHERE  get_average_rating(U.email) >= $2 
   AND EXISTS ( 
     SELECT * FROM daily_prices P 
     WHERE U.email=P.caretaker 
@@ -62,7 +62,8 @@ WHERE  get_average_rating(U.email) > $2
           FROM (SELECT generate_series(date($4), date($5), '1 day') AS day) D
           WHERE EXISTS (
             SELECT * FROM part_time_availabilities A
-            WHERE D.day BETWEEN A.start_date AND A.end_date
+            WHERE caretaker=U.email 
+              AND D.day BETWEEN A.start_date AND A.end_date
           )
         ) = (date($5) - date($4) + 1)
       ELSE FALSE 
@@ -87,7 +88,7 @@ WHERE  get_average_rating(U.email) > $2
             AND is_part_time=TRUE)
           THEN 
             CASE
-              WHEN get_average_rating(U.email) < 4
+              WHEN get_average_rating(U.email) <= 4
                 THEN 2
               ELSE 5
             END
@@ -161,6 +162,12 @@ SELECT * \
 FROM bids \
 ";
 
+export const listBidsByUserId = `
+SELECT *
+FROM bids
+WHERE caretaker=$1 AND is_active=true AND is_selected=false
+`;
+
 // INPUT:
 // owner -> {email}
 export const listTnxByUserId = `
@@ -171,10 +178,10 @@ WHERE pet_owner=$1 OR caretaker=$1 AND is_active=false AND is_selected=true
 
 // INPUT:
 // owner -> {email}
-export const listDoneTnxByOwnerId = `
+export const listDoneTnxByTakerId = `
 SELECT * 
 FROM bids 
-WHERE pet_owner=$1 
+WHERE caretaker=$1 
   AND is_selected=true
   AND end_date <= CURRENT_DATE 
 `;
@@ -208,6 +215,13 @@ SET pet_owner=$1, pet=$2, caretaker=$3, date_begin=$4,
     rating=$13, review=$14
 WHERE pet_owner=$1 AND caretaker=$3 AND start_date=$4 AND end_date=$5 AND is_selected=true AND $10=true
 `;
+
+export const reviewTransactionQuery = 
+" \
+UPDATE bids \
+SET rating=$6, review=$7 \
+WHERE pet_owner=$1 AND pet=$2 AND caretaker=$3 AND start_date=$4 AND end_date=$5 \
+";
 
 export const acceptBidByParams = `
 UPDATE bids
@@ -294,6 +308,13 @@ SET price=$3 \
 WHERE caretaker=$1 AND category=$2 \
 "
 
+export const getSalaryQuery = 
+" \
+SELECT year, month, amount \
+FROM salary \
+WHERE caretaker=$1 AND month=$2 AND year=$3 \
+";
+
 // INPUT:
 // caretaker -> {caretaker, category}
 export const deleteDailyPriceQuery = " \
@@ -341,10 +362,10 @@ export const getHighRatingCaretakerDetailsWithinNmonths = (N) => {
                 INNER JOIN bids B1 ON B1.caretaker = C1.pcs_user \
         WHERE B1.rating is NOT NULL \
             AND B1.is_selected = true \
-            AND B1.date_end > date_trunc('month', current_date - interval '" +
+            AND B1.end_date > date_trunc('month', current_date - interval '" +
     N +
     " month') \
-            AND B1.date_end <= date_trunc('month', current_date) \
+            AND B1.end_date <= date_trunc('month', current_date) \
         GROUP BY B1.caretaker, C1.pcs_user, U1.email \
         HAVING AVG(B1.rating) >= 4 \
         ORDER BY avg_rating DESC \

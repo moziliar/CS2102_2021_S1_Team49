@@ -32,10 +32,15 @@ class DashboardPage extends Component<{}, IState> {
         }
 
         const req = this.state.categoryList[index];
+        req.price *= 100;
 
         API.put('/category/update', req)
             .then(res => {
-                this.setState({ categoryList: res.data });
+                const categoryList = res.data.map(category => {
+                    category.price = category.price / 100;
+                    return category;
+                });
+                this.setState({ categoryList: categoryList });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -45,11 +50,17 @@ class DashboardPage extends Component<{}, IState> {
     // Need to check for trigger, create lead to insertion in min_daily_price
     _onHandleAddPrice = (index: number) => {
         const req = this.state.categoryList?.[index];
+        req.price *= 100;
 
         API.post('/category/create', req)
             .then(res => {
-                console.log(res.data)
-                this.setState({ categoryList: res.data });
+                const categoryList = res.data.map(category => {
+                    console.log(category);
+                    category.price = category.price / 100;
+                    console.log(category)
+                    return category;
+                });
+                this.setState({ categoryList: categoryList });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -69,7 +80,7 @@ class DashboardPage extends Component<{}, IState> {
     _getTopPerformingCareTaker = () => {
         API.get('/top/caretaker', { params: {months: this.state.months }})
             .then(res => {
-                this.setState({ topCareTaker: mockTopCareTakers })
+                this.setState({ topCareTaker: res.data })
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -79,8 +90,11 @@ class DashboardPage extends Component<{}, IState> {
     componentDidMount = () => {
         API.get('/categories/pricelist')
             .then(res => {
-                console.log(res.data)
-                this.setState({ categoryList: res.data });
+                const categoryList = res.data.map(category => {
+                    category.price = category.price / 100;
+                    return category;
+                });
+                this.setState({ categoryList: categoryList });
             })
             .catch(err => {
                 alert(err.response.data.errMessage);
@@ -120,7 +134,7 @@ class DashboardPage extends Component<{}, IState> {
                                             <td>{ taker.name }</td>
                                             <td>{ taker.email }</td>
                                             <td>{ taker.is_part_time ? "Parttime" : "Fulltime" }</td>
-                                            <td>{ taker.avg_rating }</td>
+                                            <td>{ parseInt(taker.avg_rating + '').toFixed(2) }</td>
                                         </tr>
                                     )
                                   })

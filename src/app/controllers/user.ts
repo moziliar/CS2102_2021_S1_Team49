@@ -5,10 +5,11 @@ import {
   loginQuery, createUserQuery, updateUserQuery, searchUserByEmailQuery, searchUserQuery,
   applyLeaveQuery, applyAvailabilityQuery,
   queryPetQuery,
+  getSalaryQuery,
   queryCreditCard,
   getRatesByUserQuery,
-  listDoneTnxByOwnerId,
-  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths, getAllCareTakerDailyPrice, deleteDailyPriceQuery, updateDailyPriceQuery, addDailyPrice
+  listDoneTnxByTakerId,
+  queryCaretaker, queryAvailabiliies, addCreditCardQuery, deleteCreditCardQuery, applyCareTakerQuery, getHighRatingCaretakerDetailsWithinNmonths, getAllCareTakerDailyPrice, deleteDailyPriceQuery, updateDailyPriceQuery, addDailyPrice, queryLeaves
 } from '../sql_query/query';
 
 // ================================ USER =========================================
@@ -159,25 +160,75 @@ export const ListCareTakerHandler = async (req, res) => {
     });
 
     const bids = await db.query({
-      text: listDoneTnxByOwnerId,
+      text: listDoneTnxByTakerId,
       values: [user.email],
     })
-    users.push({
-      email: user.email,
-      name: user.name,
-      pic_url: user.pic_url,
-      phone: user.phone,
-      rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
-        .reduce((prev, curr) => prev + curr) / bids.rows.length),
-      rate: rates.rows,
-      reviews: bids.rows.map(bid => {
-        return {
-          owner_name: bid.pet_owner,
-          rating: bid.rating,
-          review: bid.review,
-        }
-      })
+    console.log(bids.rows);
+
+    const isCaretakerRet = await db.query({
+      text: queryCaretaker,
+      values: [user.email],
     })
+    
+    if (isCaretakerRet.rows[0].is_part_time) {
+      const availabilitiesRet = await db.query({
+        text: queryAvailabiliies,
+        values: [user.email],
+      })
+
+      users.push({
+        email: user.email,
+        name: user.name,
+        pic_url: user.pic_url,
+        phone: user.phone,
+        is_part_time: isCaretakerRet.rows[0].is_part_time,
+        leave_or_avail: availabilitiesRet.rows.map(ret => {
+          return {
+            start_date: ret.start_date,
+            end_date: ret.end_date,
+          }
+        }),
+        rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
+          .reduce((prev, curr) => prev + curr) / bids.rows.length),
+        rate: rates.rows,
+        reviews: bids.rows.map(bid => {
+          return {
+            owner_name: bid.pet_owner,
+            rating: bid.rating,
+            review: bid.review,
+          }
+        })
+      })
+    } else {
+      const leavesRet = await db.query({
+        text: queryLeaves,
+        values: [user.email],
+      });
+
+      users.push({
+        email: user.email,
+        name: user.name,
+        pic_url: user.pic_url,
+        phone: user.phone,
+        is_part_time: isCaretakerRet.rows[0].is_part_time,
+        leave_or_avail: leavesRet.rows.map(ret => {
+          return {
+            start_date: ret.start_date,
+            end_date: ret.end_date,
+          }
+        }),
+        rating: bids.rows.length === 0 ? 0 : (bids.rows.map(bid => bid.rating)
+          .reduce((prev, curr) => prev + curr) / bids.rows.length),
+        rate: rates.rows,
+        reviews: bids.rows.map(bid => {
+          return {
+            owner_name: bid.pet_owner,
+            rating: bid.rating,
+            review: bid.review,
+          }
+        })
+      })
+    }
   }
 
   res.json(users);
@@ -192,10 +243,9 @@ export const ApplyLeaveHanlder = async (req, res) => {
       req.body.end_date,
     ],
   }).then(out => {
-      console.log(out.rows);
-      res.json({
-        success: true,
-        message: 'applied leave successfully',
+    GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
       })
   }).catch(err => {
     console.log(err);
@@ -211,11 +261,10 @@ export const ApplyAvailabilityHanlder = async (req, res) => {
       req.body.end_date,
     ],
   }).then(out => {
-    console.log(out.rows);
-    res.json({
-      success: true,
-      message: 'applied leave successfully',
-    })
+    GetUserByEmail(req.body.email)
+      .then(user => {
+        res.json(user);
+      })
   }).catch(err => {
     console.log(err);
   })
@@ -285,6 +334,17 @@ export const DeleteDailyPriceHandler = async (req, res) => {
   })
 }
 
+export const GetSalaryHandler = async (req, res) => {
+  db.query({
+    text: getSalaryQuery,
+    values: [req.query.caretaker, req.query.month, req.query.year]
+  }).then(query => {
+    res.json(query.rows[0]);
+  }).catch(err => {
+    res.status(404).json({ errMessage: 'Something error with the server. Try again later' })
+  })
+}
+
 // ================================== HELPERS ===========================================
 
 export const GetUserByEmail = async (email: string) => {
@@ -340,7 +400,7 @@ export const GetUserByEmail = async (email: string) => {
     }
   } else {
     const leavesRet = await db.query({
-      text: queryAvailabiliies,
+      text: queryLeaves,
       values: [email],
     });
 

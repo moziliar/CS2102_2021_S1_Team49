@@ -10,6 +10,7 @@ import OngoingTransactionsSection from './subcomponents/OngoingTransactionsSecti
 import OngoingBidsSection from './subcomponents/OngoingBidsSection';
 import MyAvailabilitySection from './subcomponents/MyAvailabilitySection';
 import MyDailyRateSection from './subcomponents/MyDailyRateSection';
+import PaycheckSection from './subcomponents/PaycheckSection';
 import ProtectedRoute from './subcomponents/ProtectedRoute';
 
 import '../styles/ProfilePage.scss';
@@ -51,7 +52,7 @@ class ProfilePage extends Component {
 							<ProtectedRoute path="/profile/ongoing-transactions" component={ OngoingTransactionsSection }/>
 							<ProtectedRoute path="/profile/pending-bids" component={ OngoingBidsSection }/>
 							<ProtectedRoute path="/profile/my-availability" component={ MyAvailabilitySection }/>
-							<ProtectedRoute path="/profile/paycheck" component={ EditProfileSection }/>
+							<ProtectedRoute path="/profile/paycheck" component={ PaycheckSection }/>
 							<ProtectedRoute path="/profile/daily-rate" component={ MyDailyRateSection }/>
 						</Col>
 					</Row>
@@ -72,11 +73,13 @@ class ProfilePage extends Component {
 		);
 
 		if (isCareTaker) {
+			if (this.context.currentUser.is_part_time) {
+				links.push(<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>);
+			}
 			links.push(
-				<NavLink activeClassName="is-active" to="/profile/pending-bids" key="pending-bids">Pending Bids</NavLink>,
 				<NavLink activeClassName="is-active" to="/profile/my-availability" key="my-availability">My Availability</NavLink>,
-				// <NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>,
-				<NavLink activeClassName="is-active" to="/profile/daily-rate" key="daily-rate">My Daily Rates</NavLink>
+				<NavLink activeClassName="is-active" to="/profile/daily-rate" key="daily-rate">My Daily Rates</NavLink>,
+				<NavLink activeClassName="is-active" to="/profile/paycheck" key="paycheck">Paycheck</NavLink>
 			);
 		}
 

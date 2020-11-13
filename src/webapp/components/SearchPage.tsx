@@ -9,6 +9,7 @@ import API from "../api";
 import "../styles/SearchPage.scss";
 import BidModal, { DateRangeAction } from "./subcomponents/BidModal";
 import { mockTakers } from "../../app/models/mockUsers";
+import CaretakerCalendar from "./subcomponents/CaretakerCalendar";
 
 const CATEGORY = "category";
 const START_DATE = "startDate";
@@ -91,7 +92,7 @@ class SearchPage extends Component<{}, IState> {
     const req = {
       category: formData[CATEGORY],
       rating: formData[RATING],
-      price: formData[PRICE],
+      price: formData[PRICE] * 100,
       date_begin: formData[START_DATE],
       date_end: formData[END_DATE],
     };
@@ -101,6 +102,7 @@ class SearchPage extends Component<{}, IState> {
         this.setState({
           careTakers: res.data,
           modalShow: false,
+          selectedCareTaker: null,
         });
       })
       .catch((err) => {
@@ -168,7 +170,7 @@ class SearchPage extends Component<{}, IState> {
                 </div>
               )}
             </Col>
-            <Col xs={{ span: 4, offset: 1 }} className="section">
+            <Col xs={{ span: 5 }} className="section">
               <h3>Care Taker Info</h3>
               {selectedCareTaker === null || careTakers === null ? (
                 <small>Click on the care taker to see their information</small>
@@ -293,6 +295,7 @@ class SearchPage extends Component<{}, IState> {
       <div
         key={careTaker.name}
         className="caretaker-card"
+        style={{ 'opacity': index === this.state.selectedCareTaker ? '1' : '0.6' }}
         onClick={() => this._selectCareTaker(index)}
       >
         <Row style={{ margin: "20px" }}>
@@ -304,7 +307,7 @@ class SearchPage extends Component<{}, IState> {
           </Col>
           <Col xs={9} className="detail">
             <h5>
-              {index + 1}. {careTaker.name} ({careTaker.rating} / 5.0)
+              {index + 1}. {careTaker.name} ({careTaker.rating.toFixed(2)} / 5.0)
             </h5>
             <p>Email: {careTaker.email}</p>
             <p>Contact: {careTaker.phone}</p>
@@ -328,11 +331,17 @@ class SearchPage extends Component<{}, IState> {
           >
             Place Bid
           </Button>
+          <h4>{careTaker.name}({careTaker.is_part_time ? 'Part Time' : 'Full Time'})</h4>
+          <div style={{ 'width': '350px' }}>
+            <CaretakerCalendar 
+              leave_or_avail={ careTaker.leave_or_avail } 
+              is_part_time={ careTaker.is_part_time } />
+          </div>
           <h6>Rates:</h6>
           {rates.map((rate, index) => {
             return (
-              <p key={rate.category}>
-                {rate.category} - ${rate.price}/night
+              <p key={`${rate.category}-price`}>
+                {rate.category} - ${rate.price / 100}/night
               </p>
             );
           })}
@@ -343,7 +352,7 @@ class SearchPage extends Component<{}, IState> {
                   <div key={index}>
                     <p>
                       {index + 1}. {review.owner_name} - {review.review} (
-                      {review.rating}/5.0)
+                      {review.rating.toFixed(2)}/5.0)
                     </p>
                   </div>
                 );

@@ -127,7 +127,7 @@ class BidModal extends Component<IProps, IState> {
       date_end: formData[END_DATE],
       transfer_method: formData[TRANSFER_METHOD],
       location: formData[LOCATION],
-      total_price: this._getNumberOfDays(formData[START_DATE], formData[END_DATE]) * formData[PRICE],
+      total_price: this._getNumberOfDays(formData[START_DATE], formData[END_DATE]) * formData[PRICE] * 100,
       is_active: true,
       is_selected: false,
       payment_method: formData[PAYMENT_METHOD],

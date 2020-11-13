@@ -46,25 +46,21 @@ class MyDailyRate extends Component<{}, IState> {
             const req = {
                 email: email,
                 category: category,
-                price: categoryList[index]["minPrice"]
+                price: categoryList[index]["minPrice"] * 100
             };
             if (myRateList.map(rate => rate.category).includes(category)) {
                 API.put('/dailyrate/update', req)
                     .then(res => {
-                        console.log(res.data);
-                        alert('Updated daily rates successfully');
-                    })
-                    .catch(err => {
-                        alert('Error updating daily rates. Ensure daily rates is not negative. Please try again');
+                        alert('Update successful!')
+                    }).catch(err => {
+                        alert('Ensure minimum price meet the requirement and try again');
                     })
             } else {
                 API.post('/dailyrate/create', req)
                     .then(res => {
-                        console.log(res.data);
-                        alert('Created daily rates successfully');
-                    })
-                    .catch(err => {
-                        alert('Error creating daily rates. Ensure daily rates is not negative. Please try again');
+                        alert('New category added!')
+                    }).catch(err => {
+                        alert('Ensure minimum price meet the requirement and try again');
                     })
             }
         }
@@ -80,7 +76,7 @@ class MyDailyRate extends Component<{}, IState> {
         const categoryList = firstRes.data?.map(category => {
             const isChosenCategory = secondRes.data?.map(rate => rate.category).includes(category.name);
             category["isSelected"] = isChosenCategory;
-            category["minPrice"] = isChosenCategory ? secondRes.data?.filter(rate => rate.category === category.name)[0].price : '';
+            category["minPrice"] = isChosenCategory ? secondRes.data?.filter(rate => rate.category === category.name)[0].price / 100: '';
             return category;
         });
 
@@ -119,7 +115,7 @@ class MyDailyRate extends Component<{}, IState> {
                                                     onChange={ () => this._onHandleInputChange(`[${index}].isSelected`, !category["isSelected"]) }/>
                                             </td>
                                             <td>{ category.name }</td>
-                                            <td>{ category.price }</td>
+                                            <td>{ category.price / 100 }</td>
                                             <td>
                                                 <Form.Control 
                                                     type="number" 
